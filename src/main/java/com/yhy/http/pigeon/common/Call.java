@@ -15,6 +15,8 @@ public interface Call<T> extends Cloneable {
 
     Response<T> execute() throws IOException;
 
+    Request request();
+
     void enqueue(Callback<T> callback);
 
     boolean isExecuted();
@@ -24,6 +26,4 @@ public interface Call<T> extends Cloneable {
     boolean isCanceled();
 
     Call<T> clone();
-
-    Request request();
 }
