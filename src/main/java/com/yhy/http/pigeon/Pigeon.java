@@ -2,14 +2,11 @@ package com.yhy.http.pigeon;
 
 import com.yhy.http.pigeon.adapter.CallAdapter;
 import com.yhy.http.pigeon.converter.Converter;
-import com.yhy.http.pigeon.def.DefCallAdapter;
-import com.yhy.http.pigeon.def.DefCallFactory;
-import com.yhy.http.pigeon.def.DefConverter;
 import com.yhy.http.pigeon.http.HttpMethod;
-import okhttp3.HttpUrl;
-import okhttp3.Interceptor;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
+import com.yhy.http.pigeon.offer.GsonConverter;
+import com.yhy.http.pigeon.offer.GuavaCallAdapter;
+import com.yhy.http.pigeon.offer.HttpLoggerInterceptor;
+import okhttp3.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -31,27 +28,29 @@ public class Pigeon {
     private final Map<Method, HttpMethod<?>> httpMethodMap = new ConcurrentHashMap<>();
 
     private HttpUrl host;
+    private List<Interceptor> netInterceptors;
     private List<Interceptor> interceptors;
     private Map<String, Object> headers;
-    private CallAdapter.Factory callAdapterFactory;
-    private Converter.Factory stringConverterFactory;
-    private Converter.Factory requestConverterFactory;
-    private Converter.Factory responseConverterFactory;
-    private okhttp3.Call.Factory callFactory;
+    private List<CallAdapter.Factory> callFactories;
+    private List<Converter.Factory> converterFactories;
+    private OkHttpClient.Builder client;
 
     private Pigeon(Builder builder) {
         this.host = builder.host;
+        this.netInterceptors = builder.netInterceptors;
         this.interceptors = builder.interceptors;
         this.headers = builder.headers;
-        this.callAdapterFactory = builder.callAdapterFactory;
-        this.stringConverterFactory = builder.stringConverterFactory;
-        this.requestConverterFactory = builder.requestConverterFactory;
-        this.responseConverterFactory = builder.responseConverterFactory;
-        this.callFactory = builder.callFactory;
+        this.callFactories = builder.adapterFactories;
+        this.converterFactories = builder.converterFactories;
+        this.client = builder.client;
     }
 
     public HttpUrl host() {
         return host;
+    }
+
+    public List<Interceptor> netInterceptors() {
+        return netInterceptors;
     }
 
     public List<Interceptor> interceptors() {
@@ -62,27 +61,25 @@ public class Pigeon {
         return headers;
     }
 
-    public CallAdapter<?, ?> callAdapter(Type returnType, Annotation[] annotations) {
-        return callAdapterFactory.get(returnType, annotations, this);
+    public CallAdapter<?, ?> adapter(Type returnType, Annotation[] annotations) {
+        return findCallAdapter(returnType, annotations);
     }
 
     public <T> Converter<T, String> stringConverter(Type type, Annotation[] annotations) {
-        Converter<?, String> converter = stringConverterFactory.stringConverter(type, annotations, this);
-        return null != converter ? (Converter<T, String>) converter : null;
+        return findStringConverter(type, annotations);
     }
 
     public <T> Converter<T, RequestBody> requestConverter(Type type, Annotation[] methodAnnotations, Annotation[] parameterAnnotations) {
-        Converter<?, RequestBody> converter = requestConverterFactory.requestBodyConverter(type, methodAnnotations, parameterAnnotations, this);
-        return null != converter ? (Converter<T, RequestBody>) converter : null;
+        return findRequestConverter(type, methodAnnotations, parameterAnnotations);
     }
 
     public <T> Converter<ResponseBody, T> responseConverter(Type responseType, Annotation[] annotations) {
-        Converter<ResponseBody, ?> converter = responseConverterFactory.responseBodyConverter(responseType, annotations, this);
-        return null != converter ? (Converter<ResponseBody, T>) converter : null;
+        return findResponseConverter(responseType, annotations);
     }
 
-    public okhttp3.Call.Factory callFactory() {
-        return callFactory;
+    public OkHttpClient.Builder client() {
+        // 返回干净的builder，‘client’中只包含全局拦截器，而不含自定义拦截器的builder
+        return new OkHttpClient.Builder(client.build());
     }
 
     public <T> T create(Class<T> api) {
@@ -94,6 +91,50 @@ public class Pigeon {
             }
             return loadHttpMethod(method).invoke(null != args ? args : new Object[0]);
         });
+    }
+
+    private <T> Converter<T, RequestBody> findRequestConverter(Type type, Annotation[] annotations, Annotation[] parameterAnnotations) {
+        Converter<T, RequestBody> converter;
+        for (Converter.Factory factory : converterFactories) {
+            converter = (Converter<T, RequestBody>) factory.requestBodyConverter(type, annotations, parameterAnnotations, this);
+            if (null != converter) {
+                return converter;
+            }
+        }
+        throw new IllegalStateException("Can not found adapted RequestConverter.");
+    }
+
+    private <T> Converter<ResponseBody, T> findResponseConverter(Type type, Annotation[] annotations) {
+        Converter<ResponseBody, T> converter;
+        for (Converter.Factory factory : converterFactories) {
+            converter = (Converter<ResponseBody, T>) factory.responseBodyConverter(type, annotations, this);
+            if (null != converter) {
+                return converter;
+            }
+        }
+        throw new IllegalStateException("Can not found adapted ResponseConverter.");
+    }
+
+    private <T> Converter<T, String> findStringConverter(Type type, Annotation[] annotations) {
+        Converter<T, String> converter;
+        for (Converter.Factory factory : converterFactories) {
+            converter = (Converter<T, String>) factory.stringConverter(type, annotations, this);
+            if (null != converter) {
+                return converter;
+            }
+        }
+        throw new IllegalStateException("Can not found adapted StringConverter.");
+    }
+
+    private CallAdapter<?, ?> findCallAdapter(Type returnType, Annotation[] annotations) {
+        CallAdapter<?, ?> adapter;
+        for (CallAdapter.Factory factory : callFactories) {
+            adapter = factory.get(returnType, annotations, this);
+            if (null != adapter) {
+                return adapter;
+            }
+        }
+        throw new IllegalStateException("Can not found adapted CallAdapter.");
     }
 
     private void validateInterface(Class<?> api) {
@@ -125,13 +166,13 @@ public class Pigeon {
 
     public static class Builder {
         private HttpUrl host;
+        private List<Interceptor> netInterceptors = new ArrayList<>();
         private List<Interceptor> interceptors = new ArrayList<>();
         private Map<String, Object> headers = new HashMap<>();
-        private CallAdapter.Factory callAdapterFactory = new DefCallAdapter();
-        private Converter.Factory stringConverterFactory = new DefConverter();
-        private Converter.Factory requestConverterFactory = new DefConverter();
-        private Converter.Factory responseConverterFactory = new DefConverter();
-        private okhttp3.Call.Factory callFactory = new DefCallFactory();
+        private List<CallAdapter.Factory> adapterFactories = new ArrayList<>();
+        private List<Converter.Factory> converterFactories = new ArrayList<>();
+        private OkHttpClient.Builder client;
+        private boolean logging = true;
 
         public Builder host(String url) {
             Objects.requireNonNull(url, "URL can not be null.");
@@ -144,37 +185,59 @@ public class Pigeon {
             return this;
         }
 
+        public Builder netInterceptor(Interceptor interceptor) {
+            this.netInterceptors.add(interceptor);
+            return this;
+        }
+
         public Builder header(String name, Object value) {
             this.headers.put(name, value);
             return this;
         }
 
-        public Builder callAdapterFactory(CallAdapter.Factory factory) {
-            this.callAdapterFactory = factory;
+        public Builder addAdapterFactory(CallAdapter.Factory factory) {
+            this.adapterFactories.add(factory);
             return this;
         }
 
-        public Builder stringConverterFactory(Converter.Factory factory) {
-            this.stringConverterFactory = factory;
+        public Builder addConverterFactory(Converter.Factory factory) {
+            this.converterFactories.add(factory);
             return this;
         }
 
-        public Builder requestConverterFactory(Converter.Factory factory) {
-            this.requestConverterFactory = factory;
+        public Builder client(OkHttpClient.Builder client) {
+            this.client = client;
             return this;
         }
 
-        public Builder responseConverterFactory(Converter.Factory factory) {
-            this.responseConverterFactory = factory;
-            return this;
-        }
-
-        public Builder callFactory(okhttp3.Call.Factory factory) {
-            this.callFactory = factory;
+        public Builder logging(boolean logging) {
+            this.logging = logging;
             return this;
         }
 
         public Pigeon build() {
+            if (null == host) {
+                throw new IllegalStateException("host can not be null.");
+            }
+
+            adapterFactories.add(new GuavaCallAdapter());
+            converterFactories.add(new GsonConverter());
+            if (logging) {
+                netInterceptors.add(new HttpLoggerInterceptor());
+            }
+
+            if (null == client) {
+                client = new OkHttpClient.Builder();
+            }
+
+            // 配置全局拦截器
+            if (!netInterceptors.isEmpty()) {
+                netInterceptors.forEach(client::addNetworkInterceptor);
+            }
+            if (!interceptors.isEmpty()) {
+                interceptors.forEach(client::addInterceptor);
+            }
+
             return new Pigeon(this);
         }
     }

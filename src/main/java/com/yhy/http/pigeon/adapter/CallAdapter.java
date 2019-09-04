@@ -20,7 +20,7 @@ public interface CallAdapter<R, T> {
 
     Type responseType();
 
-    T adapt(Call<R> call);
+    T adapt(Call<R> call, Object[] args) throws Exception;
 
     abstract class Factory {
 

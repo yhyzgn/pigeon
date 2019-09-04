@@ -6,6 +6,7 @@ import com.yhy.http.pigeon.common.Call;
 import com.yhy.http.pigeon.common.OkCall;
 import com.yhy.http.pigeon.converter.Converter;
 import com.yhy.http.pigeon.http.request.RequestFactory;
+import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 
 import java.lang.annotation.Annotation;
@@ -23,22 +24,22 @@ import java.lang.reflect.Type;
 public abstract class HttpHandler<Res, Ret> extends HttpMethod<Ret> {
 
     private final RequestFactory requestFactory;
-    private final okhttp3.Call.Factory callFactory;
+    private final OkHttpClient.Builder client;
     private final Converter<ResponseBody, Res> responseConverter;
 
-    private HttpHandler(RequestFactory requestFactory, okhttp3.Call.Factory callFactory, Converter<ResponseBody, Res> responseConverter) {
+    private HttpHandler(RequestFactory requestFactory, OkHttpClient.Builder client, Converter<ResponseBody, Res> responseConverter) {
         this.requestFactory = requestFactory;
-        this.callFactory = callFactory;
+        this.client = client;
         this.responseConverter = responseConverter;
     }
 
     @Override
-    public Ret invoke(Object[] args) {
-        OkCall<Res> call = new OkCall<>(requestFactory, callFactory, responseConverter, args);
+    public Ret invoke(Object[] args) throws Exception {
+        OkCall<Res> call = new OkCall<>(requestFactory, client, responseConverter, args);
         return adapt(call, args);
     }
 
-    protected abstract Ret adapt(Call<Res> call, Object[] args);
+    protected abstract Ret adapt(Call<Res> call, Object[] args) throws Exception;
 
     public static <Res, Ret> HttpHandler<Res, Ret> parseAnnotations(Pigeon pigeon, Method method, RequestFactory factory) {
         Type returnType = method.getGenericReturnType();
@@ -47,7 +48,7 @@ public abstract class HttpHandler<Res, Ret> extends HttpMethod<Ret> {
         Type responseType = callAdapter.responseType();
         Converter<ResponseBody, Res> responseConverter = createResponseConverter(pigeon, annotations, responseType);
 
-        return new AdaptedCall<>(factory, pigeon.callFactory(), responseConverter, callAdapter);
+        return new AdaptedCall<>(factory, pigeon.client(), responseConverter, callAdapter);
     }
 
     private static <Res> Converter<ResponseBody, Res> createResponseConverter(Pigeon pigeon, Annotation[] annotations, Type responseType) {
@@ -55,21 +56,21 @@ public abstract class HttpHandler<Res, Ret> extends HttpMethod<Ret> {
     }
 
     private static <Res, Ret> CallAdapter<Res, Ret> createCallAdapter(Pigeon pigeon, Annotation[] annotations, Type returnType) {
-        return (CallAdapter<Res, Ret>) pigeon.callAdapter(returnType, annotations);
+        return (CallAdapter<Res, Ret>) pigeon.adapter(returnType, annotations);
     }
 
     public static class AdaptedCall<Res, Ret> extends HttpHandler<Res, Ret> {
 
         private final CallAdapter<Res, Ret> callAdapter;
 
-        AdaptedCall(RequestFactory requestFactory, okhttp3.Call.Factory callFactory, Converter<ResponseBody, Res> responseConverter, CallAdapter<Res, Ret> callAdapter) {
-            super(requestFactory, callFactory, responseConverter);
+        AdaptedCall(RequestFactory requestFactory, OkHttpClient.Builder client, Converter<ResponseBody, Res> responseConverter, CallAdapter<Res, Ret> callAdapter) {
+            super(requestFactory, client, responseConverter);
             this.callAdapter = callAdapter;
         }
 
         @Override
-        protected Ret adapt(Call<Res> call, Object[] args) {
-            return callAdapter.adapt(call);
+        protected Ret adapt(Call<Res> call, Object[] args) throws Exception {
+            return callAdapter.adapt(call, args);
         }
     }
 }

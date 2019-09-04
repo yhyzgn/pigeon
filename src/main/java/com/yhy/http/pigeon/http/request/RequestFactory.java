@@ -2,6 +2,7 @@ package com.yhy.http.pigeon.http.request;
 
 import com.yhy.http.pigeon.Pigeon;
 import com.yhy.http.pigeon.annotation.Headers;
+import com.yhy.http.pigeon.annotation.Interceptor;
 import com.yhy.http.pigeon.annotation.*;
 import com.yhy.http.pigeon.annotation.method.*;
 import com.yhy.http.pigeon.annotation.param.*;
@@ -41,10 +42,12 @@ public class RequestFactory {
     private final boolean isForm;
     private final boolean isMultipart;
     private final ParameterHandler<?>[] parameterHandlers;
+    private List<okhttp3.Interceptor> netInterceptors;
+    private List<okhttp3.Interceptor> interceptors;
 
     public RequestFactory(Builder builder) {
         method = builder.method;
-        host = builder.pigeon.host();
+        host = builder.host;
         httpMethod = builder.httpMethod;
         relativeUrl = builder.relativeUrl;
         headers = builder.headers;
@@ -53,10 +56,11 @@ public class RequestFactory {
         isForm = builder.isForm;
         isMultipart = builder.isMultipart;
         parameterHandlers = builder.parameterHandlers;
-
+        netInterceptors = builder.netInterceptors;
+        interceptors = builder.interceptors;
     }
 
-    public Request create(Object[] args) throws IOException {
+    public Request create(OkHttpClient.Builder client, Object[] args) throws IOException {
         @SuppressWarnings("unchecked")
         ParameterHandler<Object>[] handlers = (ParameterHandler<Object>[]) parameterHandlers;
         int argsCount = args.length;
@@ -71,6 +75,15 @@ public class RequestFactory {
             argsList.add(args[i]);
             handlers[i].apply(builder, args[i]);
         }
+
+        // 自定义设置拦截器
+        if (!netInterceptors.isEmpty()) {
+            netInterceptors.forEach(client::addNetworkInterceptor);
+        }
+        if (!interceptors.isEmpty()) {
+            interceptors.forEach(client::addInterceptor);
+        }
+
         return builder.get().tag(Invocation.class, Invocation.of(method, argsList)).build();
     }
 
@@ -96,10 +109,12 @@ public class RequestFactory {
         private MediaType contentType;
         private boolean isForm;
         private boolean isMultipart;
-        private String host;
+        private HttpUrl host;
         private String relativeUrl;
         private Set<String> relativeUrlParamNames;
         private ParameterHandler<?>[] parameterHandlers;
+        private List<okhttp3.Interceptor> netInterceptors;
+        private List<okhttp3.Interceptor> interceptors;
 
         Builder(Pigeon pigeon, Method method) {
             this.pigeon = pigeon;
@@ -109,6 +124,9 @@ public class RequestFactory {
             this.parameterTypes = method.getGenericParameterTypes();
             this.parameterAnnotations = method.getParameterAnnotations();
             this.headersBuilder = new okhttp3.Headers.Builder();
+            this.host = pigeon.host();
+            this.netInterceptors = new ArrayList<>();
+            this.interceptors = new ArrayList<>();
         }
 
         RequestFactory build() {
@@ -143,7 +161,7 @@ public class RequestFactory {
             Type type = parameter.getParameterizedType();
 
             ParameterHandler<?> handler = null;
-            if (null != annotations) {
+            if (null != annotations && annotations.length > 0) {
                 for (Annotation annotation : annotations) {
                     if (null != handler) {
                         throw Utils.parameterError(method, index, "Multiple param annotations found, but only one allowed.");
@@ -472,11 +490,34 @@ public class RequestFactory {
                 }
                 isForm = true;
             } else if (annotation instanceof Host) {
-                host = ((Host) annotation).value();
+                host = HttpUrl.get(((Host) annotation).value());
+            } else if (annotation instanceof Interceptor) {
+                parseInterceptors(((Interceptor) annotation));
+            } else if (annotation instanceof Interceptors) {
+                parseInterceptors(((Interceptors) annotation).value());
+            }
+        }
+
+        private void parseInterceptors(Interceptor... annotation) {
+            if (null == annotation) return;
+            for (Interceptor ano : annotation) {
+                Class<? extends okhttp3.Interceptor> clazz = ano.value();
+                try {
+                    // 获取空参数构造函数，并创建对象
+                    okhttp3.Interceptor interceptor = clazz.getConstructor().newInstance();
+                    if (ano.net()) {
+                        netInterceptors.add(interceptor);
+                    } else {
+                        interceptors.add(interceptor);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
 
         private void parseHeader(Header... annotation) {
+            if (null == annotation) return;
             for (Header header : annotation) {
                 String headerName;
                 String headerValue;

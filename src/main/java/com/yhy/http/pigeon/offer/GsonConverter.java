@@ -1,4 +1,4 @@
-package com.yhy.http.pigeon.def;
+package com.yhy.http.pigeon.offer;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
@@ -30,10 +30,10 @@ import java.nio.charset.StandardCharsets;
  * version: 1.0.0
  * desc   :
  */
-public class DefConverter extends Converter.Factory {
+public class GsonConverter extends Converter.Factory {
     private final Gson gson;
 
-    public DefConverter() {
+    public GsonConverter() {
         this.gson = new Gson();
     }
 
@@ -94,6 +94,7 @@ public class DefConverter extends Converter.Factory {
         @Override
         public T convert(ResponseBody from) throws IOException {
             JsonReader jsonReader = gson.newJsonReader(from.charStream());
+            jsonReader.setLenient(true);
             try {
                 T result = adapter.read(jsonReader);
                 if (jsonReader.peek() != JsonToken.END_DOCUMENT) {

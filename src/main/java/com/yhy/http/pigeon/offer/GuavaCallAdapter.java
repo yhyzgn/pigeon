@@ -1,4 +1,4 @@
-package com.yhy.http.pigeon.def;
+package com.yhy.http.pigeon.offer;
 
 import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -6,8 +6,8 @@ import com.yhy.http.pigeon.Pigeon;
 import com.yhy.http.pigeon.adapter.CallAdapter;
 import com.yhy.http.pigeon.common.Call;
 import com.yhy.http.pigeon.common.Callback;
-import com.yhy.http.pigeon.http.HttpException;
 import com.yhy.http.pigeon.common.Response;
+import com.yhy.http.pigeon.http.HttpException;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
@@ -21,29 +21,19 @@ import java.lang.reflect.Type;
  * version: 1.0.0
  * desc   :
  */
-public class DefCallAdapter extends CallAdapter.Factory {
+public class GuavaCallAdapter extends CallAdapter.Factory {
 
     @Nullable
     @Override
     public CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Pigeon pigeon) {
-        if (getRawType(returnType) != ListenableFuture.class) {
-            return null;
+        if (getRawType(returnType) != Response.class) {
+            return new BodyCallAdapter<>(returnType);
         }
-        if (!(returnType instanceof ParameterizedType)) {
-            throw new IllegalStateException("ListenableFuture return type must be parameterized as ListenableFuture<Foo> or ListenableFuture<? extends Foo>");
-        }
-        Type innerType = getParameterUpperBound(0, (ParameterizedType) returnType);
-        if (getRawType(innerType) != Response.class) {
-            return new BodyCallAdapter<>(innerType);
-        }
-        if (!(innerType instanceof ParameterizedType)) {
-            throw new IllegalStateException("Response must be parameterized as Response<Foo> or Response<? extends Foo>");
-        }
-        Type responseType = getParameterUpperBound(0, (ParameterizedType) innerType);
+        Type responseType = getParameterUpperBound(0, (ParameterizedType) returnType);
         return new ResponseCallAdapter<>(responseType);
     }
 
-    private static final class BodyCallAdapter<R> implements CallAdapter<R, ListenableFuture<R>> {
+    private static final class BodyCallAdapter<R> implements CallAdapter<R, R> {
         private final Type responseType;
 
         BodyCallAdapter(Type responseType) {
@@ -56,8 +46,8 @@ public class DefCallAdapter extends CallAdapter.Factory {
         }
 
         @Override
-        public ListenableFuture<R> adapt(Call<R> call) {
-            return new AbstractFuture<R>() {
+        public R adapt(Call<R> call, Object[] args) throws Exception {
+            ListenableFuture<R> future = new AbstractFuture<R>() {
                 {
                     call.enqueue(new Callback<R>() {
                         @Override
@@ -82,10 +72,11 @@ public class DefCallAdapter extends CallAdapter.Factory {
                     call.cancel();
                 }
             };
+            return future.get();
         }
     }
 
-    private static final class ResponseCallAdapter<R> implements CallAdapter<R, ListenableFuture<Response<R>>> {
+    private static final class ResponseCallAdapter<R> implements CallAdapter<R, Response<R>> {
         private final Type responseType;
 
         ResponseCallAdapter(Type responseType) {
@@ -98,8 +89,8 @@ public class DefCallAdapter extends CallAdapter.Factory {
         }
 
         @Override
-        public ListenableFuture<Response<R>> adapt(Call<R> call) {
-            return new AbstractFuture<Response<R>>() {
+        public Response<R> adapt(Call<R> call, Object[] args) throws Exception {
+            ListenableFuture<Response<R>> future = new AbstractFuture<Response<R>>() {
                 {
                     call.enqueue(new Callback<R>() {
                         @Override
@@ -120,6 +111,7 @@ public class DefCallAdapter extends CallAdapter.Factory {
                     call.cancel();
                 }
             };
+            return future.get();
         }
     }
 }

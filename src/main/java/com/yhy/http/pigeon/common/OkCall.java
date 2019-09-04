@@ -4,6 +4,7 @@ import com.yhy.http.pigeon.converter.Converter;
 import com.yhy.http.pigeon.http.request.RequestFactory;
 import com.yhy.http.pigeon.utils.Utils;
 import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.ResponseBody;
 import okio.Buffer;
@@ -25,7 +26,7 @@ import java.util.Objects;
  */
 public class OkCall<T> implements Call<T> {
     private final RequestFactory requestFactory;
-    private final okhttp3.Call.Factory callFactory;
+    private final OkHttpClient.Builder client;
     private final Converter<ResponseBody, T> responseConverter;
     private final Object[] args;
 
@@ -36,9 +37,9 @@ public class OkCall<T> implements Call<T> {
     private Throwable failureHandler;
     private boolean executed;
 
-    public OkCall(RequestFactory requestFactory, okhttp3.Call.Factory callFactory, Converter<ResponseBody, T> responseConverter, Object[] args) {
+    public OkCall(RequestFactory requestFactory, OkHttpClient.Builder client, Converter<ResponseBody, T> responseConverter, Object[] args) {
         this.requestFactory = requestFactory;
-        this.callFactory = callFactory;
+        this.client = client;
         this.responseConverter = responseConverter;
         this.args = args;
     }
@@ -188,14 +189,14 @@ public class OkCall<T> implements Call<T> {
     @Override
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     public OkCall<T> clone() {
-        return new OkCall<>(requestFactory, callFactory, responseConverter, args);
+        return new OkCall<>(requestFactory, client, responseConverter, args);
     }
 
     private okhttp3.Call createRawCall() {
         Request request = null;
         try {
-            request = requestFactory.create(args);
-            return callFactory.newCall(request);
+            request = requestFactory.create(client, args);
+            return client.build().newCall(request);
         } catch (IOException e) {
             e.printStackTrace();
         }

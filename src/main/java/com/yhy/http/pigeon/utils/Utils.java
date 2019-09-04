@@ -191,8 +191,34 @@ public class Utils {
         }
     }
 
-    private static Type resolveTypeVariable(
-            Type context, Class<?> contextRawType, TypeVariable<?> unknown) {
+    public static RuntimeException methodError(Method method, String message, Object... args) {
+        return methodError(method, null, message, args);
+    }
+
+    public static RuntimeException methodError(Method method, @Nullable Throwable cause, String message, Object... args) {
+        message = String.format(message, args);
+        return new IllegalArgumentException(message
+                + "\n    for method "
+                + method.getDeclaringClass().getSimpleName()
+                + "."
+                + method.getName(), cause);
+    }
+
+    public static RuntimeException parameterError(Method method, Throwable cause, int p, String message, Object... args) {
+        return methodError(method, cause, message + " (parameter #" + (p + 1) + ")", args);
+    }
+
+    public static RuntimeException parameterError(Method method, int p, String message, Object... args) {
+        return methodError(method, message + " (parameter #" + (p + 1) + ")", args);
+    }
+
+    public static ResponseBody buffer(ResponseBody rawBody) throws IOException {
+        Buffer buffer = new Buffer();
+        rawBody.source().readAll(buffer);
+        return ResponseBody.create(rawBody.contentType(), rawBody.contentLength(), buffer);
+    }
+
+    private static Type resolveTypeVariable(Type context, Class<?> contextRawType, TypeVariable<?> unknown) {
         Class<?> declaredByRaw = declaringClassOf(unknown);
 
         // We can't reduce this further.
@@ -250,8 +276,7 @@ public class Utils {
         return type instanceof Class ? ((Class<?>) type).getName() : type.toString();
     }
 
-    private static @Nullable
-    Class<?> declaringClassOf(TypeVariable<?> typeVariable) {
+    private static Class<?> declaringClassOf(TypeVariable<?> typeVariable) {
         GenericDeclaration genericDeclaration = typeVariable.getGenericDeclaration();
         return genericDeclaration instanceof Class ? (Class<?>) genericDeclaration : null;
     }
@@ -262,9 +287,6 @@ public class Utils {
         }
     }
 
-    /**
-     * Returns true if {@code annotations} contains an instance of {@code cls}.
-     */
     static boolean isAnnotationPresent(Annotation[] annotations, Class<? extends Annotation> cls) {
         for (Annotation annotation : annotations) {
             if (cls.isInstance(annotation)) {
@@ -316,35 +338,9 @@ public class Utils {
         }
     }
 
-    public static RuntimeException methodError(Method method, String message, Object... args) {
-        return methodError(method, null, message, args);
-    }
-
-    public static RuntimeException methodError(Method method, @Nullable Throwable cause, String message, Object... args) {
-        message = String.format(message, args);
-        return new IllegalArgumentException(message
-                + "\n    for method "
-                + method.getDeclaringClass().getSimpleName()
-                + "."
-                + method.getName(), cause);
-    }
-
-    public static RuntimeException parameterError(Method method, Throwable cause, int p, String message, Object... args) {
-        return methodError(method, cause, message + " (parameter #" + (p + 1) + ")", args);
-    }
-
-    public static RuntimeException parameterError(Method method, int p, String message, Object... args) {
-        return methodError(method, message + " (parameter #" + (p + 1) + ")", args);
-    }
-
-    public static ResponseBody buffer(ResponseBody rawBody) throws IOException {
-        Buffer buffer = new Buffer();
-        rawBody.source().readAll(buffer);
-        return ResponseBody.create(rawBody.contentType(), rawBody.contentLength(), buffer);
-    }
-
     static final class ParameterizedTypeImpl implements ParameterizedType {
-        private final @Nullable Type ownerType;
+        private final @Nullable
+        Type ownerType;
         private final Type rawType;
         private final Type[] typeArguments;
 
@@ -365,29 +361,36 @@ public class Utils {
             this.typeArguments = typeArguments.clone();
         }
 
-        @Override public Type[] getActualTypeArguments() {
+        @Override
+        public Type[] getActualTypeArguments() {
             return typeArguments.clone();
         }
 
-        @Override public Type getRawType() {
+        @Override
+        public Type getRawType() {
             return rawType;
         }
 
-        @Override public @Nullable Type getOwnerType() {
+        @Override
+        public @Nullable
+        Type getOwnerType() {
             return ownerType;
         }
 
-        @Override public boolean equals(Object other) {
+        @Override
+        public boolean equals(Object other) {
             return other instanceof ParameterizedType && Utils.equals(this, (ParameterizedType) other);
         }
 
-        @Override public int hashCode() {
+        @Override
+        public int hashCode() {
             return Arrays.hashCode(typeArguments)
                     ^ rawType.hashCode()
                     ^ (ownerType != null ? ownerType.hashCode() : 0);
         }
 
-        @Override public String toString() {
+        @Override
+        public String toString() {
             if (typeArguments.length == 0) return typeToString(rawType);
             StringBuilder result = new StringBuilder(30 * (typeArguments.length + 1));
             result.append(typeToString(rawType));

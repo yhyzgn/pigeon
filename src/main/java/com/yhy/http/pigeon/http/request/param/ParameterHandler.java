@@ -27,7 +27,7 @@ public abstract class ParameterHandler<T> {
     public final ParameterHandler<Iterable<T>> iterable() {
         return new ParameterHandler<Iterable<T>>() {
             @Override
-            void apply(RequestBuilder builder, @Nullable Iterable<T> values) throws IOException {
+            public void apply(RequestBuilder builder, @Nullable Iterable<T> values) throws IOException {
                 if (values == null) return; // Skip null values.
                 for (T value : values) {
                     ParameterHandler.this.apply(builder, value);
@@ -39,7 +39,7 @@ public abstract class ParameterHandler<T> {
     public final ParameterHandler<Object> array() {
         return new ParameterHandler<Object>() {
             @Override
-            void apply(RequestBuilder builder, @Nullable Object values) throws IOException {
+            public void apply(RequestBuilder builder, @Nullable Object values) throws IOException {
                 if (values == null) return; // Skip null values.
                 for (int i = 0, size = Array.getLength(values); i < size; i++) {
                     //noinspection unchecked
@@ -59,7 +59,7 @@ public abstract class ParameterHandler<T> {
         }
 
         @Override
-        void apply(RequestBuilder builder, @Nullable Object value) throws IOException {
+        public void apply(RequestBuilder builder, @Nullable Object value) throws IOException {
             if (null == value) {
                 throw Utils.parameterError(method, index, "@Url parameter is null.");
             }
@@ -83,7 +83,7 @@ public abstract class ParameterHandler<T> {
         }
 
         @Override
-        void apply(RequestBuilder builder, @Nullable T value) throws IOException {
+        public void apply(RequestBuilder builder, @Nullable T value) throws IOException {
             if (value == null) {
                 throw Utils.parameterError(method, index, "Path parameter \"" + name + "\" value must not be null.");
             }
@@ -103,7 +103,7 @@ public abstract class ParameterHandler<T> {
         }
 
         @Override
-        void apply(RequestBuilder builder, @Nullable T value) throws IOException {
+        public void apply(RequestBuilder builder, @Nullable T value) throws IOException {
             if (null == value) return;
             String queryValue = converter.convert(value);
             if (null == queryValue) return;
@@ -125,7 +125,7 @@ public abstract class ParameterHandler<T> {
         }
 
         @Override
-        void apply(RequestBuilder builder, @Nullable Map<String, T> value) throws IOException {
+        public void apply(RequestBuilder builder, @Nullable Map<String, T> value) throws IOException {
             if (value == null) {
                 throw Utils.parameterError(method, index, "Query map was null");
             }
@@ -166,7 +166,7 @@ public abstract class ParameterHandler<T> {
         }
 
         @Override
-        void apply(RequestBuilder builder, @Nullable T value) throws IOException {
+        public void apply(RequestBuilder builder, @Nullable T value) throws IOException {
             if (value == null) return;
             String fieldValue = converter.convert(value);
             if (fieldValue == null) return;
@@ -188,7 +188,7 @@ public abstract class ParameterHandler<T> {
         }
 
         @Override
-        void apply(RequestBuilder builder, @Nullable Map<String, T> value) throws IOException {
+        public void apply(RequestBuilder builder, @Nullable Map<String, T> value) throws IOException {
             if (value == null) {
                 throw Utils.parameterError(method, index, "Field map was null.");
             }
@@ -229,7 +229,7 @@ public abstract class ParameterHandler<T> {
         }
 
         @Override
-        void apply(RequestBuilder builder, @Nullable T value) throws IOException {
+        public void apply(RequestBuilder builder, @Nullable T value) throws IOException {
             if (value == null) return;
             String headerValue = converter.convert(value);
             if (headerValue == null) return;
@@ -249,7 +249,7 @@ public abstract class ParameterHandler<T> {
         }
 
         @Override
-        void apply(RequestBuilder builder, @Nullable Map<String, T> value) throws IOException {
+        public void apply(RequestBuilder builder, @Nullable Map<String, T> value) throws IOException {
             if (value == null) {
                 throw Utils.parameterError(method, index, "Header map can not be null.");
             }
@@ -278,7 +278,7 @@ public abstract class ParameterHandler<T> {
         }
 
         @Override
-        void apply(RequestBuilder builder, @Nullable okhttp3.Headers headers) {
+        public void apply(RequestBuilder builder, @Nullable okhttp3.Headers headers) {
             if (headers == null) {
                 throw Utils.parameterError(method, p, "Headers parameter must not be null.");
             }
@@ -300,7 +300,7 @@ public abstract class ParameterHandler<T> {
         }
 
         @Override
-        void apply(RequestBuilder builder, @Nullable T value) {
+        public void apply(RequestBuilder builder, @Nullable T value) {
             if (value == null) return;
             RequestBody body;
             try {
@@ -319,7 +319,7 @@ public abstract class ParameterHandler<T> {
         }
 
         @Override
-        void apply(RequestBuilder builder, @Nullable MultipartBody.Part value) {
+        public void apply(RequestBuilder builder, @Nullable MultipartBody.Part value) {
             if (value != null) {
                 builder.addPart(value);
             }
@@ -340,7 +340,7 @@ public abstract class ParameterHandler<T> {
         }
 
         @Override
-        void apply(RequestBuilder builder, @Nullable Map<String, T> value) throws IOException {
+        public void apply(RequestBuilder builder, @Nullable Map<String, T> value) throws IOException {
             if (value == null) {
                 throw Utils.parameterError(method, index, "Part map was null.");
             }
@@ -371,7 +371,7 @@ public abstract class ParameterHandler<T> {
         }
 
         @Override
-        void apply(RequestBuilder builder, @Nullable T value) throws IOException {
+        public void apply(RequestBuilder builder, @Nullable T value) throws IOException {
             if (value == null) {
                 throw Utils.parameterError(method, index, "Body parameter value must not be null.");
             }
@@ -388,7 +388,7 @@ public abstract class ParameterHandler<T> {
         }
 
         @Override
-        void apply(RequestBuilder builder, @Nullable T value) {
+        public void apply(RequestBuilder builder, @Nullable T value) {
             builder.addTag(clazz, value);
         }
     }

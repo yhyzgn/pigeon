@@ -27,5 +27,5 @@ public abstract class HttpMethod<T> {
         return HttpHandler.parseAnnotations(pigeon, method, RequestFactory.parseAnnotations(pigeon, method));
     }
 
-    public abstract T invoke(Object[] objects);
+    public abstract T invoke(Object[] objects) throws Exception;
 }
