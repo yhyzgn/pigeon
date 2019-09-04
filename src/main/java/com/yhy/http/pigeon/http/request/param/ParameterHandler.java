@@ -3,6 +3,8 @@ package com.yhy.http.pigeon.http.request.param;
 import com.yhy.http.pigeon.converter.Converter;
 import com.yhy.http.pigeon.http.request.RequestBuilder;
 import com.yhy.http.pigeon.utils.Utils;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -20,7 +22,7 @@ import java.util.Objects;
  */
 public abstract class ParameterHandler<T> {
 
-    abstract void apply(RequestBuilder builder, @Nullable T value) throws IOException;
+    public abstract void apply(RequestBuilder builder, @Nullable T value) throws IOException;
 
     public final ParameterHandler<Iterable<T>> iterable() {
         return new ParameterHandler<Iterable<T>>() {
@@ -128,13 +130,13 @@ public abstract class ParameterHandler<T> {
                 throw Utils.parameterError(method, index, "Query map was null");
             }
             for (Map.Entry<String, T> et : value.entrySet()) {
-                String key = et.getKey();
-                if (key == null) {
+                String etKey = et.getKey();
+                if (etKey == null) {
                     throw Utils.parameterError(method, index, "Query map contained null key.");
                 }
                 T etValue = et.getValue();
                 if (etValue == null) {
-                    throw Utils.parameterError(method, index, "Query map contained null value for key '" + key + "'.");
+                    throw Utils.parameterError(method, index, "Query map contained null value for key '" + etKey + "'.");
                 }
 
                 String convertedValue = converter.convert(etValue);
@@ -144,10 +146,10 @@ public abstract class ParameterHandler<T> {
                             + "' converted to null by "
                             + converter.getClass().getName()
                             + " for key '"
-                            + key
+                            + etKey
                             + "'.");
                 }
-                builder.addQueryParam(key, convertedValue, encoded);
+                builder.addQueryParam(etKey, convertedValue, encoded);
             }
         }
     }
@@ -192,13 +194,13 @@ public abstract class ParameterHandler<T> {
             }
 
             for (Map.Entry<String, T> et : value.entrySet()) {
-                String key = et.getKey();
-                if (key == null) {
+                String etKey = et.getKey();
+                if (etKey == null) {
                     throw Utils.parameterError(method, index, "Field map contained null key.");
                 }
                 T etValue = et.getValue();
                 if (etValue == null) {
-                    throw Utils.parameterError(method, index, "Field map contained null value for key '" + key + "'.");
+                    throw Utils.parameterError(method, index, "Field map contained null value for key '" + etKey + "'.");
                 }
 
                 String fieldEntry = converter.convert(etValue);
@@ -208,11 +210,11 @@ public abstract class ParameterHandler<T> {
                             + "' converted to null by "
                             + converter.getClass().getName()
                             + " for key '"
-                            + key
+                            + etKey
                             + "'.");
                 }
 
-                builder.addFiled(key, fieldEntry, encoded);
+                builder.addFiled(etKey, fieldEntry, encoded);
             }
         }
     }
@@ -281,6 +283,113 @@ public abstract class ParameterHandler<T> {
                 throw Utils.parameterError(method, p, "Headers parameter must not be null.");
             }
             builder.addHeaders(headers);
+        }
+    }
+
+    public static final class Part<T> extends ParameterHandler<T> {
+        private final Method method;
+        private final int index;
+        private final okhttp3.Headers headers;
+        private final Converter<T, RequestBody> converter;
+
+        public Part(Method method, int index, okhttp3.Headers headers, Converter<T, RequestBody> converter) {
+            this.method = method;
+            this.index = index;
+            this.headers = headers;
+            this.converter = converter;
+        }
+
+        @Override
+        void apply(RequestBuilder builder, @Nullable T value) {
+            if (value == null) return;
+            RequestBody body;
+            try {
+                body = converter.convert(value);
+            } catch (IOException e) {
+                throw Utils.parameterError(method, index, "Unable to convert " + value + " to RequestBody", e);
+            }
+            builder.addPart(headers, body);
+        }
+    }
+
+    public static final class RawPart extends ParameterHandler<MultipartBody.Part> {
+        public static final RawPart INSTANCE = new RawPart();
+
+        private RawPart() {
+        }
+
+        @Override
+        void apply(RequestBuilder builder, @Nullable MultipartBody.Part value) {
+            if (value != null) {
+                builder.addPart(value);
+            }
+        }
+    }
+
+    public static final class PartMap<T> extends ParameterHandler<Map<String, T>> {
+        private final Method method;
+        private final int index;
+        private final Converter<T, RequestBody> valueConverter;
+        private final String transferEncoding;
+
+        public PartMap(Method method, int index, Converter<T, RequestBody> valueConverter, String transferEncoding) {
+            this.method = method;
+            this.index = index;
+            this.valueConverter = valueConverter;
+            this.transferEncoding = transferEncoding;
+        }
+
+        @Override
+        void apply(RequestBuilder builder, @Nullable Map<String, T> value) throws IOException {
+            if (value == null) {
+                throw Utils.parameterError(method, index, "Part map was null.");
+            }
+            for (Map.Entry<String, T> entry : value.entrySet()) {
+                String etKey = entry.getKey();
+                if (etKey == null) {
+                    throw Utils.parameterError(method, index, "Part map contained null key.");
+                }
+                T etValue = entry.getValue();
+                if (etValue == null) {
+                    throw Utils.parameterError(method, index, "Part map contained null value for key '" + etKey + "'.");
+                }
+                okhttp3.Headers headers = okhttp3.Headers.of("Content-Disposition", "form-data; name=\"" + etKey + "\"", "Content-Transfer-Encoding", transferEncoding);
+                builder.addPart(headers, valueConverter.convert(etValue));
+            }
+        }
+    }
+
+    public static class Body<T> extends ParameterHandler<T> {
+        private final Method method;
+        private final int index;
+        private final Converter<T, RequestBody> converter;
+
+        public Body(Method method, int index, Converter<T, RequestBody> converter) {
+            this.method = method;
+            this.index = index;
+            this.converter = converter;
+        }
+
+        @Override
+        void apply(RequestBuilder builder, @Nullable T value) throws IOException {
+            if (value == null) {
+                throw Utils.parameterError(method, index, "Body parameter value must not be null.");
+            }
+            RequestBody body = converter.convert(value);
+            builder.setBody(body);
+        }
+    }
+
+    public static final class Tag<T> extends ParameterHandler<T> {
+        public final Class<T> clazz;
+
+        public Tag(Class<T> clazz) {
+            this.clazz = clazz;
+        }
+
+        @Override
+        void apply(RequestBuilder builder, @Nullable T value) {
+            builder.addTag(clazz, value);
         }
     }
 }

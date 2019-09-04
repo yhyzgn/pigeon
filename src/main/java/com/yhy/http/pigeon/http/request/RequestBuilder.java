@@ -109,7 +109,7 @@ public class RequestBuilder {
         this.body = body;
     }
 
-    <T> void addTag(Class<T> cls, @Nullable T value) {
+    public <T> void addTag(Class<T> cls, @Nullable T value) {
         requestBuilder.tag(cls, value);
     }
 

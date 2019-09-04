@@ -192,11 +192,14 @@ public class OkCall<T> implements Call<T> {
     }
 
     private okhttp3.Call createRawCall() {
-        okhttp3.Call call = callFactory.newCall(requestFactory.create(args));
-        if (null == call) {
-            throw new NullPointerException("Call.Factory returned null.");
+        Request request = null;
+        try {
+            request = requestFactory.create(args);
+            return callFactory.newCall(request);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return call;
+        return null;
     }
 
     private Response<T> parseResponse(okhttp3.Response rawResponse) throws IOException {
