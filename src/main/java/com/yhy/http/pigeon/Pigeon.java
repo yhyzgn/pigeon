@@ -95,8 +95,9 @@ public class Pigeon {
 
     private <T> Converter<T, RequestBody> findRequestConverter(Type type, Annotation[] annotations, Annotation[] parameterAnnotations) {
         Converter<T, RequestBody> converter;
-        for (Converter.Factory factory : converterFactories) {
-            converter = (Converter<T, RequestBody>) factory.requestBodyConverter(type, annotations, parameterAnnotations, this);
+        // 从后向前查找
+        for (int i = converterFactories.size() - 1; i >= 0; i--) {
+            converter = (Converter<T, RequestBody>) converterFactories.get(i).requestBodyConverter(type, annotations, parameterAnnotations, this);
             if (null != converter) {
                 return converter;
             }
@@ -106,8 +107,9 @@ public class Pigeon {
 
     private <T> Converter<ResponseBody, T> findResponseConverter(Type type, Annotation[] annotations) {
         Converter<ResponseBody, T> converter;
-        for (Converter.Factory factory : converterFactories) {
-            converter = (Converter<ResponseBody, T>) factory.responseBodyConverter(type, annotations, this);
+        // 从后向前查找
+        for (int i = converterFactories.size() - 1; i >= 0; i--) {
+            converter = (Converter<ResponseBody, T>) converterFactories.get(i).responseBodyConverter(type, annotations, this);
             if (null != converter) {
                 return converter;
             }
@@ -117,8 +119,9 @@ public class Pigeon {
 
     private <T> Converter<T, String> findStringConverter(Type type, Annotation[] annotations) {
         Converter<T, String> converter;
-        for (Converter.Factory factory : converterFactories) {
-            converter = (Converter<T, String>) factory.stringConverter(type, annotations, this);
+        // 从后向前查找
+        for (int i = converterFactories.size() - 1; i >= 0; i--) {
+            converter = (Converter<T, String>) converterFactories.get(i).stringConverter(type, annotations, this);
             if (null != converter) {
                 return converter;
             }
@@ -128,8 +131,9 @@ public class Pigeon {
 
     private CallAdapter<?, ?> findCallAdapter(Type returnType, Annotation[] annotations) {
         CallAdapter<?, ?> adapter;
-        for (CallAdapter.Factory factory : callFactories) {
-            adapter = factory.get(returnType, annotations, this);
+        // 从后向前查找
+        for (int i = callFactories.size() - 1; i >= 0; i--) {
+            adapter = callFactories.get(i).get(returnType, annotations, this);
             if (null != adapter) {
                 return adapter;
             }
