@@ -8,11 +8,15 @@ import com.yhy.http.pigeon.offer.GuavaCallAdapter;
 import com.yhy.http.pigeon.offer.HttpLoggerInterceptor;
 import okhttp3.*;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -177,6 +181,10 @@ public class Pigeon {
         private List<Converter.Factory> converterFactories = new ArrayList<>();
         private OkHttpClient.Builder client;
         private boolean logging = true;
+        private SSLSocketFactory sslSocketFactory;
+        private X509TrustManager sslTrustManager;
+        private HostnameVerifier sslHostnameVerifier;
+        private Duration timeout;
 
         public Builder host(String url) {
             Objects.requireNonNull(url, "URL can not be null.");
@@ -209,8 +217,25 @@ public class Pigeon {
             return this;
         }
 
+        public Builder https(SSLSocketFactory factory, X509TrustManager manager, HostnameVerifier verifier) {
+            this.sslSocketFactory = factory;
+            this.sslTrustManager = manager;
+            this.sslHostnameVerifier = verifier;
+            return this;
+        }
+
         public Builder client(OkHttpClient.Builder client) {
             this.client = client;
+            return this;
+        }
+
+        public Builder timeout(long millis) {
+            this.timeout = Duration.ofMillis(millis);
+            return this;
+        }
+
+        public Builder timeout(Duration timeout) {
+            this.timeout = timeout;
             return this;
         }
 
@@ -224,8 +249,9 @@ public class Pigeon {
                 throw new IllegalStateException("host can not be null.");
             }
 
-            adapterFactories.add(new GuavaCallAdapter());
-            converterFactories.add(new GsonConverter());
+            // 默认Adapter和Converter需要添加在最前面，后边需要从后往前查找
+            adapterFactories.add(0, new GuavaCallAdapter());
+            converterFactories.add(0, new GsonConverter());
             if (logging) {
                 netInterceptors.add(new HttpLoggerInterceptor());
             }
@@ -234,12 +260,22 @@ public class Pigeon {
                 client = new OkHttpClient.Builder();
             }
 
+            // 配置 ssl
+            if (null != sslSocketFactory && null != sslTrustManager && null != sslHostnameVerifier) {
+                client.sslSocketFactory(sslSocketFactory, sslTrustManager).hostnameVerifier(sslHostnameVerifier);
+            }
+
             // 配置全局拦截器
             if (!netInterceptors.isEmpty()) {
                 netInterceptors.forEach(client::addNetworkInterceptor);
             }
             if (!interceptors.isEmpty()) {
                 interceptors.forEach(client::addInterceptor);
+            }
+
+            // 配置超时
+            if (null != timeout) {
+                client.connectTimeout(timeout).callTimeout(timeout).readTimeout(timeout).writeTimeout(timeout);
             }
 
             return new Pigeon(this);

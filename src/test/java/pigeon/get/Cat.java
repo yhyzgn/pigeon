@@ -1,19 +1,24 @@
-package pigeon;
+package pigeon.get;
 
 /**
  * author : 颜洪毅
  * e-mail : yhyzgn@gmail.com
- * time   : 2019-09-04 13:08
+ * time   : 2019-09-05 12:29
  * version: 1.0.0
  * desc   :
  */
 public class Cat {
     private String name;
     private int age;
+    private String remark;
 
-    public Cat(String name, int age) {
+    public Cat() {
+    }
+
+    public Cat(String name, int age, String remark) {
         this.name = name;
         this.age = age;
+        this.remark = remark;
     }
 
     public String getName() {
@@ -30,5 +35,13 @@ public class Cat {
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 }

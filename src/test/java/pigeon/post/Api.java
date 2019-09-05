@@ -1,9 +1,13 @@
-package pigeon.get;
+package pigeon.post;
 
+import com.yhy.http.pigeon.annotation.Form;
 import com.yhy.http.pigeon.annotation.Interceptor;
-import com.yhy.http.pigeon.annotation.method.GET;
+import com.yhy.http.pigeon.annotation.method.POST;
+import com.yhy.http.pigeon.annotation.param.Body;
+import com.yhy.http.pigeon.annotation.param.Field;
 import com.yhy.http.pigeon.annotation.param.Path;
 import com.yhy.http.pigeon.annotation.param.Query;
+import pigeon.get.Cat;
 import pigeon.interceptor.TestInterceptor;
 
 import java.util.Map;
@@ -17,22 +21,20 @@ import java.util.Map;
  */
 public interface Api {
 
-    @GET("/api/test/test")
-    String test();
-
-    @GET("/api/get/noParam")
+    @POST("/api/post/noParam")
     String noParam();
 
-    @GET("/api/get/normal")
+    @POST("/api/post/normal")
     @Interceptor(TestInterceptor.class)
     Map<String, Object> normal(String name, int age);
 
-    @GET("/api/get/annotation")
-    Map<String, Object> annotation(@Query String name, int age, @Query("remark") String ext);
+    @POST("/api/post/annotation")
+    @Form
+    Map<String, Object> annotation(@Query String name, int age, @Field("remark") String ext);
 
-    @GET("/api/get/path/{id}/{count}")
+    @POST("/api/post/path/{id}/{count}")
     Map<String, Object> path(@Path("id") String alias, @Path int count, String remark);
 
-    @GET("/api/get/cat")
-    Cat cat(@Query String name, int age, @Query("remark") String ext);
+    @POST("/api/post/cat")
+    Cat cat(@Body Cat cat);
 }

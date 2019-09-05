@@ -1,5 +1,7 @@
 package com.yhy.http.pigeon.offer;
 
+import com.yhy.http.pigeon.common.Invocation;
+import com.yhy.http.pigeon.common.SystemClock;
 import okhttp3.*;
 import okio.Buffer;
 import okio.BufferedSource;
@@ -27,6 +29,10 @@ public class HttpLoggerInterceptor implements Interceptor {
     @NotNull
     @Override
     public Response intercept(@NotNull Chain chain) throws IOException {
+        // 开始时间
+        long start = SystemClock.now();
+
+        // 获取http信息
         Request request = chain.request();
         HttpUrl url = request.url();
         String method = request.method();
@@ -34,13 +40,23 @@ public class HttpLoggerInterceptor implements Interceptor {
         Set<String> names = headers.names();
         Iterator<String> it = names.iterator();
 
-        LogLines lines = LogLines.start("Request starting in {}", FORMAT.format(new Date())).line("url : {}", url).line("method : {}", method);
+        LogLines lines = LogLines.start("-- Request starting in {} --", FORMAT.format(new Date())).line("url : {}", url).line("method : {}", method);
 
         lines.line("").line("-- Request Header --");
         while (it.hasNext()) {
             String name = it.next();
             String value = headers.get(name);
             lines.line("{} : {}", name, value);
+        }
+
+        if (null != request.body()) {
+            lines.empty().line("-- Response Body --");
+            if (request.body() instanceof FormBody) {
+                FormBody fb = (FormBody) request.body();
+                for (int i = 0; i < fb.size(); i++) {
+                    lines.line("{} : {}", fb.encodedName(i), fb.encodedValue(i));
+                }
+            }
         }
 
         Response response = chain.proceed(request);
@@ -64,9 +80,13 @@ public class HttpLoggerInterceptor implements Interceptor {
             lines.line(result);
         }
 
-        lines.empty().line("-- Http Finished --");
+        // 结束时间
+        long end = SystemClock.now();
+        lines.empty().line("-- Http Finished. Used {} millis. --", end - start);
 
-        log(null != request.tag() ? request.tag() : this, lines);
+        // tag
+        Invocation tag = request.tag(Invocation.class);
+        log(null != tag ? tag : this, lines);
         return response;
     }
 
