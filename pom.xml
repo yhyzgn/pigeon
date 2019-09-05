@@ -4,7 +4,7 @@
 
     <groupId>com.yhyzgn.http</groupId>
     <artifactId>pigeon</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
     <name>Pigeon</name>
     <description>Java http proxy.</description>
     <url>https://github.com/yhyzgn/Pigeon</url>
@@ -42,7 +42,7 @@
         <url>https://github.com/yhyzgn/Pigeon</url>
         <connection>scm:git:https://github.com/yhyzgn/Pigeon</connection>
         <developerConnection>scm:git:https://github.com/yhyzgn/Pigeon</developerConnection>
-        <tag>v1.0.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
