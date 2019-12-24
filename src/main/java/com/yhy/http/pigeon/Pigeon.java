@@ -168,8 +168,8 @@ public class Pigeon {
                 result = HttpMethod.parseAnnotations(this, method);
                 httpMethodMap.put(method, result);
             }
+            return result;
         }
-        return result;
     }
 
     public static class Builder {
