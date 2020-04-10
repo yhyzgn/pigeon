@@ -4,7 +4,7 @@
 
     <groupId>com.yhyzgn.http</groupId>
     <artifactId>pigeon</artifactId>
-    <version>1.0.3</version>
+    <version>1.1.0</version>
     <name>Pigeon</name>
     <description>Java http proxy.</description>
     <url>https://github.com/yhyzgn/Pigeon</url>
@@ -138,7 +138,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
+                <version>3.2.0</version>
+                <configuration>
+                    <source>8</source>
+                    <show>package</show>
+                    <!-- 禁用java 8 的DocLint新特性，以确保当javadoc有编译错误时，也能正常生成javadoc jar包-->
+                    <additionalparam>-Xdoclint:none</additionalparam>
+                </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
