@@ -186,6 +186,10 @@ public class Pigeon {
         private HostnameVerifier sslHostnameVerifier;
         private Duration timeout;
 
+        public Builder baseURL(String url) {
+            return this.host(url);
+        }
+
         public Builder host(String url) {
             Objects.requireNonNull(url, "URL can not be null.");
             this.host = HttpUrl.get(url);
