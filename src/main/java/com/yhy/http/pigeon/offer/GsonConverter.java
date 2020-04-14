@@ -28,13 +28,17 @@ import java.nio.charset.StandardCharsets;
  * e-mail : yhyzgn@gmail.com
  * time   : 2019-09-03 11:01
  * version: 1.0.0
- * desc   :
+ * desc   : 内置转换器-Gson
  */
 public class GsonConverter extends Converter.Factory {
     private final Gson gson;
 
     public GsonConverter() {
-        this.gson = new Gson();
+        this(new Gson());
+    }
+
+    public GsonConverter(Gson gson) {
+        this.gson = gson;
     }
 
     @Nullable
