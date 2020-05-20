@@ -4,6 +4,7 @@ import com.yhy.http.pigeon.Pigeon;
 import pigeon.get.Cat;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -30,8 +31,17 @@ public class ApiTester {
 //
 //        Map<String, Object> path = api.path("abcd", 6, "附加信息");
 //        System.out.println(path);
+//
+//        Cat cat = api.cat(new Cat("张三-cat", 6, "附加信息"));
+//        System.out.println(cat);
 
-        Cat cat = api.cat(new Cat("张三-cat", 6, "附加信息"));
+        Map<String, Object> header = new HashMap<>();
+        header.put("UC", "Pigeon");
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "李四");
+        params.put("age", "8");
+        params.put("remark", "附加信息");
+        Cat cat = api.mp(header, params);
         System.out.println(cat);
     }
 }

@@ -1,5 +1,6 @@
 package pigeon.get;
 
+import com.yhy.http.pigeon.annotation.Header;
 import com.yhy.http.pigeon.annotation.Interceptor;
 import com.yhy.http.pigeon.annotation.method.GET;
 import com.yhy.http.pigeon.annotation.param.Path;
@@ -35,4 +36,7 @@ public interface Api {
 
     @GET("/api/get/cat")
     Cat cat(@Query String name, int age, @Query("remark") String ext);
+
+    @GET("/api/get/cat")
+    Cat mp(@Header Map<String, Object> header, @Query Map<String, Object> params);
 }

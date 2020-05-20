@@ -1,6 +1,7 @@
 package pigeon.post;
 
 import com.yhy.http.pigeon.annotation.Form;
+import com.yhy.http.pigeon.annotation.Header;
 import com.yhy.http.pigeon.annotation.Interceptor;
 import com.yhy.http.pigeon.annotation.method.POST;
 import com.yhy.http.pigeon.annotation.param.Body;
@@ -37,4 +38,8 @@ public interface Api {
 
     @POST("/api/post/cat")
     Cat cat(@Body Cat cat);
+
+    @POST("/api/post/cat")
+    @Form
+    Cat mp(@Header Map<String, Object> header, @Field Map<String, Object> params);
 }
