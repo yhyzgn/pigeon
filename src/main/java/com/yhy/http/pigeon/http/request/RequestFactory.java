@@ -246,7 +246,7 @@ public class RequestFactory {
                     }
                     Type mapType = Utils.getSupertype(type, rawParameterType, Map.class);
                     if (!(mapType instanceof ParameterizedType)) {
-                        throw Utils.parameterError(method, index, "Map must include generic types (e.g., Map<String, String>)");
+                        throw Utils.parameterError(method, index, "Map must include generic types (e.g., Map<String, Object>)");
                     }
 
                     ParameterizedType parameterizedType = (ParameterizedType) mapType;
@@ -278,22 +278,19 @@ public class RequestFactory {
                     Converter<?, String> converter = pigeon.stringConverter(arrayComponentType, annotations);
                     return new ParameterHandler.Header<>(name, converter).array();
                 } else if (Map.class.isAssignableFrom(rawType)) {
-                    if (!isForm) {
-                        throw Utils.parameterError(method, index, "@Field Map parameters can only be used with form encoding.");
-                    }
                     Class<?> rawParameterType = Utils.getRawType(type);
                     if (!Map.class.isAssignableFrom(rawParameterType)) {
-                        throw Utils.parameterError(method, index, "@Field Map parameter type must be Map.");
+                        throw Utils.parameterError(method, index, "@Header Map parameter type must be Map.");
                     }
                     Type mapType = Utils.getSupertype(type, rawParameterType, Map.class);
                     if (!(mapType instanceof ParameterizedType)) {
-                        throw Utils.parameterError(method, index, "Map must include generic types (e.g., Map<String, String>)");
+                        throw Utils.parameterError(method, index, "Map must include generic types (e.g., Map<String, Object>)");
                     }
 
                     ParameterizedType parameterizedType = (ParameterizedType) mapType;
                     Type keyType = Utils.getParameterUpperBound(0, parameterizedType);
                     if (String.class != keyType) {
-                        throw Utils.parameterError(method, index, "@Field Map keys must be of type String: " + keyType);
+                        throw Utils.parameterError(method, index, "@Header Map keys must be of type String: " + keyType);
                     }
                     Type valueType = Utils.getParameterUpperBound(1, parameterizedType);
                     Converter<?, String> converter = pigeon.stringConverter(valueType, annotations);
@@ -339,7 +336,7 @@ public class RequestFactory {
                         }
                         Type mapType = Utils.getSupertype(type, rawParameterType, Map.class);
                         if (!(mapType instanceof ParameterizedType)) {
-                            throw Utils.parameterError(method, index, "Map must include generic types (e.g., Map<String, String>)");
+                            throw Utils.parameterError(method, index, "Map must include generic types (e.g., Map<String, Object>)");
                         }
 
                         ParameterizedType parameterizedType = (ParameterizedType) mapType;
@@ -386,7 +383,7 @@ public class RequestFactory {
                         }
                         Type mapType = Utils.getSupertype(type, rawParameterType, Map.class);
                         if (!(mapType instanceof ParameterizedType)) {
-                            throw Utils.parameterError(method, index, "Map must include generic types (e.g., Map<String, String>)");
+                            throw Utils.parameterError(method, index, "Map must include generic types (e.g., Map<String, Object>)");
                         }
 
                         ParameterizedType parameterizedType = (ParameterizedType) mapType;
@@ -442,7 +439,7 @@ public class RequestFactory {
             } else if (Map.class.isAssignableFrom(rawType)) {
                 Type mapType = Utils.getSupertype(type, rawType, Map.class);
                 if (!(mapType instanceof ParameterizedType)) {
-                    throw Utils.parameterError(method, index, "Map must include generic types (e.g., Map<String, String>)");
+                    throw Utils.parameterError(method, index, "Map must include generic types (e.g., Map<String, Object>)");
                 }
                 ParameterizedType parameterizedType = (ParameterizedType) mapType;
                 Type keyType = Utils.getParameterUpperBound(0, parameterizedType);

@@ -19,7 +19,7 @@ import java.lang.reflect.Type;
  * e-mail : yhyzgn@gmail.com
  * time   : 2019-09-03 11:08
  * version: 1.0.0
- * desc   :
+ * desc   : 内置网络请求执行器-Guava
  */
 public class GuavaCallAdapter extends CallAdapter.Factory {
 

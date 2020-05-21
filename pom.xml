@@ -4,7 +4,7 @@
 
     <groupId>com.yhyzgn.http</groupId>
     <artifactId>pigeon</artifactId>
-    <version>1.0.2</version>
+    <version>1.1.2</version>
     <name>Pigeon</name>
     <description>Java http proxy.</description>
     <url>https://github.com/yhyzgn/Pigeon</url>
@@ -138,7 +138,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
+                <version>3.2.0</version>
+                <!-- Exit code: 1 - javadoc: 错误 - 进行文档化的代码使用了模块，但在 https://docs.oracle.com/javase/8/docs/api/ 中定义的程序包在未命名模块中。 -->
+                <configuration>
+                    <source>8</source>
+                    <show>package</show>
+                </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
