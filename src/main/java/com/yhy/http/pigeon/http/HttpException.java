@@ -24,23 +24,14 @@ public class HttpException extends RuntimeException {
         this.response = response;
     }
 
-    /**
-     * HTTP status code.
-     */
     public int code() {
         return code;
     }
 
-    /**
-     * HTTP status message.
-     */
     public String message() {
         return message;
     }
 
-    /**
-     * The full HTTP response. This may be null if the exception was serialized.
-     */
     @Nullable
     public Response<?> response() {
         return response;

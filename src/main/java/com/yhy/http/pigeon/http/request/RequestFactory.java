@@ -42,8 +42,8 @@ public class RequestFactory {
     private final boolean isForm;
     private final boolean isMultipart;
     private final ParameterHandler<?>[] parameterHandlers;
-    private List<okhttp3.Interceptor> netInterceptors;
-    private List<okhttp3.Interceptor> interceptors;
+    private final List<okhttp3.Interceptor> netInterceptors;
+    private final List<okhttp3.Interceptor> interceptors;
 
     public RequestFactory(Builder builder) {
         method = builder.method;
@@ -550,7 +550,7 @@ public class RequestFactory {
             this.httpMethod = httpMethod;
             this.hasBody = hasBody;
 
-            if (Utils.isEmpty(url)) {
+            if (null == url) {
                 return;
             }
 

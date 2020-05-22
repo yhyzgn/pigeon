@@ -40,9 +40,9 @@ public class RequestBuilder {
     private FormBody.Builder formBuilder;
     private RequestBody body;
 
-    private Map<String, String> pathParamMap;
-    private Map<String, String> queryParamMap;
-    private Map<String, String> fieldParamMap;
+    private final Map<String, String> pathParamMap;
+    private final Map<String, String> queryParamMap;
+    private final Map<String, String> fieldParamMap;
 
     RequestBuilder(String method, HttpUrl host, @Nullable String relativeUrl, @Nullable Headers headers, @Nullable MediaType contentType, boolean hasBody, boolean isForm, boolean isMultipart) {
         this.method = method;

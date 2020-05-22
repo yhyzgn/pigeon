@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -127,7 +128,7 @@ public abstract class ParameterHandler<T> {
         @Override
         public void apply(RequestBuilder builder, @Nullable Map<String, T> value) throws IOException {
             if (value == null) {
-                throw Utils.parameterError(method, index, "Query map was null");
+                value = new HashMap<>();
             }
             for (Map.Entry<String, T> et : value.entrySet()) {
                 String etKey = et.getKey();
@@ -190,7 +191,7 @@ public abstract class ParameterHandler<T> {
         @Override
         public void apply(RequestBuilder builder, @Nullable Map<String, T> value) throws IOException {
             if (value == null) {
-                throw Utils.parameterError(method, index, "Field map was null.");
+                value = new HashMap<>();
             }
 
             for (Map.Entry<String, T> et : value.entrySet()) {
@@ -251,7 +252,7 @@ public abstract class ParameterHandler<T> {
         @Override
         public void apply(RequestBuilder builder, @Nullable Map<String, T> value) throws IOException {
             if (value == null) {
-                throw Utils.parameterError(method, index, "Header map can not be null.");
+                value = new HashMap<>();
             }
 
             for (Map.Entry<String, T> et : value.entrySet()) {

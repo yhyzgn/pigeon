@@ -39,4 +39,7 @@ public interface Api {
 
     @GET("/api/get/cat")
     Cat mp(@Header Map<String, Object> header, @Query Map<String, Object> params);
+
+    @GET
+    Cat def(@Header Map<String, Object> header, @Query Map<String, Object> params);
 }

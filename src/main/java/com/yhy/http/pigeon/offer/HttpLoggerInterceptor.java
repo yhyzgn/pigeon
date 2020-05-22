@@ -22,7 +22,6 @@ import java.util.*;
  * desc   :
  */
 public class HttpLoggerInterceptor implements Interceptor {
-
     private final static Logger LOGGER = LoggerFactory.getLogger(HttpLoggerInterceptor.class);
     private final static SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss E", Locale.getDefault());
 
@@ -40,7 +39,7 @@ public class HttpLoggerInterceptor implements Interceptor {
         Set<String> names = headers.names();
         Iterator<String> it = names.iterator();
 
-        LogLines lines = LogLines.start("-- Request starting in {} --", FORMAT.format(new Date())).line("url : {}", url).line("method : {}", method);
+        LogLines lines = LogLines.start("-- Request starting at {} --", FORMAT.format(new Date())).line("url : {}", url).line("method : {}", method);
 
         lines.line("").line("-- Request Header --");
         while (it.hasNext()) {
@@ -50,11 +49,13 @@ public class HttpLoggerInterceptor implements Interceptor {
         }
 
         if (null != request.body()) {
-            lines.empty().line("-- Response Body --");
+            lines.empty().line("-- Request Body --");
             if (request.body() instanceof FormBody) {
                 FormBody fb = (FormBody) request.body();
-                for (int i = 0; i < fb.size(); i++) {
-                    lines.line("{} : {}", fb.encodedName(i), fb.encodedValue(i));
+                if (null != fb) {
+                    for (int i = 0; i < fb.size(); i++) {
+                        lines.line("{} : {}", fb.encodedName(i), fb.encodedValue(i));
+                    }
                 }
             }
         }
@@ -64,6 +65,7 @@ public class HttpLoggerInterceptor implements Interceptor {
         names = headers.names();
         it = names.iterator();
         lines.empty().line("-- Response Header --");
+        lines.line("Status : {}", response.code());
         while (it.hasNext()) {
             String name = it.next();
             String value = headers.get(name);
@@ -90,21 +92,20 @@ public class HttpLoggerInterceptor implements Interceptor {
         return response;
     }
 
-    private HttpLoggerInterceptor log(Object tag, LogLines lines) {
+    private void log(Object tag, LogLines lines) {
         StringBuffer sb = new StringBuffer(System.lineSeparator());
         sb
                 .append("┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
                 .append(System.lineSeparator())
                 .append("│ ").append(tag.toString())
                 .append(System.lineSeparator())
-                .append("├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+                .append("├┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
                 .append(System.lineSeparator());
         lines.lines().forEach(item -> {
             sb.append("│ ").append(String.format(item.msg.replace("{}", "%s"), item.args)).append(System.lineSeparator());
         });
         sb.append("└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────");
         LOGGER.info(sb.toString());
-        return this;
     }
 
     private static class LogLines {
