@@ -83,7 +83,8 @@ public class Pigeon {
 
     public OkHttpClient.Builder client() {
         // 返回干净的builder，‘client’中只包含全局拦截器，而不含自定义拦截器的builder
-        return new OkHttpClient.Builder(client.build());
+        // return new OkHttpClient.Builder(client.build());
+        return client;
     }
 
     public <T> T create(Class<T> api) {
