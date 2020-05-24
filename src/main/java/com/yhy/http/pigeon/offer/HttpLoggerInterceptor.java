@@ -48,16 +48,10 @@ public class HttpLoggerInterceptor implements Interceptor {
             lines.line("{} : {}", name, value);
         }
 
-        if (null != request.body()) {
+        RequestBody reqBody = request.body();
+        if (null != reqBody) {
             lines.empty().line("-- Request Body --");
-            if (request.body() instanceof FormBody) {
-                FormBody fb = (FormBody) request.body();
-                if (null != fb) {
-                    for (int i = 0; i < fb.size(); i++) {
-                        lines.line("{} : {}", fb.encodedName(i), fb.encodedValue(i));
-                    }
-                }
-            }
+            lines.line(requestBodyToString(reqBody));
         }
 
         Response response = chain.proceed(request);
@@ -72,9 +66,9 @@ public class HttpLoggerInterceptor implements Interceptor {
             lines.line("{} : {}", name, value);
         }
 
-        ResponseBody body = response.body();
-        if (null != body) {
-            BufferedSource source = body.source();
+        ResponseBody resBody = response.body();
+        if (null != resBody) {
+            BufferedSource source = resBody.source();
             source.request(Long.MAX_VALUE);
             Buffer buffer = source.getBuffer();
             String result = buffer.clone().readString(StandardCharsets.UTF_8);
@@ -106,6 +100,12 @@ public class HttpLoggerInterceptor implements Interceptor {
         });
         sb.append("└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────");
         LOGGER.info(sb.toString());
+    }
+
+    private String requestBodyToString(RequestBody body) throws IOException {
+        Buffer buffer = new Buffer();
+        body.writeTo(buffer);
+        return buffer.readUtf8();
     }
 
     private static class LogLines {
