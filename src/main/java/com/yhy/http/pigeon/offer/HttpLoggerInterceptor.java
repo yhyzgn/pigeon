@@ -19,7 +19,7 @@ import java.util.*;
  * e-mail : yhyzgn@gmail.com
  * time   : 2019-09-04 18:14
  * version: 1.0.0
- * desc   :
+ * desc   : 默认的日志打印器
  */
 public class HttpLoggerInterceptor implements Interceptor {
     private final static Logger LOGGER = LoggerFactory.getLogger(HttpLoggerInterceptor.class);
@@ -109,7 +109,7 @@ public class HttpLoggerInterceptor implements Interceptor {
     }
 
     private static class LogLines {
-        private static List<LogLine> lines = new ArrayList<>();
+        private static final List<LogLine> lines = new ArrayList<>();
 
         static LogLines start(String msg, Object... args) {
             lines.add(new LogLine(msg, args));

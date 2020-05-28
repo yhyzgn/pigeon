@@ -17,7 +17,8 @@ import java.util.*;
  * desc   :
  */
 public class Utils {
-    static final Type[] EMPTY_TYPE_ARRAY = new Type[0];
+    private static final Type[] EMPTY_TYPE_ARRAY = new Type[0];
+    public final static String VERSION = "1.1.6";
 
     public static boolean isEmpty(Object object) {
         if (null == object) return true;

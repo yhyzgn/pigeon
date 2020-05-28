@@ -25,19 +25,19 @@ import java.util.concurrent.ConcurrentHashMap;
  * e-mail : yhyzgn@gmail.com
  * time   : 2019-09-02 12:34
  * version: 1.0.0
- * desc   :
+ * desc   : Pigeon
  */
 @SuppressWarnings("unchecked")
 public class Pigeon {
     private final Map<Method, HttpMethod<?>> httpMethodMap = new ConcurrentHashMap<>();
 
-    private HttpUrl host;
-    private List<Interceptor> netInterceptors;
-    private List<Interceptor> interceptors;
-    private Map<String, Object> headers;
-    private List<CallAdapter.Factory> callFactories;
-    private List<Converter.Factory> converterFactories;
-    private OkHttpClient.Builder client;
+    private final HttpUrl host;
+    private final List<Interceptor> netInterceptors;
+    private final List<Interceptor> interceptors;
+    private final Map<String, Object> headers;
+    private final List<CallAdapter.Factory> callFactories;
+    private final List<Converter.Factory> converterFactories;
+    private final OkHttpClient.Builder client;
 
     private Pigeon(Builder builder) {
         this.host = builder.host;
@@ -174,11 +174,11 @@ public class Pigeon {
 
     public static class Builder {
         private HttpUrl host;
-        private List<Interceptor> netInterceptors = new ArrayList<>();
-        private List<Interceptor> interceptors = new ArrayList<>();
-        private Map<String, Object> headers = new HashMap<>();
-        private List<CallAdapter.Factory> adapterFactories = new ArrayList<>();
-        private List<Converter.Factory> converterFactories = new ArrayList<>();
+        private final List<Interceptor> netInterceptors = new ArrayList<>();
+        private final List<Interceptor> interceptors = new ArrayList<>();
+        private final Map<String, Object> headers = new HashMap<>();
+        private final List<CallAdapter.Factory> adapterFactories = new ArrayList<>();
+        private final List<Converter.Factory> converterFactories = new ArrayList<>();
         private OkHttpClient.Builder client;
         private boolean logging = true;
         private SSLSocketFactory sslSocketFactory;
