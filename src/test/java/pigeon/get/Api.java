@@ -41,5 +41,6 @@ public interface Api {
     Cat mp(@Header Map<String, Object> header, @Query Map<String, Object> params);
 
     @GET
+    @Interceptor(value = TestInterceptor.class, net = true)
     Cat def(@Header Map<String, Object> header, @Query Map<String, Object> params);
 }
