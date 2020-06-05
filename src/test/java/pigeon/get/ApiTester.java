@@ -1,6 +1,7 @@
 package pigeon.get;
 
 import com.yhy.http.pigeon.Pigeon;
+import com.yhy.http.pigeon.offer.StringResponseConverter;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,7 +17,7 @@ import java.util.Map;
 public class ApiTester {
 
     public static void main(String[] args) throws IOException {
-        Pigeon pigeon = new Pigeon.Builder().host("http://localhost:8080/api/get/cat").build();
+        Pigeon pigeon = new Pigeon.Builder().host("http://localhost:8080/api/get/cat").addConverterFactory(new StringResponseConverter()).build();
         Api api = pigeon.create(Api.class);
 
 //        String test = api.test();
@@ -44,9 +45,9 @@ public class ApiTester {
         params.put("age", "8");
         params.put("remark", "附加信息");
 //        Cat cat = api.mp(header, params);
-        Cat cat = api.def(header, params);
+        String cat = api.def(header, params);
         System.out.println(cat);
         cat = api.def(header, params);
-        System.out.println(cat);
+        System.out.println(cat instanceof String);
     }
 }
