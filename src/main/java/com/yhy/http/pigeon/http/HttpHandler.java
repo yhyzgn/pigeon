@@ -6,7 +6,6 @@ import com.yhy.http.pigeon.common.Call;
 import com.yhy.http.pigeon.common.OkCall;
 import com.yhy.http.pigeon.converter.Converter;
 import com.yhy.http.pigeon.http.request.RequestFactory;
-import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 
 import java.lang.annotation.Annotation;
@@ -18,24 +17,24 @@ import java.lang.reflect.Type;
  * e-mail : yhyzgn@gmail.com
  * time   : 2019-09-02 17:31
  * version: 1.0.0
- * desc   :
+ * desc   : http请求处理器
  */
 @SuppressWarnings("unchecked")
 public abstract class HttpHandler<Res, Ret> extends HttpMethod<Ret> {
-
     private final RequestFactory requestFactory;
-    private final OkHttpClient.Builder client;
+    private final Pigeon pigeon;
     private final Converter<ResponseBody, Res> responseConverter;
 
-    private HttpHandler(RequestFactory requestFactory, OkHttpClient.Builder client, Converter<ResponseBody, Res> responseConverter) {
+    private HttpHandler(RequestFactory requestFactory, Pigeon pigeon, Converter<ResponseBody, Res> responseConverter) {
         this.requestFactory = requestFactory;
-        this.client = client;
+        this.pigeon = pigeon;
         this.responseConverter = responseConverter;
     }
 
     @Override
     public Ret invoke(Object[] args) throws Exception {
-        OkCall<Res> call = new OkCall<>(requestFactory, client, responseConverter, args);
+        // 每次请求都用最新（干净）的 pigeon.client()
+        OkCall<Res> call = new OkCall<>(requestFactory, pigeon.client(), responseConverter, args);
         return adapt(call, args);
     }
 
@@ -48,7 +47,7 @@ public abstract class HttpHandler<Res, Ret> extends HttpMethod<Ret> {
         Type responseType = callAdapter.responseType();
         Converter<ResponseBody, Res> responseConverter = createResponseConverter(pigeon, annotations, responseType);
 
-        return new AdaptedCall<>(factory, pigeon.client(), responseConverter, callAdapter);
+        return new AdaptedCall<>(factory, pigeon, responseConverter, callAdapter);
     }
 
     private static <Res> Converter<ResponseBody, Res> createResponseConverter(Pigeon pigeon, Annotation[] annotations, Type responseType) {
@@ -63,8 +62,8 @@ public abstract class HttpHandler<Res, Ret> extends HttpMethod<Ret> {
 
         private final CallAdapter<Res, Ret> callAdapter;
 
-        AdaptedCall(RequestFactory requestFactory, OkHttpClient.Builder client, Converter<ResponseBody, Res> responseConverter, CallAdapter<Res, Ret> callAdapter) {
-            super(requestFactory, client, responseConverter);
+        AdaptedCall(RequestFactory requestFactory, Pigeon pigeon, Converter<ResponseBody, Res> responseConverter, CallAdapter<Res, Ret> callAdapter) {
+            super(requestFactory, pigeon, responseConverter);
             this.callAdapter = callAdapter;
         }
 

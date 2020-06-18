@@ -5,6 +5,7 @@ import com.yhy.http.pigeon.annotation.Interceptor;
 import com.yhy.http.pigeon.annotation.method.GET;
 import com.yhy.http.pigeon.annotation.param.Path;
 import com.yhy.http.pigeon.annotation.param.Query;
+import com.yhy.http.pigeon.common.Response;
 import pigeon.interceptor.TestInterceptor;
 
 import java.util.Map;
@@ -41,5 +42,6 @@ public interface Api {
     Cat mp(@Header Map<String, Object> header, @Query Map<String, Object> params);
 
     @GET
-    Cat def(@Header Map<String, Object> header, @Query Map<String, Object> params);
+    @Interceptor(value = TestInterceptor.class, net = true)
+    String def(@Header Map<String, ?> header, @Query Map<String, Object> params);
 }

@@ -22,7 +22,7 @@ import java.util.Objects;
  * e-mail : yhyzgn@gmail.com
  * time   : 2019-09-03 10:03
  * version: 1.0.0
- * desc   :
+ * desc   : 全世界最老实的人总是踏实肯干
  */
 public class OkCall<T> implements Call<T> {
     private final RequestFactory requestFactory;
@@ -69,10 +69,10 @@ public class OkCall<T> implements Call<T> {
                 }
             }
         }
-        if (canceled) {
+        if (canceled && null != call) {
             call.cancel();
         }
-        return parseResponse(call.execute());
+        return null != call ? parseResponse(call.execute()) : null;
     }
 
     @Override
@@ -92,7 +92,7 @@ public class OkCall<T> implements Call<T> {
         }
         try {
             call = rawCall = createRawCall();
-            return call.request();
+            return null != call ? call.request() : null;
         } catch (RuntimeException | Error e) {
             failureHandler = e;
             throw e;
@@ -123,40 +123,42 @@ public class OkCall<T> implements Call<T> {
             callback.onFailure(this, failure);
             return;
         }
-        if (canceled) {
+        if (canceled && null != call) {
             call.cancel();
         }
 
-        call.enqueue(new okhttp3.Callback() {
-            @Override
-            public void onFailure(@NotNull okhttp3.Call call, @NotNull IOException e) {
-                callFailure(e);
-            }
-
-            @Override
-            public void onResponse(@NotNull okhttp3.Call call, @NotNull okhttp3.Response rawResponse) throws IOException {
-                Response<T> response;
-                try {
-                    response = parseResponse(rawResponse);
-                } catch (Throwable e) {
+        if (null != call) {
+            call.enqueue(new okhttp3.Callback() {
+                @Override
+                public void onFailure(@NotNull okhttp3.Call call, @NotNull IOException e) {
                     callFailure(e);
-                    return;
                 }
-                try {
-                    callback.onResponse(OkCall.this, response);
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                }
-            }
 
-            private void callFailure(Throwable e) {
-                try {
-                    callback.onFailure(OkCall.this, e);
-                } catch (Throwable t) {
-                    t.printStackTrace();
+                @Override
+                public void onResponse(@NotNull okhttp3.Call call, @NotNull okhttp3.Response rawResponse) throws IOException {
+                    Response<T> response;
+                    try {
+                        response = parseResponse(rawResponse);
+                    } catch (Throwable e) {
+                        callFailure(e);
+                        return;
+                    }
+                    try {
+                        callback.onResponse(OkCall.this, response);
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                    }
                 }
-            }
-        });
+
+                private void callFailure(Throwable e) {
+                    try {
+                        callback.onFailure(OkCall.this, e);
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                    }
+                }
+            });
+        }
     }
 
     @Override

@@ -17,7 +17,8 @@ import java.util.*;
  * desc   :
  */
 public class Utils {
-    static final Type[] EMPTY_TYPE_ARRAY = new Type[0];
+    private static final Type[] EMPTY_TYPE_ARRAY = new Type[0];
+    public final static String VERSION = "1.2.2";
 
     public static boolean isEmpty(Object object) {
         if (null == object) return true;
@@ -77,10 +78,10 @@ public class Utils {
             return hasUnresolvableType(((GenericArrayType) type).getGenericComponentType());
         }
         if (type instanceof TypeVariable) {
-            return true;
+            return false;
         }
         if (type instanceof WildcardType) {
-            return true;
+            return false;
         }
         String className = type == null ? "null" : type.getClass().getName();
         throw new IllegalArgumentException("Expected a Class, ParameterizedType, or GenericArrayType, but <" + type + "> is of type " + className);

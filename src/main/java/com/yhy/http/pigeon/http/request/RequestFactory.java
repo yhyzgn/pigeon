@@ -84,7 +84,10 @@ public class RequestFactory {
             interceptors.forEach(client::addInterceptor);
         }
 
-        return builder.get().tag(Invocation.class, Invocation.of(method, argsList)).build();
+        Request.Builder bld = builder.get().tag(Invocation.class, Invocation.of(method, argsList));
+        // 加上 User-Agent 信息
+        bld.header("User-Agent", "Pigeon/" + Utils.VERSION);
+        return bld.build();
     }
 
     public static RequestFactory parseAnnotations(Pigeon pigeon, Method method) {

@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * e-mail : yhyzgn@gmail.com
  * time   : 2019-09-02 12:34
  * version: 1.0.0
- * desc   : 入口
+ * desc   : Pigeon
  */
 @SuppressWarnings("unchecked")
 public class Pigeon {
