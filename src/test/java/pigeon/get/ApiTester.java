@@ -46,5 +46,9 @@ public class ApiTester {
 //        Cat cat = api.mp(header, params);
         Cat cat = api.def(header, params);
         System.out.println(cat);
+        cat = api.def(header, params);
+        System.out.println(cat);
+        cat = api.def(header, params);
+        System.out.println(cat);
     }
 }

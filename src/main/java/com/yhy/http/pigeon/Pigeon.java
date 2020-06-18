@@ -25,22 +25,28 @@ import java.util.concurrent.ConcurrentHashMap;
  * e-mail : yhyzgn@gmail.com
  * time   : 2019-09-02 12:34
  * version: 1.0.0
- * desc   :
+ * desc   : 入口
  */
 @SuppressWarnings("unchecked")
 public class Pigeon {
     private final Map<Method, HttpMethod<?>> httpMethodMap = new ConcurrentHashMap<>();
 
-    private HttpUrl host;
-    private List<Interceptor> netInterceptors;
-    private List<Interceptor> interceptors;
-    private Map<String, Object> headers;
-    private List<CallAdapter.Factory> callFactories;
-    private List<Converter.Factory> converterFactories;
-    private OkHttpClient.Builder client;
+    private final HttpUrl host;
+    private final SSLSocketFactory sslSocketFactory;
+    private final X509TrustManager sslTrustManager;
+    private final HostnameVerifier sslHostnameVerifier;
+    private final List<Interceptor> netInterceptors;
+    private final List<Interceptor> interceptors;
+    private final Map<String, Object> headers;
+    private final List<CallAdapter.Factory> callFactories;
+    private final List<Converter.Factory> converterFactories;
+    private final OkHttpClient.Builder client;
 
     private Pigeon(Builder builder) {
         this.host = builder.host;
+        this.sslSocketFactory = builder.sslSocketFactory;
+        this.sslTrustManager = builder.sslTrustManager;
+        this.sslHostnameVerifier = builder.sslHostnameVerifier;
         this.netInterceptors = builder.netInterceptors;
         this.interceptors = builder.interceptors;
         this.headers = builder.headers;
@@ -83,7 +89,8 @@ public class Pigeon {
 
     public OkHttpClient.Builder client() {
         // 返回干净的builder，‘client’中只包含全局拦截器，而不含自定义拦截器的builder
-        return new OkHttpClient.Builder(client.build());
+        // 兼容低版本的 OkHttpClient.Builder
+        return newBuilder();
     }
 
     public <T> T create(Class<T> api) {
@@ -172,13 +179,52 @@ public class Pigeon {
         }
     }
 
+    private OkHttpClient.Builder newBuilder() {
+        OkHttpClient ok = client.build();
+        OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                .dispatcher(ok.dispatcher())
+                .connectionPool(ok.connectionPool())
+                .eventListenerFactory(ok.eventListenerFactory())
+                .retryOnConnectionFailure(ok.retryOnConnectionFailure())
+                .authenticator(ok.authenticator())
+                .followRedirects(ok.followRedirects())
+                .followSslRedirects(ok.followSslRedirects())
+                .cookieJar(ok.cookieJar())
+                .cache(ok.cache())
+                .dns(ok.dns())
+                .proxy(ok.proxy())
+                .proxySelector(ok.proxySelector())
+                .proxyAuthenticator(ok.proxyAuthenticator())
+                .socketFactory(ok.socketFactory())
+                .connectionSpecs(ok.connectionSpecs())
+                .protocols(ok.protocols())
+                .hostnameVerifier(ok.hostnameVerifier())
+                .certificatePinner(ok.certificatePinner())
+                .callTimeout(Duration.ofMillis(ok.callTimeoutMillis()))
+                .connectTimeout(Duration.ofMillis(ok.connectTimeoutMillis()))
+                .readTimeout(Duration.ofMillis(ok.readTimeoutMillis()))
+                .writeTimeout(Duration.ofMillis(ok.writeTimeoutMillis()))
+                .pingInterval(Duration.ofMillis(ok.pingIntervalMillis()))
+                .certificatePinner(ok.certificatePinner());
+
+        // 配置 ssl
+        if (null != sslSocketFactory && null != sslTrustManager && null != sslHostnameVerifier) {
+            builder.sslSocketFactory(sslSocketFactory, sslTrustManager).hostnameVerifier(sslHostnameVerifier);
+        }
+
+        ok.interceptors().forEach(builder::addInterceptor);
+        ok.networkInterceptors().forEach(builder::addNetworkInterceptor);
+
+        return builder;
+    }
+
     public static class Builder {
         private HttpUrl host;
-        private List<Interceptor> netInterceptors = new ArrayList<>();
-        private List<Interceptor> interceptors = new ArrayList<>();
-        private Map<String, Object> headers = new HashMap<>();
-        private List<CallAdapter.Factory> adapterFactories = new ArrayList<>();
-        private List<Converter.Factory> converterFactories = new ArrayList<>();
+        private final List<Interceptor> netInterceptors = new ArrayList<>();
+        private final List<Interceptor> interceptors = new ArrayList<>();
+        private final Map<String, Object> headers = new HashMap<>();
+        private final List<CallAdapter.Factory> adapterFactories = new ArrayList<>();
+        private final List<Converter.Factory> converterFactories = new ArrayList<>();
         private OkHttpClient.Builder client;
         private boolean logging = true;
         private SSLSocketFactory sslSocketFactory;

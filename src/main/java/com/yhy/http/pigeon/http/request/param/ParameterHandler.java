@@ -19,8 +19,9 @@ import java.util.Objects;
  * e-mail : yhyzgn@gmail.com
  * time   : 2019-09-02 16:44
  * version: 1.0.0
- * desc   :
+ * desc   : 参数处理器
  */
+@SuppressWarnings("unchecked")
 public abstract class ParameterHandler<T> {
 
     public abstract void apply(RequestBuilder builder, @Nullable T value) throws IOException;
