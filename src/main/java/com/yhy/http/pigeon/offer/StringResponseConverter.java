@@ -16,7 +16,7 @@ import java.lang.reflect.Type;
  * version: 1.0.0
  * desc   : 内置字符串响应转换器
  */
-public class StringResponseConverter extends GsonConverter {
+public class StringResponseConverter extends JacksonConverter {
 
     @Nullable
     @Override

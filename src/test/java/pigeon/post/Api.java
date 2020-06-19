@@ -8,6 +8,7 @@ import com.yhy.http.pigeon.annotation.param.Body;
 import com.yhy.http.pigeon.annotation.param.Field;
 import com.yhy.http.pigeon.annotation.param.Path;
 import com.yhy.http.pigeon.annotation.param.Query;
+import pigeon.Rmt;
 import pigeon.get.Cat;
 import pigeon.interceptor.TestInterceptor;
 
@@ -42,4 +43,11 @@ public interface Api {
     @POST("/api/post/cat")
     @Form
     Cat mp(@Header Map<String, Object> header, @Field Map<String, Object> params);
+
+    @POST
+    @Form
+    Rmt<String> form(@Header Map<String, Object> header, @Field String field);
+
+    @POST
+    Rmt<Cat> body(@Header Map<String, Object> header, @Body Map<String, Object> body);
 }

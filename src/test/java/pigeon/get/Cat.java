@@ -44,4 +44,13 @@ public class Cat {
     public void setRemark(String remark) {
         this.remark = remark;
     }
+
+    @Override
+    public String toString() {
+        return "Cat{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                ", remark='" + remark + '\'' +
+                '}';
+    }
 }

@@ -3,9 +3,9 @@ package com.yhy.http.pigeon;
 import com.yhy.http.pigeon.adapter.CallAdapter;
 import com.yhy.http.pigeon.converter.Converter;
 import com.yhy.http.pigeon.http.HttpMethod;
-import com.yhy.http.pigeon.offer.GsonConverter;
 import com.yhy.http.pigeon.offer.GuavaCallAdapter;
 import com.yhy.http.pigeon.offer.HttpLoggerInterceptor;
+import com.yhy.http.pigeon.offer.JacksonConverter;
 import okhttp3.*;
 
 import javax.net.ssl.HostnameVerifier;
@@ -301,7 +301,7 @@ public class Pigeon {
 
             // 默认Adapter和Converter需要添加在最前面，后边需要从后往前查找
             adapterFactories.add(0, new GuavaCallAdapter());
-            converterFactories.add(0, new GsonConverter());
+            converterFactories.add(0, new JacksonConverter());
             if (logging) {
                 netInterceptors.add(new HttpLoggerInterceptor());
             }

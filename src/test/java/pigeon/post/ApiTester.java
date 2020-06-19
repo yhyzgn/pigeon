@@ -1,6 +1,7 @@
 package pigeon.post;
 
 import com.yhy.http.pigeon.Pigeon;
+import pigeon.Rmt;
 import pigeon.get.Cat;
 
 import java.io.IOException;
@@ -17,7 +18,8 @@ import java.util.Map;
 public class ApiTester {
 
     public static void main(String[] args) throws IOException {
-        Pigeon pigeon = new Pigeon.Builder().host("http://localhost:8080").build();
+//        Pigeon pigeon = new Pigeon.Builder().host("http://localhost:8080").build();
+        Pigeon pigeon = new Pigeon.Builder().host("https://t-tio.ybsjyyn.com/reporter/api/debug/json").build();
         Api api = pigeon.create(Api.class);
 
 //        String noParam = api.noParam();
@@ -41,7 +43,14 @@ public class ApiTester {
         params.put("name", "李四");
         params.put("age", "8");
         params.put("remark", "附加信息");
-        Cat cat = api.mp(header, params);
-        System.out.println(cat);
+//        Cat cat = api.mp(header, params);
+//        System.out.println(cat);
+
+//        Rmt<String> form = api.form(header, "Field Test");
+//        System.out.println(form);
+
+        Rmt<Cat> body = api.body(header, params);
+        System.out.println(body);
+
     }
 }
