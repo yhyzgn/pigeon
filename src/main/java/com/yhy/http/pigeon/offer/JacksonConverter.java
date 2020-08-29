@@ -10,6 +10,7 @@ import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import okio.Buffer;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -70,9 +71,8 @@ public class JacksonConverter extends Converter.Factory {
             this.type = type;
         }
 
-        @Nullable
         @Override
-        public RequestBody convert(T from) throws IOException {
+        public @NotNull RequestBody convert(T from) throws IOException {
             Buffer buffer = new Buffer();
             Writer writer = new OutputStreamWriter(buffer.outputStream(), UTF_8);
             JsonGenerator gen = mapper.writer().forType(type).createGenerator(writer);
@@ -91,9 +91,14 @@ public class JacksonConverter extends Converter.Factory {
             this.type = type;
         }
 
+        @SuppressWarnings("unchecked")
         @Nullable
         @Override
         public T convert(ResponseBody from) throws IOException {
+            // 如果目标类型是String，则直接返回，避免jackson出现不识别无双引号的字符串类型
+            if (type.getRawClass() == String.class) {
+                return (T) from.string();
+            }
             return mapper.readValue(from.byteStream(), type);
         }
     }
