@@ -3,9 +3,10 @@ package com.yhy.http.pigeon;
 import com.yhy.http.pigeon.adapter.CallAdapter;
 import com.yhy.http.pigeon.converter.Converter;
 import com.yhy.http.pigeon.http.HttpMethod;
-import com.yhy.http.pigeon.offer.GuavaCallAdapter;
-import com.yhy.http.pigeon.offer.HttpLoggerInterceptor;
-import com.yhy.http.pigeon.offer.JacksonConverter;
+import com.yhy.http.pigeon.internal.GuavaCallAdapter;
+import com.yhy.http.pigeon.internal.HeaderInterceptor;
+import com.yhy.http.pigeon.internal.HttpLoggerInterceptor;
+import com.yhy.http.pigeon.internal.JacksonConverter;
 import okhttp3.*;
 
 import javax.net.ssl.HostnameVerifier;
@@ -37,7 +38,7 @@ public class Pigeon {
     private final HostnameVerifier sslHostnameVerifier;
     private final List<Interceptor> netInterceptors;
     private final List<Interceptor> interceptors;
-    private final Map<String, Object> headers;
+    private final Map<String, String> headers;
     private final List<CallAdapter.Factory> callFactories;
     private final List<Converter.Factory> converterFactories;
     private final OkHttpClient.Builder client;
@@ -67,7 +68,7 @@ public class Pigeon {
         return interceptors;
     }
 
-    public Map<String, Object> headers() {
+    public Map<String, String> headers() {
         return headers;
     }
 
@@ -222,7 +223,7 @@ public class Pigeon {
         private HttpUrl host;
         private final List<Interceptor> netInterceptors = new ArrayList<>();
         private final List<Interceptor> interceptors = new ArrayList<>();
-        private final Map<String, Object> headers = new HashMap<>();
+        private final Map<String, String> headers = new HashMap<>();
         private final List<CallAdapter.Factory> adapterFactories = new ArrayList<>();
         private final List<Converter.Factory> converterFactories = new ArrayList<>();
         private OkHttpClient.Builder client;
@@ -252,7 +253,7 @@ public class Pigeon {
             return this;
         }
 
-        public Builder header(String name, Object value) {
+        public Builder header(String name, String value) {
             this.headers.put(name, value);
             return this;
         }
@@ -302,6 +303,9 @@ public class Pigeon {
             // 默认Adapter和Converter需要添加在最前面，后边需要从后往前查找
             adapterFactories.add(0, new GuavaCallAdapter());
             converterFactories.add(0, new JacksonConverter());
+
+            // 公共请求头拦截器
+            netInterceptors.add(new HeaderInterceptor(headers));
             if (logging) {
                 netInterceptors.add(new HttpLoggerInterceptor());
             }
