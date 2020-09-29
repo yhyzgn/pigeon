@@ -2,6 +2,7 @@ package pigeon.get;
 
 import com.yhy.http.pigeon.Pigeon;
 import pigeon.Rmt;
+import pigeon.interceptor.TestInterceptor;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -18,7 +19,7 @@ public class ApiTester {
 
     public static void main(String[] args) throws IOException {
 //        Pigeon pigeon = new Pigeon.Builder().host("http://localhost:8080/dbs/test").addConverterFactory(new StringResponseConverter()).build();
-        Pigeon pigeon = new Pigeon.Builder().host("https://t-tio.ybsjyyn.com/reporter/api/debug").build();
+        Pigeon pigeon = new Pigeon.Builder().host("https://t-tio.ybsjyyn.com/reporter/api/debug").header("XX", "asdfasdf").build();
         Api api = pigeon.create(Api.class);
 
 //        String test = api.test();

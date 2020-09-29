@@ -1,6 +1,6 @@
 package pigeon.interceptor;
 
-import com.yhy.http.pigeon.offer.HttpLoggerInterceptor;
+import com.yhy.http.pigeon.internal.HttpLoggerInterceptor;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +17,7 @@ import java.io.IOException;
  * desc   :
  */
 public class TestInterceptor implements Interceptor {
-    private final static Logger LOGGER = LoggerFactory.getLogger(HttpLoggerInterceptor.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(TestInterceptor.class);
 
     @NotNull
     @Override

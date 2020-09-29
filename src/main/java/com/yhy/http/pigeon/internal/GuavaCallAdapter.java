@@ -1,4 +1,4 @@
-package com.yhy.http.pigeon.offer;
+package com.yhy.http.pigeon.internal;
 
 import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.ListenableFuture;

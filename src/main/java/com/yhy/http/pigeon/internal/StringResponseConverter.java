@@ -1,4 +1,4 @@
-package com.yhy.http.pigeon.offer;
+package com.yhy.http.pigeon.internal;
 
 import com.yhy.http.pigeon.Pigeon;
 import com.yhy.http.pigeon.converter.Converter;

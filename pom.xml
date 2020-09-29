@@ -4,7 +4,7 @@
 
     <groupId>com.yhyzgn.http</groupId>
     <artifactId>pigeon</artifactId>
-    <version>1.2.6</version>
+    <version>1.2.8</version>
     <name>Pigeon</name>
     <description>Java http proxy.</description>
     <url>https://github.com/yhyzgn/Pigeon</url>
@@ -68,14 +68,12 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
             <version>2.11.0</version>
-            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.11.0</version>
-            <optional>true</optional>
         </dependency>
 
         <dependency>

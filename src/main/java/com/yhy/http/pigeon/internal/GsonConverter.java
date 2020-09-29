@@ -1,4 +1,4 @@
-package com.yhy.http.pigeon.offer;
+package com.yhy.http.pigeon.internal;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
