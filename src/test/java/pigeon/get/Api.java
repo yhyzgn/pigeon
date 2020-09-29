@@ -36,7 +36,7 @@ public interface Api {
     Map<String, Object> path(@Path("id") String alias, @Path int count, String remark);
 
     @GET("/api/get/cat")
-    Cat cat(@Query String name, int age, @Query("remark") String ext);
+    Cat cat(@Query String name, int age, @Query(value = "remark", defaultValue = "啊哈哈") String ext);
 
     @GET("/api/get/cat")
     Cat mp(@Header Map<String, Object> header, @Query Map<String, Object> params);

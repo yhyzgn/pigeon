@@ -181,7 +181,7 @@ public class RequestFactory {
         }
 
         private ParameterHandler<?> parseParameterParameter(int index, Type type, Parameter parameter) {
-            return parseParameterQuery(type, parameter.getName(), false, index, null);
+            return parseParameterQuery(type, parameter.getName(), null, false, index, null);
         }
 
         private ParameterHandler<?> parseParameterAnnotation(int index, Type type, Parameter parameter, Annotation[] annotations, Annotation annotation) {
@@ -207,14 +207,14 @@ public class RequestFactory {
                 }
                 validatePathName(index, name);
                 Converter<?, String> converter = pigeon.stringConverter(type, annotations);
-                return new ParameterHandler.Path<>(method, index, name, converter, path.encoded());
+                return new ParameterHandler.Path<>(method, index, name, path.defaultValue(), path.encoded(), converter);
             } else if (annotation instanceof Query) {
                 Query query = (Query) annotation;
                 String name = query.value();
                 if (Utils.isEmpty(name)) {
                     name = parameter.getName();
                 }
-                return parseParameterQuery(type, name, query.encoded(), index, annotations);
+                return parseParameterQuery(type, name, query.defaultValue(), query.encoded(), index, annotations);
             } else if (annotation instanceof Field) {
                 if (!isForm) {
                     throw Utils.parameterError(method, index, "@Field parameters can only be used with form encoding.");
@@ -234,11 +234,11 @@ public class RequestFactory {
                     ParameterizedType parameterizedType = (ParameterizedType) type;
                     Type iterableType = Utils.getParameterUpperBound(0, parameterizedType);
                     Converter<?, String> converter = pigeon.stringConverter(iterableType, annotations);
-                    return new ParameterHandler.Field<>(name, converter, encoded).iterable();
+                    return new ParameterHandler.Field<>(name, field.defaultValue(), encoded, converter).iterable();
                 } else if (rawType.isArray()) {
                     Class<?> arrayComponentType = boxIfPrimitive(rawType.getComponentType());
                     Converter<?, String> converter = pigeon.stringConverter(arrayComponentType, annotations);
-                    return new ParameterHandler.Field<>(name, converter, encoded).array();
+                    return new ParameterHandler.Field<>(name, field.defaultValue(), encoded, converter).array();
                 } else if (Map.class.isAssignableFrom(rawType)) {
                     if (!isForm) {
                         throw Utils.parameterError(method, index, "@Field Map parameters can only be used with form encoding.");
@@ -262,7 +262,7 @@ public class RequestFactory {
                     return new ParameterHandler.FieldMap<>(method, index, converter, encoded);
                 } else {
                     Converter<?, String> converter = pigeon.stringConverter(type, annotations);
-                    return new ParameterHandler.Field<>(name, converter, encoded);
+                    return new ParameterHandler.Field<>(name, field.defaultValue(), encoded, converter);
                 }
             } else if (annotation instanceof Header) {
                 String name = ((Header) annotation).value();
@@ -425,7 +425,7 @@ public class RequestFactory {
             return null;
         }
 
-        private ParameterHandler<?> parseParameterQuery(Type type, String name, boolean encoded, int index, Annotation[] annotations) {
+        private ParameterHandler<?> parseParameterQuery(Type type, String name, String defaultValue, boolean encoded, int index, Annotation[] annotations) {
             Class<?> rawType = Utils.getRawType(type);
             if (Iterable.class.isAssignableFrom(rawType)) {
                 if (!(type instanceof ParameterizedType)) {
@@ -434,11 +434,11 @@ public class RequestFactory {
                 ParameterizedType parameterizedType = (ParameterizedType) type;
                 Type iterableType = Utils.getParameterUpperBound(0, parameterizedType);
                 Converter<?, String> converter = pigeon.stringConverter(iterableType, annotations);
-                return new ParameterHandler.Query<>(name, converter, encoded).iterable();
+                return new ParameterHandler.Query<>(name, defaultValue, encoded, converter).iterable();
             } else if (rawType.isArray()) {
                 Class<?> arrayComponentType = boxIfPrimitive(rawType.getComponentType());
                 Converter<?, String> converter = pigeon.stringConverter(arrayComponentType, annotations);
-                return new ParameterHandler.Query<>(name, converter, encoded).array();
+                return new ParameterHandler.Query<>(name, defaultValue, encoded, converter).array();
             } else if (Map.class.isAssignableFrom(rawType)) {
                 Type mapType = Utils.getSupertype(type, rawType, Map.class);
                 if (!(mapType instanceof ParameterizedType)) {
@@ -454,7 +454,7 @@ public class RequestFactory {
                 return new ParameterHandler.QueryMap<>(method, index, converter, encoded);
             } else {
                 Converter<?, String> converter = pigeon.stringConverter(type, annotations);
-                return new ParameterHandler.Query<>(name, converter, encoded);
+                return new ParameterHandler.Query<>(name, defaultValue, encoded, converter);
             }
         }
 

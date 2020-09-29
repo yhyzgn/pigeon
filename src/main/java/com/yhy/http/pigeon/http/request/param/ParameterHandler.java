@@ -73,41 +73,51 @@ public abstract class ParameterHandler<T> {
         private final Method method;
         private final int index;
         private final String name;
+        private final String defaultValue;
         private final Converter<T, String> converter;
         private final boolean encoded;
 
-        public Path(Method method, int index, String name, Converter<T, String> converter, boolean encoded) {
+        public Path(Method method, int index, String name, String defaultValue, boolean encoded, Converter<T, String> converter) {
             this.method = method;
             this.index = index;
             this.name = Objects.requireNonNull(name, "Path param name can not be null.");
+            this.defaultValue = "".equals(defaultValue) ? null : defaultValue;
             this.converter = converter;
             this.encoded = encoded;
         }
 
         @Override
         public void apply(RequestBuilder builder, @Nullable T value) throws IOException {
-            if (value == null) {
+            String pathValue = defaultValue;
+            if (null != value) {
+                pathValue = converter.convert(value);
+            }
+            if (pathValue == null) {
                 throw Utils.parameterError(method, index, "Path parameter \"" + name + "\" value must not be null.");
             }
-            builder.addPathParam(name, converter.convert(value), encoded);
+            builder.addPathParam(name, pathValue, encoded);
         }
     }
 
     public static class Query<T> extends ParameterHandler<T> {
         private final String name;
+        private final String defaultValue;
         private final Converter<T, String> converter;
         private final boolean encoded;
 
-        public Query(String name, Converter<T, String> converter, boolean encoded) {
+        public Query(String name, String defaultValue, boolean encoded, Converter<T, String> converter) {
             this.name = Objects.requireNonNull(name, "Query param name can not be null.");
-            this.converter = converter;
+            this.defaultValue = "".equals(defaultValue) ? null : defaultValue;
             this.encoded = encoded;
+            this.converter = converter;
         }
 
         @Override
         public void apply(RequestBuilder builder, @Nullable T value) throws IOException {
-            if (null == value) return;
-            String queryValue = converter.convert(value);
+            String queryValue = defaultValue;
+            if (null != value) {
+                queryValue = converter.convert(value);
+            }
             if (null == queryValue) return;
             builder.addQueryParam(name, queryValue, encoded);
         }
@@ -158,19 +168,23 @@ public abstract class ParameterHandler<T> {
 
     public static class Field<T> extends ParameterHandler<T> {
         private final String name;
+        private final String defaultValue;
         private final Converter<T, String> converter;
         private final boolean encoded;
 
-        public Field(String name, Converter<T, String> converter, boolean encoded) {
+        public Field(String name, String defaultValue, boolean encoded, Converter<T, String> converter) {
             this.name = Objects.requireNonNull(name, "Filed name can not be null.");
+            this.defaultValue = "".equals(defaultValue) ? null : defaultValue;
             this.converter = converter;
             this.encoded = encoded;
         }
 
         @Override
         public void apply(RequestBuilder builder, @Nullable T value) throws IOException {
-            if (value == null) return;
-            String fieldValue = converter.convert(value);
+            String fieldValue = defaultValue;
+            if (null != value) {
+                fieldValue = converter.convert(value);
+            }
             if (fieldValue == null) return;
             builder.addFiled(name, fieldValue, encoded);
         }
