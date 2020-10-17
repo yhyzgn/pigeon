@@ -11,6 +11,6 @@ buildNumber.properties
 .mvn/timing.properties
 
 .gradle/
-gradle*
+gradle.properties
 build/
 ext/
