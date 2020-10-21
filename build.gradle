@@ -23,7 +23,7 @@ dependencies {
     api 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
     api 'com.google.code.gson:gson:2.8.6'
     api 'com.google.guava:guava:29.0-jre'
-    api 'org.slf4j:slf4j-api:2.0.0-alpha1'
+    compileOnly 'org.slf4j:slf4j-api:2.0.0-alpha1'
     compileOnly 'org.jetbrains:annotations:19.0.0'
 }
 
