@@ -4,7 +4,6 @@ import com.yhy.http.pigeon.adapter.CallAdapter;
 import com.yhy.http.pigeon.converter.Converter;
 import com.yhy.http.pigeon.http.HttpMethod;
 import com.yhy.http.pigeon.internal.GuavaCallAdapter;
-import com.yhy.http.pigeon.internal.HeaderInterceptor;
 import com.yhy.http.pigeon.internal.HttpLoggerInterceptor;
 import com.yhy.http.pigeon.internal.JacksonConverter;
 import okhttp3.*;
@@ -304,12 +303,6 @@ public class Pigeon {
             adapterFactories.add(0, new GuavaCallAdapter());
             converterFactories.add(0, new JacksonConverter());
 
-            // 公共请求头拦截器
-            netInterceptors.add(new HeaderInterceptor(headers));
-            if (logging) {
-                netInterceptors.add(new HttpLoggerInterceptor());
-            }
-
             if (null == client) {
                 client = new OkHttpClient.Builder();
             }
@@ -317,6 +310,10 @@ public class Pigeon {
             // 配置 ssl
             if (null != sslSocketFactory && null != sslTrustManager && null != sslHostnameVerifier) {
                 client.sslSocketFactory(sslSocketFactory, sslTrustManager).hostnameVerifier(sslHostnameVerifier);
+            }
+
+            if (logging) {
+                netInterceptors.add(new HttpLoggerInterceptor());
             }
 
             // 配置全局拦截器

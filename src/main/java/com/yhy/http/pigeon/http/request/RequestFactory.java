@@ -5,6 +5,7 @@ import com.yhy.http.pigeon.annotation.Headers;
 import com.yhy.http.pigeon.annotation.Interceptor;
 import com.yhy.http.pigeon.annotation.*;
 import com.yhy.http.pigeon.annotation.method.*;
+import com.yhy.http.pigeon.annotation.param.Field;
 import com.yhy.http.pigeon.annotation.param.*;
 import com.yhy.http.pigeon.common.Invocation;
 import com.yhy.http.pigeon.converter.Converter;
@@ -15,10 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
 import java.net.URI;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -44,6 +42,7 @@ public class RequestFactory {
     private final ParameterHandler<?>[] parameterHandlers;
     private final List<okhttp3.Interceptor> netInterceptors;
     private final List<okhttp3.Interceptor> interceptors;
+    private final Map<String, String> headerMap;
 
     public RequestFactory(Builder builder) {
         method = builder.method;
@@ -58,6 +57,7 @@ public class RequestFactory {
         parameterHandlers = builder.parameterHandlers;
         netInterceptors = builder.netInterceptors;
         interceptors = builder.interceptors;
+        headerMap = builder.headerMap;
     }
 
     public Request create(OkHttpClient.Builder client, Object[] args) throws IOException {
@@ -76,17 +76,12 @@ public class RequestFactory {
             handlers[i].apply(builder, args[i]);
         }
 
-        // 自定义设置拦截器
-        if (!netInterceptors.isEmpty()) {
-            netInterceptors.forEach(client::addNetworkInterceptor);
-        }
-        if (!interceptors.isEmpty()) {
-            interceptors.forEach(client::addInterceptor);
-        }
-
         Request.Builder bld = builder.get().tag(Invocation.class, Invocation.of(method, argsList));
         // 加上 User-Agent 信息
         bld.header("User-Agent", "Pigeon/" + Utils.VERSION);
+        if (null != headerMap) {
+            headerMap.forEach(bld::header);
+        }
         return bld.build();
     }
 
@@ -116,8 +111,9 @@ public class RequestFactory {
         private String relativeUrl;
         private Set<String> relativeUrlParamNames;
         private ParameterHandler<?>[] parameterHandlers;
-        private List<okhttp3.Interceptor> netInterceptors;
-        private List<okhttp3.Interceptor> interceptors;
+        private final List<okhttp3.Interceptor> netInterceptors;
+        private final List<okhttp3.Interceptor> interceptors;
+        private final Map<String, String> headerMap;
 
         Builder(Pigeon pigeon, Method method) {
             this.pigeon = pigeon;
@@ -128,6 +124,7 @@ public class RequestFactory {
             this.parameterAnnotations = method.getParameterAnnotations();
             this.headersBuilder = new okhttp3.Headers.Builder();
             this.host = pigeon.host();
+            this.headerMap = pigeon.headers();
             this.netInterceptors = new ArrayList<>();
             this.interceptors = new ArrayList<>();
         }
@@ -519,8 +516,8 @@ public class RequestFactory {
         private void parseHeader(Header... annotation) {
             if (null == annotation) return;
             for (Header header : annotation) {
-                String headerName;
-                String headerValue;
+                String headerName = null;
+                String headerValue = null;
                 // 先检查value
                 if (Utils.isNotEmpty(header.value())) {
                     int index = header.value().indexOf(":");
@@ -529,6 +526,16 @@ public class RequestFactory {
                     }
                     headerName = header.value().substring(0, index).trim();
                     headerValue = header.value().substring(index + 1).trim();
+                } else if (Header.Interface.class.isAssignableFrom(header.pairClass())) {
+                    Class<? extends Header.Interface> pairClass = header.pairClass();
+                    try {
+                        Constructor<? extends Header.Interface> constructor = pairClass.getConstructor();
+                        Header.Interface headerInterface = constructor.newInstance();
+                        headerName = headerInterface.name();
+                        headerValue = headerInterface.value();
+                    } catch (Exception e) {
+                        throw new IllegalArgumentException("The class implements Header.Interface must contains no argument constructor.");
+                    }
                 } else {
                     // 如果value为空，再从pairName和pairValue中获取
                     if (Utils.isEmpty(header.pairName()) || Utils.isEmpty(header.pairValue())) {
@@ -538,10 +545,12 @@ public class RequestFactory {
                     headerValue = header.pairValue();
                 }
 
-                if ("Content-Type".equalsIgnoreCase(headerName)) {
+                if ("Content-Type".equalsIgnoreCase(headerName) && null != headerValue) {
                     contentType = MediaType.get(headerValue);
                 }
-                headersBuilder.add(headerName, headerValue);
+                if (null != headerName && null != headerValue) {
+                    headersBuilder.add(headerName, headerValue);
+                }
             }
             headers = headersBuilder.build();
         }

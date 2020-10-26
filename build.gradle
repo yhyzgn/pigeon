@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat
+
 plugins {
     id "java-library"
     id "maven-publish"
@@ -15,6 +17,34 @@ apply from: "ext.gradle"
 group rootProject.ext.groupId
 version rootProject.ext.version
 
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.warnings = false
+    options.deprecation = true
+    options.compilerArgs += ["-parameters"]
+}
+
+tasks.withType(GenerateModuleMetadata) {
+    enabled = false
+}
+
+jar {
+    afterEvaluate {
+        manifest {
+            attributes 'Implementation-Version': archiveVersion
+            attributes 'Built-Gradle': gradle.gradleVersion
+            attributes 'Bundle-DocURL': 'https://github.com/yhyzgn/'
+            attributes 'Build-OS': System.getProperty("os.name")
+            attributes 'Built-By': System.getProperty("user.name")
+            attributes 'Build-Jdk': System.getProperty("java.version")
+            attributes 'Build-Timestamp': new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())
+        }
+    }
+}
+
 dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 
@@ -25,6 +55,7 @@ dependencies {
     api 'com.google.guava:guava:29.0-jre'
     compileOnly 'org.slf4j:slf4j-api:2.0.0-alpha1'
     compileOnly 'org.jetbrains:annotations:19.0.0'
+    testImplementation 'org.slf4j:slf4j-simple:2.0.0-alpha1'
 }
 
 task replaceVersion() {
@@ -48,35 +79,21 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 javadoc {
-    description = "生成jar格式的javadoc。"
-    // 只显示 protected 和 public 的类和成员
-    options.memberLevel = JavadocMemberLevel.PROTECTED
-    options.author = true
-    options.version = true
-    options.header = project.name
-    // 静默javadoc检查（比如不支持@date会报错等），jdk 8+
-    options.addStringOption('Xdoclint:none', '-quiet')
-    // 防止本地打开中文乱码
-    options.addStringOption("charset", "UTF-8")
-    // suppress warnings due to cross-module @see and @link references;
-    // note that global 'api' task does display all warnings.
-    logging.captureStandardError LogLevel.INFO
-    // suppress "## warnings" message
-    logging.captureStandardOutput LogLevel.INFO
-    // 编码一定要配置否则直接出错
-    options.encoding = "UTF-8"
-    options.charSet = "UTF-8"
-    // java9
-    if (JavaVersion.current().isJava9Compatible()) {
-        options.addBooleanOption('html5', true)
+    afterEvaluate {
+        configure(options) {
+            encoding "UTF-8"
+            charSet 'UTF-8'
+            author true
+            version true
+            failOnError false
+            links "http://docs.oracle.com/javase/8/docs/api"
+        }
     }
 }
 
 compileJava.dependsOn replaceVersion
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
     withJavadocJar()
     withSourcesJar()
 }

@@ -73,7 +73,6 @@ public class GsonConverter extends Converter.Factory {
             this.adapter = adapter;
         }
 
-        @Nullable
         @Override
         public RequestBody convert(T from) throws IOException {
             Buffer buffer = new Buffer();
@@ -81,7 +80,7 @@ public class GsonConverter extends Converter.Factory {
             JsonWriter jsonWriter = gson.newJsonWriter(writer);
             adapter.write(jsonWriter, from);
             jsonWriter.close();
-            return RequestBody.create(MEDIA_TYPE, buffer.readByteArray());
+            return RequestBody.create(buffer.readByteArray(), MEDIA_TYPE);
         }
     }
 

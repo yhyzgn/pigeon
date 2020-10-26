@@ -78,7 +78,7 @@ public class JacksonConverter extends Converter.Factory {
             JsonGenerator gen = mapper.writer().forType(type).createGenerator(writer);
             mapper.writeValue(gen, from);
             gen.close();
-            return RequestBody.create(MEDIA_TYPE, buffer.readByteArray());
+            return RequestBody.create(buffer.readByteArray(), MEDIA_TYPE);
         }
     }
 

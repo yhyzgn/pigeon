@@ -19,7 +19,8 @@ public class ApiTester {
 
     public static void main(String[] args) throws IOException {
 //        Pigeon pigeon = new Pigeon.Builder().host("http://localhost:8080/dbs/test").addConverterFactory(new StringResponseConverter()).build();
-        Pigeon pigeon = new Pigeon.Builder().host("https://t-tio.ybsjyyn.com/reporter/api/debug").header("XX", "asdfasdf").build();
+        Pigeon pigeon = new Pigeon.Builder().host("http://localhost:8080").netInterceptor(new TestInterceptor()).header("XX", "asdfasdf").build();
+//        Pigeon pigeon = new Pigeon.Builder().host("https://t-tio.ybsjyyn.com/reporter/api/debug").netInterceptor(new TestInterceptor()).header("XX", "asdfasdf").build();
         Api api = pigeon.create(Api.class);
 
 //        String test = api.test();

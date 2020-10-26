@@ -6,6 +6,7 @@ import com.yhy.http.pigeon.annotation.method.GET;
 import com.yhy.http.pigeon.annotation.param.Path;
 import com.yhy.http.pigeon.annotation.param.Query;
 import pigeon.Rmt;
+import pigeon.header.TimestampHeader;
 import pigeon.interceptor.TestInterceptor;
 
 import java.util.Map;
@@ -36,6 +37,7 @@ public interface Api {
     Map<String, Object> path(@Path("id") String alias, @Path int count, String remark);
 
     @GET("/api/get/cat")
+    @Header(pairClass = TimestampHeader.class)
     Cat cat(@Query String name, int age, @Query(value = "remark", defaultValue = "啊哈哈") String ext);
 
     @GET("/api/get/cat")

@@ -26,4 +26,13 @@ public @interface Header {
     String pairName() default "";
 
     String pairValue() default "";
+
+    Class<? extends Interface> pairClass() default Interface.class;
+
+    interface Interface {
+
+        String name();
+
+        String value();
+    }
 }

@@ -1,11 +1,9 @@
 package pigeon.interceptor;
 
-import com.yhy.http.pigeon.internal.HttpLoggerInterceptor;
 import okhttp3.Interceptor;
+import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -17,12 +15,13 @@ import java.io.IOException;
  * desc   :
  */
 public class TestInterceptor implements Interceptor {
-    private final static Logger LOGGER = LoggerFactory.getLogger(TestInterceptor.class);
 
     @NotNull
     @Override
     public Response intercept(@NotNull Chain chain) throws IOException {
-        LOGGER.info("[TestInterceptor] executed !");
-        return chain.proceed(chain.request());
+        System.out.println("[TestInterceptor] executed !");
+        Request request = chain.request();
+        System.out.println(request.header("XX"));
+        return chain.proceed(request.newBuilder().build());
     }
 }
