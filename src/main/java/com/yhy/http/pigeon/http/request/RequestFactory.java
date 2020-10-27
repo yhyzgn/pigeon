@@ -61,6 +61,14 @@ public class RequestFactory {
     }
 
     public Request create(OkHttpClient.Builder client, Object[] args) throws IOException {
+        // 自定义设置拦截器
+        if (!netInterceptors.isEmpty()) {
+            netInterceptors.forEach(client::addNetworkInterceptor);
+        }
+        if (!interceptors.isEmpty()) {
+            interceptors.forEach(client::addInterceptor);
+        }
+
         @SuppressWarnings("unchecked")
         ParameterHandler<Object>[] handlers = (ParameterHandler<Object>[]) parameterHandlers;
         int argsCount = args.length;
