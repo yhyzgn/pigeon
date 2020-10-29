@@ -534,7 +534,7 @@ public class RequestFactory {
                     }
                     headerName = header.value().substring(0, index).trim();
                     headerValue = header.value().substring(index + 1).trim();
-                } else if (Header.Interface.class.isAssignableFrom(header.pairClass())) {
+                } else if (header.pairClass() != Header.Interface.class && Header.Interface.class.isAssignableFrom(header.pairClass())) {
                     Class<? extends Header.Interface> pairClass = header.pairClass();
                     try {
                         Constructor<? extends Header.Interface> constructor = pairClass.getConstructor();
@@ -557,7 +557,15 @@ public class RequestFactory {
                     contentType = MediaType.get(headerValue);
                 }
                 if (null != headerName && null != headerValue) {
-                    headersBuilder.add(headerName, headerValue);
+                    Converter<String, String> converter = pigeon.stringConverter(String.class, new Annotation[]{});
+                    try {
+                        headerValue = converter.convert(headerValue);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    if (null != headerValue) {
+                        headersBuilder.add(headerName, headerValue);
+                    }
                 }
             }
             headers = headersBuilder.build();
