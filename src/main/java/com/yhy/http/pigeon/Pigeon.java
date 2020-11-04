@@ -1,6 +1,7 @@
 package com.yhy.http.pigeon;
 
 import com.yhy.http.pigeon.adapter.CallAdapter;
+import com.yhy.http.pigeon.annotation.Header;
 import com.yhy.http.pigeon.converter.Converter;
 import com.yhy.http.pigeon.http.HttpMethod;
 import com.yhy.http.pigeon.internal.GuavaCallAdapter;
@@ -38,6 +39,7 @@ public class Pigeon {
     private final List<Interceptor> netInterceptors;
     private final List<Interceptor> interceptors;
     private final Map<String, String> headers;
+    private final List<Header.Dynamic> dynamicHeaders;
     private final List<CallAdapter.Factory> callFactories;
     private final List<Converter.Factory> converterFactories;
     private final OkHttpClient.Builder client;
@@ -50,6 +52,7 @@ public class Pigeon {
         this.netInterceptors = builder.netInterceptors;
         this.interceptors = builder.interceptors;
         this.headers = builder.headers;
+        this.dynamicHeaders = builder.dynamicHeaders;
         this.callFactories = builder.adapterFactories;
         this.converterFactories = builder.converterFactories;
         this.client = builder.client;
@@ -69,6 +72,10 @@ public class Pigeon {
 
     public Map<String, String> headers() {
         return headers;
+    }
+
+    public List<Header.Dynamic> dynamicHeaders() {
+        return dynamicHeaders;
     }
 
     public CallAdapter<?, ?> adapter(Type returnType, Annotation[] annotations) {
@@ -223,6 +230,7 @@ public class Pigeon {
         private final List<Interceptor> netInterceptors = new ArrayList<>();
         private final List<Interceptor> interceptors = new ArrayList<>();
         private final Map<String, String> headers = new HashMap<>();
+        private final List<Header.Dynamic> dynamicHeaders = new ArrayList<>();
         private final List<CallAdapter.Factory> adapterFactories = new ArrayList<>();
         private final List<Converter.Factory> converterFactories = new ArrayList<>();
         private OkHttpClient.Builder client;
@@ -252,8 +260,26 @@ public class Pigeon {
             return this;
         }
 
+        /**
+         * 静态请求头
+         *
+         * @param name  名称
+         * @param value 静态值
+         * @return builder
+         */
         public Builder header(String name, String value) {
             this.headers.put(name, value);
+            return this;
+        }
+
+        /**
+         * 动态请求头
+         *
+         * @param header 动态支持
+         * @return builder
+         */
+        public Builder header(Header.Dynamic header) {
+            this.dynamicHeaders.add(header);
             return this;
         }
 

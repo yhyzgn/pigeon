@@ -10,7 +10,7 @@ import java.lang.reflect.*;
 import java.util.*;
 
 /**
- * author : 颜洪毅
+ * author : 颜洪�?
  * e-mail : yhyzgn@gmail.com
  * time   : 2019-09-02 17:03
  * version: 1.0.0
@@ -18,7 +18,7 @@ import java.util.*;
  */
 public class Utils {
     private static final Type[] EMPTY_TYPE_ARRAY = new Type[0];
-    public final static String VERSION = "1.2.17";
+    public final static String VERSION = "1.2.18";
 
     public static boolean isEmpty(Object object) {
         if (null == object) return true;

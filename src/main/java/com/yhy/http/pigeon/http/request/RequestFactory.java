@@ -43,6 +43,7 @@ public class RequestFactory {
     private final List<okhttp3.Interceptor> netInterceptors;
     private final List<okhttp3.Interceptor> interceptors;
     private final Map<String, String> headerMap;
+    private final List<Header.Dynamic> dynamicHeaders;
 
     public RequestFactory(Builder builder) {
         method = builder.method;
@@ -58,6 +59,7 @@ public class RequestFactory {
         netInterceptors = builder.netInterceptors;
         interceptors = builder.interceptors;
         headerMap = builder.headerMap;
+        dynamicHeaders = builder.dynamicHeaders;
     }
 
     public Request create(OkHttpClient.Builder client, Object[] args) throws IOException {
@@ -87,8 +89,15 @@ public class RequestFactory {
         Request.Builder bld = builder.get().tag(Invocation.class, Invocation.of(method, argsList));
         // 加上 User-Agent 信息
         bld.header("User-Agent", "Pigeon/" + Utils.VERSION);
+        // 静态 header
         if (null != headerMap) {
             headerMap.forEach(bld::header);
+        }
+        // 动态 header
+        if (null != dynamicHeaders) {
+            dynamicHeaders.forEach(header -> {
+                bld.header(header.name(), header.value());
+            });
         }
         return bld.build();
     }
@@ -122,6 +131,7 @@ public class RequestFactory {
         private final List<okhttp3.Interceptor> netInterceptors;
         private final List<okhttp3.Interceptor> interceptors;
         private final Map<String, String> headerMap;
+        private final List<Header.Dynamic> dynamicHeaders;
 
         Builder(Pigeon pigeon, Method method) {
             this.pigeon = pigeon;
@@ -133,6 +143,7 @@ public class RequestFactory {
             this.headersBuilder = new okhttp3.Headers.Builder();
             this.host = pigeon.host();
             this.headerMap = pigeon.headers();
+            this.dynamicHeaders = pigeon.dynamicHeaders();
             this.netInterceptors = new ArrayList<>();
             this.interceptors = new ArrayList<>();
         }
@@ -534,11 +545,11 @@ public class RequestFactory {
                     }
                     headerName = header.value().substring(0, index).trim();
                     headerValue = header.value().substring(index + 1).trim();
-                } else if (header.pairClass() != Header.Interface.class && Header.Interface.class.isAssignableFrom(header.pairClass())) {
-                    Class<? extends Header.Interface> pairClass = header.pairClass();
+                } else if (header.pairClass() != Header.Dynamic.class && Header.Dynamic.class.isAssignableFrom(header.pairClass())) {
+                    Class<? extends Header.Dynamic> pairClass = header.pairClass();
                     try {
-                        Constructor<? extends Header.Interface> constructor = pairClass.getConstructor();
-                        Header.Interface headerInterface = constructor.newInstance();
+                        Constructor<? extends Header.Dynamic> constructor = pairClass.getConstructor();
+                        Header.Dynamic headerInterface = constructor.newInstance();
                         headerName = headerInterface.name();
                         headerValue = headerInterface.value();
                     } catch (Exception e) {

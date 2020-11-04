@@ -11,7 +11,7 @@ import java.util.Date;
  * version: 1.0.0
  * desc   :
  */
-public class TimestampHeader implements Header.Interface {
+public class TimestampHeader implements Header.Dynamic {
     @Override
     public String name() {
         return "Timestamp";
