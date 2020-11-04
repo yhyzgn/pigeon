@@ -1,7 +1,7 @@
 ext {
     groupId = 'com.yhyzgn.http'
     artifactId = 'pigeon'
-    version = '1.2.18'
+    version = '1.2.19'
     description = 'Java http proxy.'
     url = 'github.com/yhyzgn/pigeon'
 }

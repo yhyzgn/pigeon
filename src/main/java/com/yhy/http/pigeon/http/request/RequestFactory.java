@@ -96,7 +96,11 @@ public class RequestFactory {
         // 动态 header
         if (null != dynamicHeaders) {
             dynamicHeaders.forEach(header -> {
-                bld.header(header.name(), header.value());
+                String name = header.name();
+                String value = header.value();
+                if (null != name && null != value) {
+                    bld.header(name, value);
+                }
             });
         }
         return bld.build();
@@ -549,9 +553,9 @@ public class RequestFactory {
                     Class<? extends Header.Dynamic> pairClass = header.pairClass();
                     try {
                         Constructor<? extends Header.Dynamic> constructor = pairClass.getConstructor();
-                        Header.Dynamic headerInterface = constructor.newInstance();
-                        headerName = headerInterface.name();
-                        headerValue = headerInterface.value();
+                        Header.Dynamic headerDynamic = constructor.newInstance();
+                        headerName = headerDynamic.name();
+                        headerValue = headerDynamic.value();
                     } catch (Exception e) {
                         throw new IllegalArgumentException("The class implements Header.Interface must contains no argument constructor.");
                     }
