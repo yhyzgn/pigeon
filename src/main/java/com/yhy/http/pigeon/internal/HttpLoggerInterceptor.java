@@ -5,12 +5,13 @@ import com.yhy.http.pigeon.common.SystemClock;
 import okhttp3.*;
 import okio.Buffer;
 import okio.BufferedSource;
+import okio.GzipSource;
+import okio.Okio;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -67,23 +68,34 @@ public class HttpLoggerInterceptor implements Interceptor {
         }
 
         ResponseBody resBody = response.body();
+        Response wrapResponse = response;
         if (null != resBody) {
-            BufferedSource source = resBody.source();
-            source.request(Long.MAX_VALUE);
-            Buffer buffer = source.getBuffer();
-            String result = buffer.clone().readString(StandardCharsets.UTF_8);
+            MediaType contentType = resBody.contentType();
+            String encoding = Optional.ofNullable(response.header("Content-Encoding")).orElse("");
+            BufferedSource source;
+            if ("gzip".equals(encoding)) {
+                source = Okio.buffer(new GzipSource(resBody.source()));
+            } else {
+                source = resBody.source();
+            }
+            String content = source.readUtf8();
             lines.empty().line("-- Response Body --");
-            lines.line(result);
+            lines.line(content);
+
+            // 重组 Response
+            // 须移除 Content-Encoding，因为当前 body 已解压
+            wrapResponse = response.newBuilder().removeHeader("Content-Encoding").body(ResponseBody.create(content, contentType)).build();
         }
 
         // 结束时间
         long end = SystemClock.now();
-        lines.empty().line("-- Http Finished. Used {} millis. --", end - start);
+        lines.empty().line("-- Http Pigeon Finished. Used {} millis. --", end - start);
 
         // tag
         Invocation tag = request.tag(Invocation.class);
         log(null != tag ? tag : this, lines);
-        return response;
+
+        return wrapResponse;
     }
 
     private void log(Object tag, LogLines lines) {
