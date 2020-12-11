@@ -114,8 +114,7 @@ public class RequestBuilder {
     }
 
     public Request.Builder get() {
-        HttpUrl url;
-        HttpUrl.Builder urlBuilder;
+        HttpUrl.Builder urlBuilder = host.newBuilder();
 
         if (Utils.isNotEmpty(pathParamMap)) {
             // 存在 path 参数
@@ -123,20 +122,21 @@ public class RequestBuilder {
                 relativeUrl = relativeUrl.replace("{" + et.getKey() + "}", et.getValue());
             }
         }
+        // 设置 path
+        // 去除 path 前的 /
+        if (relativeUrl.startsWith("/")) {
+            relativeUrl = relativeUrl.replaceAll("^/+", "");
+        }
+        urlBuilder.addPathSegments(relativeUrl);
+
         if (Utils.isNotEmpty(queryParamMap)) {
             // 带参数的url
-            urlBuilder = host.newBuilder(relativeUrl);
-            if (urlBuilder == null) {
-                throw new IllegalArgumentException("Malformed URL. Host: " + host + ", Relative: " + relativeUrl);
-            }
             for (Map.Entry<String, String> et : queryParamMap.entrySet()) {
                 urlBuilder.addEncodedQueryParameter(et.getKey(), et.getValue());
             }
-            url = urlBuilder.build();
-        } else {
-            // 不带任何参数的url
-            url = host.resolve(relativeUrl);
         }
+        HttpUrl url = urlBuilder.build();
+
         if (null != formBuilder && Utils.isNotEmpty(fieldParamMap)) {
             for (Map.Entry<String, String> et : fieldParamMap.entrySet()) {
                 formBuilder.addEncoded(et.getKey(), et.getValue());
@@ -160,9 +160,6 @@ public class RequestBuilder {
             } else {
                 headersBuilder.add("Content-Type", contentType.toString());
             }
-        }
-        if (url == null) {
-            throw new IllegalArgumentException("URL can not be null. Host: " + host + ", Relative: " + relativeUrl);
         }
         return requestBuilder
                 .url(url)
