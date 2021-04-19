@@ -4,9 +4,9 @@ import com.yhy.http.pigeon.adapter.CallAdapter;
 import com.yhy.http.pigeon.annotation.Header;
 import com.yhy.http.pigeon.converter.Converter;
 import com.yhy.http.pigeon.http.HttpMethod;
-import com.yhy.http.pigeon.internal.GuavaCallAdapter;
-import com.yhy.http.pigeon.internal.HttpLoggerInterceptor;
-import com.yhy.http.pigeon.internal.JacksonConverter;
+import com.yhy.http.pigeon.internal.*;
+import com.yhy.http.pigeon.provider.HeaderProvider;
+import com.yhy.http.pigeon.provider.InterceptorProvider;
 import okhttp3.*;
 
 import javax.net.ssl.HostnameVerifier;
@@ -42,6 +42,8 @@ public class Pigeon {
     private final List<Header.Dynamic> dynamicHeaders;
     private final List<CallAdapter.Factory> callFactories;
     private final List<Converter.Factory> converterFactories;
+    private final HeaderProvider headerProvider;
+    private final InterceptorProvider interceptorProvider;
     private final OkHttpClient.Builder client;
 
     private Pigeon(Builder builder) {
@@ -55,6 +57,8 @@ public class Pigeon {
         this.dynamicHeaders = builder.dynamicHeaders;
         this.callFactories = builder.adapterFactories;
         this.converterFactories = builder.converterFactories;
+        this.headerProvider = builder.headerProvider;
+        this.interceptorProvider = builder.interceptorProvider;
         this.client = builder.client;
     }
 
@@ -76,6 +80,14 @@ public class Pigeon {
 
     public List<Header.Dynamic> dynamicHeaders() {
         return dynamicHeaders;
+    }
+
+    public HeaderProvider headerProvider() {
+        return headerProvider;
+    }
+
+    public InterceptorProvider interceptorProvider() {
+        return interceptorProvider;
     }
 
     public CallAdapter<?, ?> adapter(Type returnType, Annotation[] annotations) {
@@ -233,6 +245,8 @@ public class Pigeon {
         private final List<Header.Dynamic> dynamicHeaders = new ArrayList<>();
         private final List<CallAdapter.Factory> adapterFactories = new ArrayList<>();
         private final List<Converter.Factory> converterFactories = new ArrayList<>();
+        private HeaderProvider headerProvider = new ConstructorHeaderProvider();
+        private InterceptorProvider interceptorProvider = new ConstructorInterceptorProvider();
         private OkHttpClient.Builder client;
         private boolean logging = true;
         private SSLSocketFactory sslSocketFactory;
@@ -280,6 +294,32 @@ public class Pigeon {
          */
         public Builder header(Header.Dynamic header) {
             this.dynamicHeaders.add(header);
+            return this;
+        }
+
+        /**
+         * 请求头提供者
+         *
+         * @param provider 提供者
+         * @return builder
+         */
+        public Builder provider(HeaderProvider provider) {
+            if (null != provider) {
+                this.headerProvider = provider;
+            }
+            return this;
+        }
+
+        /**
+         * 拦截器提供者
+         *
+         * @param provider 提供者
+         * @return builder
+         */
+        public Builder provider(InterceptorProvider provider) {
+            if (null != provider) {
+                this.interceptorProvider = provider;
+            }
             return this;
         }
 

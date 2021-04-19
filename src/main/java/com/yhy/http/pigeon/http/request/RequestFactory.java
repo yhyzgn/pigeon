@@ -5,7 +5,6 @@ import com.yhy.http.pigeon.annotation.Headers;
 import com.yhy.http.pigeon.annotation.Interceptor;
 import com.yhy.http.pigeon.annotation.*;
 import com.yhy.http.pigeon.annotation.method.*;
-import com.yhy.http.pigeon.annotation.param.Field;
 import com.yhy.http.pigeon.annotation.param.*;
 import com.yhy.http.pigeon.common.Invocation;
 import com.yhy.http.pigeon.converter.Converter;
@@ -16,7 +15,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -524,14 +526,14 @@ public class RequestFactory {
                 Class<? extends okhttp3.Interceptor> clazz = ano.value();
                 try {
                     // 获取空参数构造函数，并创建对象
-                    okhttp3.Interceptor interceptor = clazz.getConstructor().newInstance();
+                    okhttp3.Interceptor interceptor = pigeon.interceptorProvider().provide(clazz);
                     if (ano.net()) {
                         netInterceptors.add(interceptor);
                     } else {
                         interceptors.add(interceptor);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    throw new IllegalArgumentException("The Interceptor must implements okhttp3.Interceptor and provide a empty argument constructor or a InterceptorProvider.");
                 }
             }
         }
@@ -549,15 +551,14 @@ public class RequestFactory {
                     }
                     headerName = header.value().substring(0, index).trim();
                     headerValue = header.value().substring(index + 1).trim();
-                } else if (header.pairClass() != Header.Dynamic.class && Header.Dynamic.class.isAssignableFrom(header.pairClass())) {
-                    Class<? extends Header.Dynamic> pairClass = header.pairClass();
+                } else if (header.dynamic() != Header.Dynamic.class && Header.Dynamic.class.isAssignableFrom(header.dynamic())) {
+                    Class<? extends Header.Dynamic> pairClass = header.dynamic();
                     try {
-                        Constructor<? extends Header.Dynamic> constructor = pairClass.getConstructor();
-                        Header.Dynamic headerDynamic = constructor.newInstance();
+                        Header.Dynamic headerDynamic = pigeon.headerProvider().provide(pairClass);
                         headerName = headerDynamic.name();
                         headerValue = headerDynamic.value();
                     } catch (Exception e) {
-                        throw new IllegalArgumentException("The class implements Header.Interface must contains no argument constructor.");
+                        throw new IllegalArgumentException("The dynamic header class must implements Header.Dynamic and provide a empty argument constructor or a HeaderProvider.");
                     }
                 } else {
                     // 如果value为空，再从pairName和pairValue中获取

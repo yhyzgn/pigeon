@@ -27,7 +27,7 @@ public @interface Header {
 
     String pairValue() default "";
 
-    Class<? extends Dynamic> pairClass() default Dynamic.class;
+    Class<? extends Dynamic> dynamic() default Dynamic.class;
 
     /**
      * Header support dynamic value
