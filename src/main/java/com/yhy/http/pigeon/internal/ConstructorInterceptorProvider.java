@@ -18,4 +18,8 @@ public class ConstructorInterceptorProvider implements InterceptorProvider {
     public <T extends Interceptor> T provide(Class<T> interceptorClass) throws Exception {
         return interceptorClass.getConstructor().newInstance();
     }
+
+    public static ConstructorInterceptorProvider create() {
+        return new ConstructorInterceptorProvider();
+    }
 }

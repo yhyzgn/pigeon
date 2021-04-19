@@ -4,7 +4,9 @@ import com.yhy.http.pigeon.adapter.CallAdapter;
 import com.yhy.http.pigeon.annotation.Header;
 import com.yhy.http.pigeon.converter.Converter;
 import com.yhy.http.pigeon.http.HttpMethod;
-import com.yhy.http.pigeon.internal.*;
+import com.yhy.http.pigeon.internal.GuavaCallAdapter;
+import com.yhy.http.pigeon.internal.HttpLoggerInterceptor;
+import com.yhy.http.pigeon.internal.JacksonConverter;
 import com.yhy.http.pigeon.provider.HeaderProvider;
 import com.yhy.http.pigeon.provider.InterceptorProvider;
 import okhttp3.*;
@@ -245,8 +247,8 @@ public class Pigeon {
         private final List<Header.Dynamic> dynamicHeaders = new ArrayList<>();
         private final List<CallAdapter.Factory> adapterFactories = new ArrayList<>();
         private final List<Converter.Factory> converterFactories = new ArrayList<>();
-        private HeaderProvider headerProvider = new ConstructorHeaderProvider();
-        private InterceptorProvider interceptorProvider = new ConstructorInterceptorProvider();
+        private HeaderProvider headerProvider;
+        private InterceptorProvider interceptorProvider;
         private OkHttpClient.Builder client;
         private boolean logging = true;
         private SSLSocketFactory sslSocketFactory;
@@ -304,9 +306,7 @@ public class Pigeon {
          * @return builder
          */
         public Builder provider(HeaderProvider provider) {
-            if (null != provider) {
-                this.headerProvider = provider;
-            }
+            this.headerProvider = provider;
             return this;
         }
 
@@ -317,9 +317,7 @@ public class Pigeon {
          * @return builder
          */
         public Builder provider(InterceptorProvider provider) {
-            if (null != provider) {
-                this.interceptorProvider = provider;
-            }
+            this.interceptorProvider = provider;
             return this;
         }
 

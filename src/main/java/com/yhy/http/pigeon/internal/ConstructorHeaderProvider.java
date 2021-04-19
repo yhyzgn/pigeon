@@ -22,4 +22,8 @@ public class ConstructorHeaderProvider implements HeaderProvider {
         Constructor<? extends Header.Dynamic> constructor = dynamicHeaderClass.getConstructor();
         return constructor.newInstance();
     }
+
+    public static ConstructorHeaderProvider create() {
+        return new ConstructorHeaderProvider();
+    }
 }

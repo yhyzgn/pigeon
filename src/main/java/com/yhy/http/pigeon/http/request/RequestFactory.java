@@ -9,6 +9,10 @@ import com.yhy.http.pigeon.annotation.param.*;
 import com.yhy.http.pigeon.common.Invocation;
 import com.yhy.http.pigeon.converter.Converter;
 import com.yhy.http.pigeon.http.request.param.ParameterHandler;
+import com.yhy.http.pigeon.internal.ConstructorHeaderProvider;
+import com.yhy.http.pigeon.internal.ConstructorInterceptorProvider;
+import com.yhy.http.pigeon.provider.HeaderProvider;
+import com.yhy.http.pigeon.provider.InterceptorProvider;
 import com.yhy.http.pigeon.utils.Utils;
 import okhttp3.*;
 import org.jetbrains.annotations.Nullable;
@@ -524,9 +528,13 @@ public class RequestFactory {
             if (null == annotation) return;
             for (Interceptor ano : annotation) {
                 Class<? extends okhttp3.Interceptor> clazz = ano.value();
+                InterceptorProvider provider = pigeon.interceptorProvider();
+                if (null == provider) {
+                    provider = ConstructorInterceptorProvider.create();
+                }
                 try {
                     // 获取空参数构造函数，并创建对象
-                    okhttp3.Interceptor interceptor = pigeon.interceptorProvider().provide(clazz);
+                    okhttp3.Interceptor interceptor = provider.provide(clazz);
                     if (ano.net()) {
                         netInterceptors.add(interceptor);
                     } else {
@@ -553,8 +561,12 @@ public class RequestFactory {
                     headerValue = header.value().substring(index + 1).trim();
                 } else if (header.dynamic() != Header.Dynamic.class && Header.Dynamic.class.isAssignableFrom(header.dynamic())) {
                     Class<? extends Header.Dynamic> pairClass = header.dynamic();
+                    HeaderProvider provider = pigeon.headerProvider();
+                    if (null == provider) {
+                        provider = ConstructorHeaderProvider.create();
+                    }
                     try {
-                        Header.Dynamic headerDynamic = pigeon.headerProvider().provide(pairClass);
+                        Header.Dynamic headerDynamic = provider.provide(pairClass);
                         headerName = headerDynamic.name();
                         headerValue = headerDynamic.value();
                     } catch (Exception e) {
