@@ -1,7 +1,7 @@
 package com.yhy.http.pigeon.internal;
 
 import com.yhy.http.pigeon.annotation.Header;
-import com.yhy.http.pigeon.provider.HeaderProvider;
+import com.yhy.http.pigeon.delegate.HeaderDelegate;
 
 import java.lang.reflect.Constructor;
 
@@ -15,15 +15,15 @@ import java.lang.reflect.Constructor;
  * @since 1.0.0
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class ConstructorHeaderProvider implements HeaderProvider {
+public class ConstructorHeaderDelegate implements HeaderDelegate {
 
     @Override
-    public Header.Dynamic provide(Class dynamicHeaderClass) throws Exception {
+    public Header.Dynamic apply(Class dynamicHeaderClass) throws Exception {
         Constructor<? extends Header.Dynamic> constructor = dynamicHeaderClass.getConstructor();
         return constructor.newInstance();
     }
 
-    public static ConstructorHeaderProvider create() {
-        return new ConstructorHeaderProvider();
+    public static ConstructorHeaderDelegate create() {
+        return new ConstructorHeaderDelegate();
     }
 }

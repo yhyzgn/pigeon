@@ -1,4 +1,4 @@
-package com.yhy.http.pigeon.provider;
+package com.yhy.http.pigeon.delegate;
 
 /**
  * 拦截器提供者
@@ -9,7 +9,7 @@ package com.yhy.http.pigeon.provider;
  * @version 1.0.0
  * @since 1.0.0
  */
-public interface InterceptorProvider {
+public interface InterceptorDelegate {
 
     /**
      * 拦截器提供者
@@ -19,5 +19,5 @@ public interface InterceptorProvider {
      * @return 对象
      * @throws Exception 可能出现的异常
      */
-    <T extends okhttp3.Interceptor> T provide(Class<T> interceptorClass) throws Exception;
+    <T extends okhttp3.Interceptor> T apply(Class<T> interceptorClass) throws Exception;
 }

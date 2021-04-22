@@ -1,4 +1,4 @@
-package com.yhy.http.pigeon.provider;
+package com.yhy.http.pigeon.delegate;
 
 import com.yhy.http.pigeon.annotation.Header;
 
@@ -11,7 +11,7 @@ import com.yhy.http.pigeon.annotation.Header;
  * @version 1.0.0
  * @since 1.0.0
  */
-public interface HeaderProvider {
+public interface HeaderDelegate {
 
     /**
      * 从下层逻辑获取动态请求头
@@ -21,5 +21,5 @@ public interface HeaderProvider {
      * @return 动态请求头对象
      * @throws Exception 可能出现的异常
      */
-    <T extends Header.Dynamic> T provide(Class<T> dynamicHeaderClass) throws Exception;
+    <T extends Header.Dynamic> T apply(Class<T> dynamicHeaderClass) throws Exception;
 }
