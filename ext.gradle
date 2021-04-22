@@ -1,7 +1,7 @@
 ext {
     groupId = 'com.yhyzgn.http'
     artifactId = 'pigeon'
-    version = '1.4.3'
+    version = '1.4.4'
     description = 'Java http client with OkHttp3.'
     url = 'github.com/yhyzgn/pigeon'
 }
