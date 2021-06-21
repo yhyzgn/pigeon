@@ -14,10 +14,10 @@ public interface InterceptorDelegate {
     /**
      * 拦截器提供者
      *
-     * @param interceptorClass 拦截器提供者类
-     * @param <T>              拦截器类
+     * @param clazz 拦截器提供者类
+     * @param <T>   拦截器类
      * @return 对象
      * @throws Exception 可能出现的异常
      */
-    <T extends okhttp3.Interceptor> T apply(Class<T> interceptorClass) throws Exception;
+    <T extends okhttp3.Interceptor> T apply(Class<T> clazz) throws Exception;
 }

@@ -16,10 +16,10 @@ public interface HeaderDelegate {
     /**
      * 从下层逻辑获取动态请求头
      *
-     * @param dynamicHeaderClass 动态请求头类
-     * @param <T>                请求头类
+     * @param clazz 动态请求头类
+     * @param <T>   请求头类
      * @return 动态请求头对象
      * @throws Exception 可能出现的异常
      */
-    <T extends Header.Dynamic> T apply(Class<T> dynamicHeaderClass) throws Exception;
+    <T extends Header.Dynamic> T apply(Class<T> clazz) throws Exception;
 }

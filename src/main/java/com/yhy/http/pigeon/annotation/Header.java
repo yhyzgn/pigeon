@@ -1,6 +1,8 @@
 package com.yhy.http.pigeon.annotation;
 
 import java.lang.annotation.*;
+import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * author : 颜洪毅 <br>
@@ -34,8 +36,16 @@ public @interface Header {
      */
     interface Dynamic {
 
-        String name();
+        @Deprecated
+        default String name() {
+            return null;
+        }
 
-        String value();
+        @Deprecated
+        default String value() {
+            return null;
+        }
+
+        Map<String, String> pairs(Method method);
     }
 }

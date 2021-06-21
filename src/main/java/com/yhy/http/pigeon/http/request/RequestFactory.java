@@ -101,11 +101,21 @@ public class RequestFactory {
         }
         // 动态 header
         if (null != dynamicHeaders) {
-            dynamicHeaders.forEach(header -> {
-                String name = header.name();
-                String value = header.value();
+            dynamicHeaders.forEach(dynamic -> {
+                String name = dynamic.name();
+                String value = dynamic.value();
                 if (null != name && null != value) {
                     bld.header(name, value);
+                }
+
+                // 新式动态请求头
+                Map<String, String> dmh = dynamic.pairs(method);
+                if (null != dmh && !dmh.isEmpty()) {
+                    dmh.forEach((k, v) -> {
+                        if (null != k && null != v) {
+                            bld.header(k, v);
+                        }
+                    });
                 }
             });
         }

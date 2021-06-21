@@ -2,7 +2,9 @@ package pigeon.header;
 
 import com.yhy.http.pigeon.annotation.Header;
 
+import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * author : 颜洪毅
@@ -20,5 +22,10 @@ public class TimestampHeader implements Header.Dynamic {
     @Override
     public String value() {
         return new Date().getTime() + "";
+    }
+
+    @Override
+    public Map<String, String> pairs(Method method) {
+        return null;
     }
 }
