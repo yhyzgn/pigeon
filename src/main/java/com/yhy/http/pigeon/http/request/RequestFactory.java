@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
  * version: 1.0.0
  * desc   :
  */
+@SuppressWarnings("deprecation")
 public class RequestFactory {
     private final Method method;
     private final HttpUrl host;

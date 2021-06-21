@@ -21,5 +21,5 @@ public @interface Interceptor {
 
     Class<? extends okhttp3.Interceptor> value();
 
-    boolean net() default false;
+    boolean net() default true;
 }
