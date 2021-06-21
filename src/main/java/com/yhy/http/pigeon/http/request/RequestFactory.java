@@ -98,7 +98,11 @@ public class RequestFactory {
         bld.header("User-Agent", "Pigeon/" + Utils.VERSION);
         // 静态 header
         if (null != headerMap) {
-            headerMap.forEach(bld::header);
+            headerMap.forEach((k, v) -> {
+                if (null != k && null != v) {
+                    bld.header(k, v);
+                }
+            });
         }
         // 动态 header
         if (null != dynamicHeaders) {
