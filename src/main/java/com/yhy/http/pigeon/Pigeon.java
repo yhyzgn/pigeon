@@ -47,6 +47,7 @@ public class Pigeon {
     private final HeaderDelegate headerDelegate;
     private final InterceptorDelegate interceptorDelegate;
     private final OkHttpClient.Builder client;
+    private final boolean methodCacheEnabled;
 
     private Pigeon(Builder builder) {
         this.host = builder.host;
@@ -62,6 +63,7 @@ public class Pigeon {
         this.headerDelegate = builder.headerDelegate;
         this.interceptorDelegate = builder.interceptorDelegate;
         this.client = builder.client;
+        this.methodCacheEnabled = builder.methodCacheEnabled;
     }
 
     public HttpUrl host() {
@@ -188,6 +190,11 @@ public class Pigeon {
     }
 
     private HttpMethod<?> loadHttpMethod(Method method) {
+        if (!methodCacheEnabled) {
+            return HttpMethod.parseAnnotations(this, method);
+        }
+        
+        // 启用了代理缓存
         HttpMethod<?> result = httpMethodMap.get(method);
         if (null != result) return result;
         synchronized (httpMethodMap) {
@@ -251,6 +258,7 @@ public class Pigeon {
         private InterceptorDelegate interceptorDelegate;
         private OkHttpClient.Builder client;
         private boolean logging = true;
+        private boolean methodCacheEnabled = true;
         private SSLSocketFactory sslSocketFactory;
         private X509TrustManager sslTrustManager;
         private HostnameVerifier sslHostnameVerifier;
@@ -353,8 +361,13 @@ public class Pigeon {
             return this;
         }
 
-        public Builder logging(boolean logging) {
-            this.logging = logging;
+        public Builder logging(boolean enabled) {
+            this.logging = enabled;
+            return this;
+        }
+
+        public Builder methodCache(boolean enabled) {
+            this.methodCacheEnabled = enabled;
             return this;
         }
 

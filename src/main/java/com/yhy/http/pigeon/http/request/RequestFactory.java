@@ -584,6 +584,22 @@ public class RequestFactory {
                         Header.Dynamic headerDynamic = delegate.apply(pairClass);
                         headerName = headerDynamic.name();
                         headerValue = headerDynamic.value();
+
+                        if (null != headerName && null != headerValue) {
+                            headersBuilder.add(headerName, headerValue);
+                        }
+
+                        // 新式动态请求头
+                        Map<String, String> dmh = headerDynamic.pairs(method);
+                        if (null != dmh && !dmh.isEmpty()) {
+                            dmh.forEach((k, v) -> {
+                                if (null != k && null != v) {
+                                    headersBuilder.add(k, v);
+                                }
+                            });
+                        }
+
+                        continue;
                     } catch (Exception e) {
                         throw new IllegalArgumentException("The dynamic header class must implements Header.Dynamic and provide a empty argument constructor or a HeaderProvider.");
                     }
@@ -596,19 +612,18 @@ public class RequestFactory {
                     headerValue = header.pairValue();
                 }
 
-                if ("Content-Type".equalsIgnoreCase(headerName) && null != headerValue) {
+                if ("Content-Type".equalsIgnoreCase(headerName)) {
                     contentType = MediaType.get(headerValue);
                 }
-                if (null != headerName && null != headerValue) {
-                    Converter<String, String> converter = pigeon.stringConverter(String.class, new Annotation[]{});
-                    try {
-                        headerValue = converter.convert(headerValue);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    if (null != headerValue) {
-                        headersBuilder.add(headerName, headerValue);
-                    }
+
+                Converter<String, String> converter = pigeon.stringConverter(String.class, new Annotation[]{});
+                try {
+                    headerValue = converter.convert(headerValue);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (null != headerValue) {
+                    headersBuilder.add(headerName, headerValue);
                 }
             }
             headers = headersBuilder.build();

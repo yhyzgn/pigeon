@@ -20,6 +20,19 @@ version rootProject.ext.version
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
+dependencies {
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+
+    api 'com.squareup.okhttp3:okhttp:5.0.0-alpha.2'
+    api 'com.fasterxml.jackson.core:jackson-core:2.12.3'
+    api 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
+    api 'com.google.code.gson:gson:2.8.6'
+    api 'com.google.guava:guava:29.0-jre'
+    compileOnly 'org.slf4j:slf4j-api:2.0.0-alpha1'
+    compileOnly 'org.jetbrains:annotations:19.0.0'
+    testImplementation 'org.slf4j:slf4j-simple:2.0.0-alpha1'
+}
+
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
     options.warnings = false
@@ -50,17 +63,29 @@ jar {
     }
 }
 
-dependencies {
-    testImplementation group: 'junit', name: 'junit', version: '4.12'
-
-    api 'com.squareup.okhttp3:okhttp:5.0.0-alpha.2'
-    api 'com.fasterxml.jackson.core:jackson-core:2.12.3'
-    api 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
-    api 'com.google.code.gson:gson:2.8.6'
-    api 'com.google.guava:guava:29.0-jre'
-    compileOnly 'org.slf4j:slf4j-api:2.0.0-alpha1'
-    compileOnly 'org.jetbrains:annotations:19.0.0'
-    testImplementation 'org.slf4j:slf4j-simple:2.0.0-alpha1'
+javadoc {
+    description = "生成jar格式的javadoc。"
+    // 只显示 protected 和 public 的类和成员
+    options.memberLevel = JavadocMemberLevel.PROTECTED
+    options.author = true
+    options.version = true
+    options.header = project.name
+    // 静默javadoc检查（比如不支持@date会报错等），jdk 8+
+    options.addStringOption('Xdoclint:none', '-quiet')
+    // 防止本地打开中文乱码
+    options.addStringOption("charset", "UTF-8")
+    // suppress warnings due to cross-module @see and @link references;
+    // note that global 'api' task does display all warnings.
+    logging.captureStandardError LogLevel.INFO
+    // suppress "## warnings" message
+    logging.captureStandardOutput LogLevel.INFO
+    // 编码一定要配置否则直接出错
+    options.encoding = "UTF-8"
+    options.charSet = "UTF-8"
+    // java9
+    if (JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
 }
 
 task replaceVersion() {

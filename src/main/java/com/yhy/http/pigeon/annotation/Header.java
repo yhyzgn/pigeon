@@ -33,6 +33,7 @@ public @interface Header {
 
     /**
      * Header support dynamic value
+     * Must disable 'methodCache' of 'Pigeon' by way {@link com.yhy.http.pigeon.Pigeon.Builder#methodCache(boolean)} while using 'Header.Dynamic'
      */
     interface Dynamic {
 
