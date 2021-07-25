@@ -52,7 +52,7 @@ public class HttpLoggerInterceptor implements Interceptor {
         RequestBody reqBody = request.body();
         if (null != reqBody) {
             lines.empty().line("-- Request Body --");
-            lines.line(requestBodyToString(reqBody));
+            lines.line(requestBodyToString(reqBody).replace(System.lineSeparator(), System.lineSeparator() + "│ "));
         }
 
         Response response = chain.proceed(request);
@@ -80,7 +80,7 @@ public class HttpLoggerInterceptor implements Interceptor {
             }
             String content = source.readUtf8();
             lines.empty().line("-- Response Body --");
-            lines.line(content);
+            lines.line(content.replace(System.lineSeparator(), System.lineSeparator() + "│ "));
 
             // 重组 Response
             // 须移除 Content-Encoding，因为当前 body 已解压
@@ -101,16 +101,16 @@ public class HttpLoggerInterceptor implements Interceptor {
     private void log(Object tag, LogLines lines) {
         StringBuffer sb = new StringBuffer(System.lineSeparator());
         sb
-                .append("┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
+                .append("┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
                 .append(System.lineSeparator())
                 .append("│ ").append(tag.toString())
                 .append(System.lineSeparator())
-                .append("├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
+                .append("├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
                 .append(System.lineSeparator());
         lines.lines().forEach(item -> {
             sb.append("│ ").append(item.msg.contains("{}") ? String.format(item.msg.replace("{}", "%s"), item.args) : item.msg).append(System.lineSeparator());
         });
-        sb.append("└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────");
+        sb.append("└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────");
         LOGGER.info(sb.toString());
     }
 
