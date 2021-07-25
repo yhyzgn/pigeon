@@ -144,7 +144,7 @@ public class RequestFactory {
         private final Annotation[][] parameterAnnotations;
         private String httpMethod;
         private boolean hasBody;
-        private okhttp3.Headers.Builder headersBuilder;
+        private final okhttp3.Headers.Builder headersBuilder;
         private okhttp3.Headers headers;
         private MediaType contentType;
         private boolean isForm;
@@ -169,8 +169,8 @@ public class RequestFactory {
             this.host = pigeon.host();
             this.headerMap = pigeon.headers();
             this.dynamicHeaders = pigeon.dynamicHeaders();
-            this.netInterceptors = new ArrayList<>();
-            this.interceptors = new ArrayList<>();
+            this.netInterceptors = pigeon.netInterceptors();
+            this.interceptors = pigeon.interceptors();
         }
 
         RequestFactory build() {

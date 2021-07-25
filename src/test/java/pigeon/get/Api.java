@@ -49,5 +49,5 @@ public interface Api {
 
     @GET
     @Interceptor(value = TestInterceptor.class, net = true)
-    Rmt<String> rmt(@Header Map<String, ?> header, @Query Map<String, Object> params);
+    String rmt(@Header Map<String, ?> header, @Query Map<String, Object> params);
 }

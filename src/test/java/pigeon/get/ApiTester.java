@@ -1,6 +1,7 @@
 package pigeon.get;
 
 import com.yhy.http.pigeon.Pigeon;
+import com.yhy.http.pigeon.internal.StringResponseConverter;
 import pigeon.Rmt;
 import pigeon.interceptor.TestInterceptor;
 
@@ -18,8 +19,8 @@ import java.util.Map;
 public class ApiTester {
 
     public static void main(String[] args) throws IOException {
-//        Pigeon pigeon = new Pigeon.Builder().host("http://localhost:8080/dbs/test").addConverterFactory(new StringResponseConverter()).build();
-        Pigeon pigeon = new Pigeon.Builder().host("http://localhost:8080").netInterceptor(new TestInterceptor()).header("XX", "asdfasdf").build();
+        Pigeon pigeon = new Pigeon.Builder().host("https://www.baidu.com").addConverterFactory(new StringResponseConverter()).header("XX", "XX-Header-Value").build();
+//        Pigeon pigeon = new Pigeon.Builder().host("http://localhost:8080").netInterceptor(new TestInterceptor()).header("XX", "asdfasdf").build();
 //        Pigeon pigeon = new Pigeon.Builder().host("https://t-tio.ybsjyyn.com/reporter/api/debug").netInterceptor(new TestInterceptor()).header("XX", "asdfasdf").build();
         Api api = pigeon.create(Api.class);
 
@@ -58,9 +59,14 @@ public class ApiTester {
 //        cat = api.def(header, params);
 //        System.out.println(cat);
 
-        api.cat("asdf", 23, null);
+//        api.cat("asdf", 23, null);
 
-        Rmt<String> cat = api.rmt(header, params);
-        System.out.println(cat);
+        String cat = api.rmt(header, params);
+//        System.out.println(cat);
+
+        System.out.println("=========================================");
+
+        cat = api.rmt(header, params);
+//        System.out.println(cat);
     }
 }

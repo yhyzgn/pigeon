@@ -47,7 +47,7 @@ public class Pigeon {
     private final HeaderDelegate headerDelegate;
     private final InterceptorDelegate interceptorDelegate;
     private final OkHttpClient.Builder client;
-    private final boolean methodCacheEnabled;
+    private final boolean methodReuseEnabled;
 
     private Pigeon(Builder builder) {
         this.host = builder.host;
@@ -63,7 +63,7 @@ public class Pigeon {
         this.headerDelegate = builder.headerDelegate;
         this.interceptorDelegate = builder.interceptorDelegate;
         this.client = builder.client;
-        this.methodCacheEnabled = builder.methodCacheEnabled;
+        this.methodReuseEnabled = builder.methodReuseEnabled;
     }
 
     public HttpUrl host() {
@@ -111,7 +111,7 @@ public class Pigeon {
     }
 
     public OkHttpClient.Builder client() {
-        // 返回干净的builder，‘client’中只包含全局拦截器，而不含自定义拦截器的builder
+        // 返回干净的builder，‘client’中只包含基础的 OkHttpClient 配置
         // 兼容低版本的 OkHttpClient.Builder
         return newBuilder();
     }
@@ -190,10 +190,10 @@ public class Pigeon {
     }
 
     private HttpMethod<?> loadHttpMethod(Method method) {
-        if (!methodCacheEnabled) {
+        if (!methodReuseEnabled) {
             return HttpMethod.parseAnnotations(this, method);
         }
-        
+
         // 启用了代理缓存
         HttpMethod<?> result = httpMethodMap.get(method);
         if (null != result) return result;
@@ -240,9 +240,6 @@ public class Pigeon {
             builder.sslSocketFactory(sslSocketFactory, sslTrustManager).hostnameVerifier(sslHostnameVerifier);
         }
 
-        ok.interceptors().forEach(builder::addInterceptor);
-        ok.networkInterceptors().forEach(builder::addNetworkInterceptor);
-
         return builder;
     }
 
@@ -258,7 +255,7 @@ public class Pigeon {
         private InterceptorDelegate interceptorDelegate;
         private OkHttpClient.Builder client;
         private boolean logging = true;
-        private boolean methodCacheEnabled = true;
+        private boolean methodReuseEnabled = true;
         private SSLSocketFactory sslSocketFactory;
         private X509TrustManager sslTrustManager;
         private HostnameVerifier sslHostnameVerifier;
@@ -366,8 +363,20 @@ public class Pigeon {
             return this;
         }
 
+        /**
+         * Reuse parsed method
+         *
+         * @param enabled enabled
+         * @return builder
+         * @deprecated Use {@link #methodReuseEnabled(boolean enabled)} in instead.
+         */
+        @Deprecated
         public Builder methodCache(boolean enabled) {
-            this.methodCacheEnabled = enabled;
+            return methodReuseEnabled(enabled);
+        }
+
+        public Builder methodReuseEnabled(boolean enabled) {
+            this.methodReuseEnabled = enabled;
             return this;
         }
 

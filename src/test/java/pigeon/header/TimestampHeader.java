@@ -4,6 +4,7 @@ import com.yhy.http.pigeon.annotation.Header;
 
 import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -14,18 +15,11 @@ import java.util.Map;
  * desc   :
  */
 public class TimestampHeader implements Header.Dynamic {
-    @Override
-    public String name() {
-        return "Timestamp";
-    }
-
-    @Override
-    public String value() {
-        return new Date().getTime() + "";
-    }
 
     @Override
     public Map<String, String> pairs(Method method) {
-        return null;
+        Map<String, String> mp = new HashMap<>();
+        mp.put("Timestamp", new Date().getTime() + "");
+        return mp;
     }
 }
