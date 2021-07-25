@@ -84,7 +84,7 @@ public class HttpLoggerInterceptor implements Interceptor {
 
             // 重组 Response
             // 须移除 Content-Encoding，因为当前 body 已解压
-            wrapResponse = response.newBuilder().removeHeader("Content-Encoding").body(ResponseBody.create(content, contentType)).build();
+            wrapResponse = response.newBuilder().removeHeader("Content-Encoding").body(ResponseBody.create(contentType, content)).build();
         }
 
         // 结束时间

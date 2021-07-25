@@ -80,7 +80,7 @@ public class GsonConverter extends Converter.Factory {
             JsonWriter jsonWriter = gson.newJsonWriter(writer);
             adapter.write(jsonWriter, from);
             jsonWriter.close();
-            return RequestBody.create(buffer.readByteArray(), MEDIA_TYPE);
+            return RequestBody.create(MEDIA_TYPE, buffer.readByteArray());
         }
     }
 

@@ -18,7 +18,7 @@ import java.util.*;
  */
 public class Utils {
     private static final Type[] EMPTY_TYPE_ARRAY = new Type[0];
-    public final static String VERSION = "1.5.2";
+    public final static String VERSION = "1.5.3";
 
     public static boolean isEmpty(Object object) {
         if (null == object) return true;
@@ -216,7 +216,7 @@ public class Utils {
     public static ResponseBody buffer(ResponseBody rawBody) throws IOException {
         Buffer buffer = new Buffer();
         rawBody.source().readAll(buffer);
-        return ResponseBody.create(buffer, rawBody.contentType(), rawBody.contentLength());
+        return ResponseBody.create(rawBody.contentType(), rawBody.contentLength(), buffer);
     }
 
     private static Type resolveTypeVariable(Type context, Class<?> contextRawType, TypeVariable<?> unknown) {

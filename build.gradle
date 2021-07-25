@@ -23,11 +23,13 @@ targetCompatibility = JavaVersion.VERSION_1_8
 dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 
-    api 'com.squareup.okhttp3:okhttp:5.0.0-alpha.2'
+    api 'com.squareup.okhttp3:okhttp:5.0.0-alpha.2' // 新版本（kotlin 版本）
+//    api 'com.squareup.okhttp3:okhttp:3.14.9' // 已兼容旧版本（java 版本）
     api 'com.fasterxml.jackson.core:jackson-core:2.12.3'
     api 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
     api 'com.google.code.gson:gson:2.8.6'
     api 'com.google.guava:guava:29.0-jre'
+    api 'org.jetbrains:annotations:13.0'
     compileOnly 'org.slf4j:slf4j-api:2.0.0-alpha1'
     compileOnly 'org.jetbrains:annotations:19.0.0'
     testImplementation 'org.slf4j:slf4j-simple:2.0.0-alpha1'

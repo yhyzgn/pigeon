@@ -150,7 +150,7 @@ public class RequestBuilder {
                 body = multipartBuilder.build();
             } else if (hasBody) {
                 // 如果强行有body，则设置个空body
-                body = RequestBody.create(new byte[0], MediaType.parse("application/json"));
+                body = RequestBody.create(MediaType.parse("application/json"), new byte[0]);
             }
         }
 
