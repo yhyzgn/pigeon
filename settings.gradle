@@ -1,1 +1,9 @@
 rootProject.name = 'pigeon'
+
+include 'pigeon'
+include 'pigeon-spring'
+include 'pigeon-spring-starter-abstract'
+include 'pigeon-spring-boot-starter'
+include 'pigeon-spring-boot-starter-simple'
+include 'pigeon-spring-boot-starter-simple-api'
+

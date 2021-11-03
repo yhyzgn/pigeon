@@ -1,7 +1,39 @@
 ext {
-    groupId = 'com.yhyzgn.http'
-    artifactId = 'pigeon'
-    version = '1.5.3'
-    description = 'Java http client with OkHttp3.'
-    url = 'github.com/yhyzgn/pigeon'
+    group = 'com.yhyzgn.http'
+    version = '0.0.1-SNAPSHOT'
+    url = 'github.com/yhyzgn/pigeon' as Object
+    repository = [
+            release : 'https://oss.sonatype.org/service/local/staging/deploy/maven2/',
+            snapshot: 'https://oss.sonatype.org/content/repositories/snapshots/'
+    ] as LinkedHashMap
+    pigeon = [
+            artifact   : 'pigeon',
+            version    : '1.5.4',
+            description: 'Java http client with OkHttp3.'
+    ] as LinkedHashMap
+    spring = [
+            artifact   : 'pigeon-spring',
+            version    : '1.0.0',
+            description: 'Spring supported.'
+    ]
+    starterAbstract = [
+            artifact   : 'pigeon-spring-starter-abstract',
+            version    : '1.0.0',
+            description: 'Spring boot supported abstractly.'
+    ]
+    starter = [
+            artifact   : 'pigeon-spring-boot-starter',
+            version    : '1.0.0',
+            description: 'Spring boot starter.'
+    ]
+    starterSimple = [
+            artifact   : 'pigeon-spring-boot-starter-simple',
+            version    : '1.0.0',
+            description: 'Spring boot starter simple.'
+    ]
+    starterSimpleApi = [
+            artifact   : 'pigeon-spring-boot-starter-simple-api',
+            version    : '1.0.0',
+            description: 'Spring boot starter simple api.'
+    ]
 }
