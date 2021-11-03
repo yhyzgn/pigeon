@@ -5,6 +5,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id "java-library"
     id "maven-publish"
+    id "signing"
 }
 
 apply from: "../ext.gradle"
@@ -24,8 +25,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
 
-    api project(':pigeon-spring-starter-abstract')
-//    api "${rootConfig.group}:${rootConfig.starterAbstract.artifact}:${rootConfig.starterAbstract.version}"
+//    api project(':pigeon-spring-starter-abstract')
+    api "${rootConfig.group}:${rootConfig.starterAbstract.artifact}:${rootConfig.starterAbstract.version}"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
@@ -161,14 +162,14 @@ publishing {
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-//            credentials {
-//                username = ossrhUsername
-//                password = ossrhPassword
-//            }
+            credentials {
+                username = ossrhUsername
+                password = ossrhPassword
+            }
         }
     }
 }
 
-//signing {
-//    sign publishing.publications.mavenJava
-//}
+signing {
+    sign publishing.publications.mavenJava
+}

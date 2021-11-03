@@ -22,7 +22,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
     implementation 'com.tengyun.saas:lib-util:1.0.0-SNAPSHOT'
 
-    implementation project(':pigeon-spring-boot-starter')
+//    implementation project(':pigeon-spring-boot-starter')
+    implementation "${rootConfig.group}:${rootConfig.starter.artifact}:${rootConfig.starter.version}"
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

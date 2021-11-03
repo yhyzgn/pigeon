@@ -113,6 +113,7 @@ public class RequestBuilder {
         requestBuilder.tag(cls, value);
     }
 
+    @SuppressWarnings("deprecation")
     public Request.Builder get() {
         HttpUrl.Builder urlBuilder = host.newBuilder();
 

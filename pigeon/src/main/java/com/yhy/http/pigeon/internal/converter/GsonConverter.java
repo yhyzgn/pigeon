@@ -73,6 +73,7 @@ public class GsonConverter extends Converter.Factory {
             this.adapter = adapter;
         }
 
+        @SuppressWarnings("deprecation")
         @Override
         public RequestBody convert(T from) throws IOException {
             Buffer buffer = new Buffer();

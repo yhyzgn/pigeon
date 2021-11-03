@@ -23,15 +23,14 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
-    implementation 'org.springframework:spring-core:5.3.7'
-    implementation 'org.springframework:spring-context:5.3.7'
-    implementation 'org.springframework:spring-beans:5.3.7'
+    implementation 'org.springframework:spring-core:5.3.12'
+    implementation 'org.springframework:spring-context:5.3.11'
+    implementation 'org.springframework:spring-beans:5.3.12'
 
-    api project(':pigeon')
-//    implementation "${rootConfig.group}:${rootConfig.pigeon.artifact}:${rootConfig.pigeon.version}"
+    implementation "${rootConfig.group}:${rootConfig.pigeon.artifact}:${rootConfig.pigeon.version}"
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
 test {
@@ -164,14 +163,14 @@ publishing {
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-//            credentials {
-//                username = ossrhUsername
-//                password = ossrhPassword
-//            }
+            credentials {
+                username = ossrhUsername
+                password = ossrhPassword
+            }
         }
     }
 }
 
-//signing {
-//    sign publishing.publications.mavenJava
-//}
+signing {
+    sign publishing.publications.mavenJava
+}

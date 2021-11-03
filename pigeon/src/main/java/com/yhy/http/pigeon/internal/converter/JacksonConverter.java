@@ -39,6 +39,7 @@ public class JacksonConverter extends Converter.Factory {
     public JacksonConverter(ObjectMapper mapper) {
         // 排除json字符串中实体类没有的字段
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.findAndRegisterModules();
         this.mapper = mapper;
     }
 
@@ -71,6 +72,7 @@ public class JacksonConverter extends Converter.Factory {
             this.type = type;
         }
 
+        @SuppressWarnings("deprecation")
         @Override
         public @NotNull RequestBody convert(T from) throws IOException {
             Buffer buffer = new Buffer();

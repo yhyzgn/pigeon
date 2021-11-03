@@ -18,5 +18,6 @@ public interface NormalAPI {
 
     @GET("/get")
     @Header(dynamic = TokenHeader.class)
+    @Header(pairName = "Remote-Property", pairValue = "${remote.header}")
     Res get();
 }

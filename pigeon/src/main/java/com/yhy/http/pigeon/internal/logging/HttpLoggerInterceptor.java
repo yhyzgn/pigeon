@@ -26,6 +26,7 @@ public class HttpLoggerInterceptor implements Interceptor {
     private final static Logger LOGGER = LoggerFactory.getLogger(HttpLoggerInterceptor.class);
     private final static SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss E", Locale.getDefault());
 
+    @SuppressWarnings("deprecation")
     @NotNull
     @Override
     public Response intercept(@NotNull Chain chain) throws IOException {

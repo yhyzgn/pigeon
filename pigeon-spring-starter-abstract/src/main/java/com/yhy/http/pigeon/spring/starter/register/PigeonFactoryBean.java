@@ -1,11 +1,10 @@
 package com.yhy.http.pigeon.spring.starter.register;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yhy.http.pigeon.Pigeon;
-import com.yhy.http.pigeon.internal.converter.JacksonConverter;
 import com.yhy.http.pigeon.internal.ssl.VoidSSLHostnameVerifier;
 import com.yhy.http.pigeon.internal.ssl.VoidSSLSocketFactory;
 import com.yhy.http.pigeon.internal.ssl.VoidSSLX509TrustManager;
+import com.yhy.http.pigeon.spring.converter.SpringConverter;
 import com.yhy.http.pigeon.spring.delegate.SpringHeaderDelegate;
 import com.yhy.http.pigeon.spring.delegate.SpringInterceptorDelegate;
 import okhttp3.Interceptor;
@@ -41,6 +40,8 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
 
     private ApplicationContext context;
 
+    private SpringConverter springConverter;
+
     private Class<? extends Annotation> pigeonAnnotation;
     private Class<?> pigeonInterface;
     private String baseURL;
@@ -54,11 +55,11 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
     private Class<? extends SSLSocketFactory> sslSocketFactory;
     private Class<? extends X509TrustManager> sslTrustManager;
     private Class<? extends HostnameVerifier> sslHostnameVerifier;
-    private JacksonConverter defaultConverter;
 
     @Override
     public void setApplicationContext(@NotNull ApplicationContext context) throws BeansException {
         this.context = context;
+        this.springConverter = new SpringConverter(context.getEnvironment());
     }
 
     @Override
@@ -73,19 +74,20 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        Assert.notNull(pigeonAnnotation, "PigeonConfig.annotationClass can not be null");
+        Assert.notNull(pigeonAnnotation, "The returned value of enableAnnotation() can not be null");
         String annotationClassName = pigeonAnnotation.getSimpleName();
         Assert.hasText(baseURL, "@" + annotationClassName + " [baseURL] can not be empty or null.");
         LOGGER.info("@" + annotationClassName + " properties for [{}] set complete.", pigeonInterface);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.findAndRegisterModules();
-        defaultConverter = new JacksonConverter(objectMapper);
     }
 
     @SuppressWarnings("unchecked")
     <T> T getTarget() {
-        Pigeon.Builder builder = new Pigeon.Builder().baseURL(baseURL).logging(logging);
+        Pigeon.Builder builder = new Pigeon.Builder()
+            .baseURL(baseURL)
+            .logging(logging)
+            .addConverterFactory(springConverter)
+            .methodReuseEnabled(false);
+
         if (!CollectionUtils.isEmpty(header)) {
             header.forEach(builder::header);
         }
@@ -102,8 +104,6 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
         if (sslSocketFactory != null && sslSocketFactory != VoidSSLSocketFactory.class && sslTrustManager != null && sslTrustManager != VoidSSLX509TrustManager.class && sslHostnameVerifier != null && sslHostnameVerifier != VoidSSLHostnameVerifier.class) {
             builder.https(getInstance(sslSocketFactory), getInstance(sslTrustManager), getInstance(sslHostnameVerifier));
         }
-
-        builder.addConverterFactory(defaultConverter);
 
         if (shouldHeaderDelegate) {
             builder.delegate(context.getBean(SpringHeaderDelegate.class));
@@ -173,9 +173,5 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
 
     public void setSslHostnameVerifier(Class<? extends HostnameVerifier> sslHostnameVerifier) {
         this.sslHostnameVerifier = sslHostnameVerifier;
-    }
-
-    public void setDefaultConverter(JacksonConverter defaultConverter) {
-        this.defaultConverter = defaultConverter;
     }
 }

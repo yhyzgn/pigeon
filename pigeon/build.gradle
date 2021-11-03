@@ -89,7 +89,7 @@ task replaceVersion() {
     ant.replaceregexp(
             file: "./src/main/java/com/yhy/http/pigeon/utils/Utils.java",
             match: "public final static String VERSION = \"(.+)\"",
-            replace: "public final static String VERSION = \"${rootConfig.version}\"",
+            replace: "public final static String VERSION = \"${rootConfig.pigeon.version}\"",
             flags: 'g',
             byline: "true"
     )
@@ -168,14 +168,14 @@ publishing {
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-//            credentials {
-//                username = ossrhUsername
-//                password = ossrhPassword
-//            }
+            credentials {
+                username = ossrhUsername
+                password = ossrhPassword
+            }
         }
     }
 }
 
-//signing {
-//    sign publishing.publications.mavenJava
-//}
+signing {
+    sign publishing.publications.mavenJava
+}
