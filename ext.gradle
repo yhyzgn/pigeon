@@ -18,12 +18,12 @@ ext {
     ] as LinkedHashMap
     starterAbstract = [
             artifact   : 'pigeon-spring-starter-abstract',
-            version    : '1.0.0',
+            version    : '1.0.1',
             description: 'Spring boot supported abstractly.'
     ] as LinkedHashMap
     starter = [
             artifact   : 'pigeon-spring-boot-starter',
-            version    : '1.2.1',
+            version    : '1.2.2',
             description: 'Spring boot starter.'
     ] as LinkedHashMap
     starterSimple = [

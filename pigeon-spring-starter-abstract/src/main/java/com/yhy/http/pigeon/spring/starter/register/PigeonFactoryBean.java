@@ -1,6 +1,7 @@
 package com.yhy.http.pigeon.spring.starter.register;
 
 import com.yhy.http.pigeon.Pigeon;
+import com.yhy.http.pigeon.annotation.Header;
 import com.yhy.http.pigeon.internal.ssl.VoidSSLHostnameVerifier;
 import com.yhy.http.pigeon.internal.ssl.VoidSSLSocketFactory;
 import com.yhy.http.pigeon.internal.ssl.VoidSSLX509TrustManager;
@@ -56,6 +57,10 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
     private Class<? extends X509TrustManager> sslTrustManager;
     private Class<? extends HostnameVerifier> sslHostnameVerifier;
 
+    private List<Class<? extends Header.Dynamic>> globalHeaderList;
+    private List<Class<? extends Interceptor>> globalInterceptorList;
+    private List<Class<? extends Interceptor>> globalNetInterceptorList;
+
     @Override
     public void setApplicationContext(@NotNull ApplicationContext context) throws BeansException {
         this.context = context;
@@ -88,6 +93,39 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
             .addConverterFactory(springConverter)
             .methodReuseEnabled(false);
 
+        SpringHeaderDelegate headerDelegate = context.getBean(SpringHeaderDelegate.class);
+        SpringInterceptorDelegate interceptorDelegate = context.getBean(SpringInterceptorDelegate.class);
+
+        if (!CollectionUtils.isEmpty(globalHeaderList)) {
+            globalHeaderList.forEach(item -> {
+                try {
+                    builder.header(headerDelegate.apply(item));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        if (!CollectionUtils.isEmpty(globalInterceptorList)) {
+            globalInterceptorList.forEach(item -> {
+                try {
+                    builder.interceptor(interceptorDelegate.apply(item));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        if (!CollectionUtils.isEmpty(globalNetInterceptorList)) {
+            globalNetInterceptorList.forEach(item -> {
+                try {
+                    builder.netInterceptor(interceptorDelegate.apply(item));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
         if (!CollectionUtils.isEmpty(header)) {
             header.forEach(builder::header);
         }
@@ -106,10 +144,10 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
         }
 
         if (shouldHeaderDelegate) {
-            builder.delegate(context.getBean(SpringHeaderDelegate.class));
+            builder.delegate(headerDelegate);
         }
         if (shouldInterceptorDelegate) {
-            builder.delegate(context.getBean(SpringInterceptorDelegate.class));
+            builder.delegate(interceptorDelegate);
         }
 
         return (T) builder.methodReuseEnabled(false).build().create(pigeonInterface);
@@ -173,5 +211,17 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
 
     public void setSslHostnameVerifier(Class<? extends HostnameVerifier> sslHostnameVerifier) {
         this.sslHostnameVerifier = sslHostnameVerifier;
+    }
+
+    public void setGlobalHeaderList(List<Class<? extends Header.Dynamic>> globalHeaderList) {
+        this.globalHeaderList = globalHeaderList;
+    }
+
+    public void setGlobalInterceptorList(List<Class<? extends Interceptor>> globalInterceptorList) {
+        this.globalInterceptorList = globalInterceptorList;
+    }
+
+    public void setGlobalNetInterceptorList(List<Class<? extends Interceptor>> globalNetInterceptorList) {
+        this.globalNetInterceptorList = globalNetInterceptorList;
     }
 }

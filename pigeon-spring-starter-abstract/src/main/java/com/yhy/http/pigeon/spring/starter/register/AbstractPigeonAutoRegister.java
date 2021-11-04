@@ -1,5 +1,6 @@
 package com.yhy.http.pigeon.spring.starter.register;
 
+import com.yhy.http.pigeon.annotation.Header;
 import com.yhy.http.pigeon.internal.ssl.VoidSSLHostnameVerifier;
 import com.yhy.http.pigeon.internal.ssl.VoidSSLSocketFactory;
 import com.yhy.http.pigeon.internal.ssl.VoidSSLX509TrustManager;
@@ -48,8 +49,8 @@ import java.util.stream.Stream;
 public abstract class AbstractPigeonAutoRegister implements ImportBeanDefinitionRegistrar, ResourceLoaderAware, EnvironmentAware {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPigeonAutoRegister.class);
 
-    private Environment environment;
-    private ResourceLoader resourceLoader;
+    protected Environment environment;
+    protected ResourceLoader resourceLoader;
 
     private Class<? extends Annotation> pigeonAnnotation;
     private Class<? extends Annotation> enableAnnotation;
@@ -80,6 +81,18 @@ public abstract class AbstractPigeonAutoRegister implements ImportBeanDefinition
     public abstract Class<? extends Annotation> enableAnnotation();
 
     public abstract Class<? extends Annotation> pigeonAnnotation();
+
+    public List<Class<? extends Header.Dynamic>> globalHeaderList() {
+        return null;
+    }
+
+    public List<Class<? extends Interceptor>> globalInterceptorList() {
+        return null;
+    }
+
+    public List<Class<? extends Interceptor>> globalNetInterceptorList() {
+        return null;
+    }
 
     @Override
     public void registerBeanDefinitions(@NotNull AnnotationMetadata metadata, @NotNull BeanDefinitionRegistry registry) {
@@ -161,6 +174,9 @@ public abstract class AbstractPigeonAutoRegister implements ImportBeanDefinition
         builder.addPropertyValue("sslSocketFactory", getSSLSocketFactory(attrs));
         builder.addPropertyValue("sslTrustManager", getSSLTrustManager(attrs));
         builder.addPropertyValue("sslHostnameVerifier", getSSLHostnameVerifier(attrs));
+        builder.addPropertyValue("globalHeaderList", globalHeaderList());
+        builder.addPropertyValue("globalInterceptorList", globalInterceptorList());
+        builder.addPropertyValue("globalNetInterceptorList", globalNetInterceptorList());
         builder.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
 
         AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
