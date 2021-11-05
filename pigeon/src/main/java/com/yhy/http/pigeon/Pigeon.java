@@ -7,9 +7,10 @@ import com.yhy.http.pigeon.delegate.HeaderDelegate;
 import com.yhy.http.pigeon.delegate.InterceptorDelegate;
 import com.yhy.http.pigeon.http.HttpMethod;
 import com.yhy.http.pigeon.internal.adapter.GuavaCallAdapter;
-import com.yhy.http.pigeon.internal.logging.HttpLoggerInterceptor;
 import com.yhy.http.pigeon.internal.converter.JacksonConverter;
+import com.yhy.http.pigeon.internal.logging.HttpLoggerInterceptor;
 import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
@@ -66,22 +67,27 @@ public class Pigeon {
         this.methodReuseEnabled = builder.methodReuseEnabled;
     }
 
+    @NotNull
     public HttpUrl host() {
         return host;
     }
 
+    @NotNull
     public List<Interceptor> netInterceptors() {
         return netInterceptors;
     }
 
+    @NotNull
     public List<Interceptor> interceptors() {
         return interceptors;
     }
 
+    @NotNull
     public Map<String, String> headers() {
         return headers;
     }
 
+    @NotNull
     public List<Header.Dynamic> dynamicHeaders() {
         return dynamicHeaders;
     }
@@ -210,30 +216,30 @@ public class Pigeon {
     private OkHttpClient.Builder newBuilder() {
         OkHttpClient ok = client.build();
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .dispatcher(ok.dispatcher())
-                .connectionPool(ok.connectionPool())
-                .eventListenerFactory(ok.eventListenerFactory())
-                .retryOnConnectionFailure(ok.retryOnConnectionFailure())
-                .authenticator(ok.authenticator())
-                .followRedirects(ok.followRedirects())
-                .followSslRedirects(ok.followSslRedirects())
-                .cookieJar(ok.cookieJar())
-                .cache(ok.cache())
-                .dns(ok.dns())
-                .proxy(ok.proxy())
-                .proxySelector(ok.proxySelector())
-                .proxyAuthenticator(ok.proxyAuthenticator())
-                .socketFactory(ok.socketFactory())
-                .connectionSpecs(ok.connectionSpecs())
-                .protocols(ok.protocols())
-                .hostnameVerifier(ok.hostnameVerifier())
-                .certificatePinner(ok.certificatePinner())
-                .callTimeout(Duration.ofMillis(ok.callTimeoutMillis()))
-                .connectTimeout(Duration.ofMillis(ok.connectTimeoutMillis()))
-                .readTimeout(Duration.ofMillis(ok.readTimeoutMillis()))
-                .writeTimeout(Duration.ofMillis(ok.writeTimeoutMillis()))
-                .pingInterval(Duration.ofMillis(ok.pingIntervalMillis()))
-                .certificatePinner(ok.certificatePinner());
+            .dispatcher(ok.dispatcher())
+            .connectionPool(ok.connectionPool())
+            .eventListenerFactory(ok.eventListenerFactory())
+            .retryOnConnectionFailure(ok.retryOnConnectionFailure())
+            .authenticator(ok.authenticator())
+            .followRedirects(ok.followRedirects())
+            .followSslRedirects(ok.followSslRedirects())
+            .cookieJar(ok.cookieJar())
+            .cache(ok.cache())
+            .dns(ok.dns())
+            .proxy(ok.proxy())
+            .proxySelector(ok.proxySelector())
+            .proxyAuthenticator(ok.proxyAuthenticator())
+            .socketFactory(ok.socketFactory())
+            .connectionSpecs(ok.connectionSpecs())
+            .protocols(ok.protocols())
+            .hostnameVerifier(ok.hostnameVerifier())
+            .certificatePinner(ok.certificatePinner())
+            .callTimeout(Duration.ofMillis(ok.callTimeoutMillis()))
+            .connectTimeout(Duration.ofMillis(ok.connectTimeoutMillis()))
+            .readTimeout(Duration.ofMillis(ok.readTimeoutMillis()))
+            .writeTimeout(Duration.ofMillis(ok.writeTimeoutMillis()))
+            .pingInterval(Duration.ofMillis(ok.pingIntervalMillis()))
+            .certificatePinner(ok.certificatePinner());
 
         // 配置 ssl
         if (null != sslSocketFactory && null != sslTrustManager && null != sslHostnameVerifier) {

@@ -54,7 +54,6 @@ public class RequestFactory {
 
     public RequestFactory(Builder builder) {
         method = builder.method;
-        host = builder.host;
         httpMethod = builder.httpMethod;
         relativeUrl = builder.relativeUrl;
         headers = builder.headers;
@@ -63,10 +62,23 @@ public class RequestFactory {
         isForm = builder.isForm;
         isMultipart = builder.isMultipart;
         parameterHandlers = builder.parameterHandlers;
+
+        // 合并全局配置和当前配置
+        host = Optional.ofNullable(builder.host).orElse(builder.pigeon.host());
+        headerMap = builder.pigeon.headers();
+
         netInterceptors = builder.netInterceptors;
+        if (!builder.pigeon.netInterceptors().isEmpty()) {
+            netInterceptors.addAll(0, builder.pigeon.netInterceptors());
+        }
         interceptors = builder.interceptors;
-        headerMap = builder.headerMap;
+        if (!builder.pigeon.interceptors().isEmpty()) {
+            interceptors.addAll(0, builder.pigeon.interceptors());
+        }
         dynamicHeaders = builder.dynamicHeaders;
+        if (!builder.pigeon.dynamicHeaders().isEmpty()) {
+            dynamicHeaders.addAll(0, builder.pigeon.dynamicHeaders());
+        }
     }
 
     public Request create(OkHttpClient.Builder client, Object[] args) throws IOException {
@@ -155,7 +167,6 @@ public class RequestFactory {
         private ParameterHandler<?>[] parameterHandlers;
         private final List<okhttp3.Interceptor> netInterceptors;
         private final List<okhttp3.Interceptor> interceptors;
-        private final Map<String, String> headerMap;
         private final List<Header.Dynamic> dynamicHeaders;
 
         Builder(Pigeon pigeon, Method method) {
@@ -166,11 +177,9 @@ public class RequestFactory {
             this.parameterTypes = method.getGenericParameterTypes();
             this.parameterAnnotations = method.getParameterAnnotations();
             this.headersBuilder = new okhttp3.Headers.Builder();
-            this.host = pigeon.host();
-            this.headerMap = pigeon.headers();
-            this.dynamicHeaders = pigeon.dynamicHeaders();
-            this.netInterceptors = pigeon.netInterceptors();
-            this.interceptors = pigeon.interceptors();
+            this.dynamicHeaders = new ArrayList<>();
+            this.netInterceptors = new ArrayList<>();
+            this.interceptors = new ArrayList<>();
         }
 
         RequestFactory build() {

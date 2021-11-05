@@ -24,10 +24,10 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
     implementation 'org.springframework:spring-core:5.3.12'
-    implementation 'org.springframework:spring-context:5.3.11'
+    implementation 'org.springframework:spring-context:5.3.12'
     implementation 'org.springframework:spring-beans:5.3.12'
 
-    implementation "${rootConfig.group}:${rootConfig.pigeon.artifact}:${rootConfig.pigeon.version}"
+    api "${rootConfig.group}:${rootConfig.pigeon.artifact}:${rootConfig.pigeon.version}"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'

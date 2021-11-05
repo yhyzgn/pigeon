@@ -24,7 +24,7 @@ targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
     implementation 'org.springframework:spring-core:5.3.12'
-    implementation 'org.springframework:spring-context:5.3.11'
+    implementation 'org.springframework:spring-context:5.3.12'
     implementation 'org.springframework:spring-beans:5.3.12'
 
 //    api project(':pigeon')
