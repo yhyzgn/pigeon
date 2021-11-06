@@ -8,22 +8,22 @@ ext {
     ] as LinkedHashMap
     pigeon = [
             artifact   : 'pigeon',
-            version    : '1.5.5',
+            version    : '1.5.6',
             description: 'Java http client with OkHttp3.'
     ] as LinkedHashMap
     spring = [
             artifact   : 'pigeon-spring',
-            version    : '1.0.1',
+            version    : '1.0.2',
             description: 'Spring supported.'
     ] as LinkedHashMap
     starterAbstract = [
             artifact   : 'pigeon-spring-starter-abstract',
-            version    : '1.0.1',
+            version    : '1.0.2',
             description: 'Spring boot supported abstractly.'
     ] as LinkedHashMap
     starter = [
             artifact   : 'pigeon-spring-boot-starter',
-            version    : '1.2.2',
+            version    : '1.2.3',
             description: 'Spring boot starter.'
     ] as LinkedHashMap
     starterSimple = [
