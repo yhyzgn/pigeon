@@ -13,6 +13,12 @@ def rootConfig = rootProject.ext
 group rootConfig.group
 version rootConfig.pigeon.version
 
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
