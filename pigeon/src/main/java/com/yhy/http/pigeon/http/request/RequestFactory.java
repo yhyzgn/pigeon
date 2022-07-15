@@ -97,7 +97,11 @@ public class RequestFactory {
             throw new IllegalArgumentException("Argument count (" + argsCount + ") doesn't match expected count (" + handlers.length + ")");
         }
 
-        RequestBuilder builder = new RequestBuilder(httpMethod, host, relativeUrl, headers, contentType, hasBody, isForm, isMultipart);
+        String relUrl = relativeUrl;
+        if(host.uri().getPath().endsWith("/") && relUrl.startsWith("/")) {
+            relUrl = relUrl.substring(1);
+        }
+        RequestBuilder builder = new RequestBuilder(httpMethod, host, relUrl, headers, contentType, hasBody, isForm, isMultipart);
 
         List<Object> argsList = new ArrayList<>(argsCount);
         for (int i = 0; i < argsCount; i++) {
