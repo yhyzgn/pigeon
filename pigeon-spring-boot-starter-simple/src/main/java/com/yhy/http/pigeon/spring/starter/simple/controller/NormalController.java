@@ -2,6 +2,7 @@ package com.yhy.http.pigeon.spring.starter.simple.controller;
 
 import com.tengyun.saas.lib.util.response.Res;
 import com.yhy.http.pigeon.spring.starter.simple.remote.NormalAPI;
+import com.yhy.http.pigeon.spring.starter.simple.utils.CodeUtils;
 import com.yhy.http.pigeon.spring.starter.simple.utils.SnowFlake;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +29,7 @@ public class NormalController {
     @GetMapping("/get")
     public Res get() {
         System.out.println(snowFlake.next());
+        System.out.println(CodeUtils.next(6));
         return normalAPI.get();
     }
 }
