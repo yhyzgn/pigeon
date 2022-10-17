@@ -1,8 +1,5 @@
 package com.yhy.http.pigeon.spring.starter.annotation;
 
-import com.yhy.http.pigeon.internal.ssl.VoidSSLHostnameVerifier;
-import com.yhy.http.pigeon.internal.ssl.VoidSSLSocketFactory;
-import com.yhy.http.pigeon.internal.ssl.VoidSSLX509TrustManager;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 
@@ -51,9 +48,9 @@ public @interface Pigeon {
 
     String shouldInterceptorDelegate() default "true";
 
-    Class<? extends SSLSocketFactory> sslSocketFactory() default VoidSSLSocketFactory.class;
+    Class<? extends SSLSocketFactory> sslSocketFactory() default SSLSocketFactory.class;
 
-    Class<? extends X509TrustManager> sslTrustManager() default VoidSSLX509TrustManager.class;
+    Class<? extends X509TrustManager> sslTrustManager() default X509TrustManager.class;
 
-    Class<? extends HostnameVerifier> sslHostnameVerifier() default VoidSSLHostnameVerifier.class;
+    Class<? extends HostnameVerifier> sslHostnameVerifier() default HostnameVerifier.class;
 }

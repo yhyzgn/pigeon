@@ -1,10 +1,8 @@
 package com.yhy.http.pigeon.spring.starter.annotation;
 
-import com.yhy.http.pigeon.internal.ssl.VoidSSLHostnameVerifier;
-import com.yhy.http.pigeon.internal.ssl.VoidSSLSocketFactory;
-import com.yhy.http.pigeon.internal.ssl.VoidSSLX509TrustManager;
 import com.yhy.http.pigeon.spring.delegate.SpringHeaderDelegate;
 import com.yhy.http.pigeon.spring.delegate.SpringInterceptorDelegate;
+import com.yhy.http.pigeon.spring.starter.config.PigeonStarterAutoConfiguration;
 import com.yhy.http.pigeon.spring.starter.register.PigeonAutoRegister;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.annotation.AliasFor;
@@ -27,7 +25,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import({PigeonAutoRegister.class, SpringHeaderDelegate.class, SpringInterceptorDelegate.class})
+@Import({PigeonAutoRegister.class, SpringHeaderDelegate.class, SpringInterceptorDelegate.class, PigeonStarterAutoConfiguration.class})
 public @interface EnablePigeon {
 
     @AliasFor("basePackages")
@@ -52,9 +50,9 @@ public @interface EnablePigeon {
 
     String shouldInterceptorDelegate() default "true";
 
-    Class<? extends SSLSocketFactory> sslSocketFactory() default VoidSSLSocketFactory.class;
+    Class<? extends SSLSocketFactory> sslSocketFactory() default SSLSocketFactory.class;
 
-    Class<? extends X509TrustManager> sslTrustManager() default VoidSSLX509TrustManager.class;
+    Class<? extends X509TrustManager> sslTrustManager() default X509TrustManager.class;
 
-    Class<? extends HostnameVerifier> sslHostnameVerifier() default VoidSSLHostnameVerifier.class;
+    Class<? extends HostnameVerifier> sslHostnameVerifier() default HostnameVerifier.class;
 }

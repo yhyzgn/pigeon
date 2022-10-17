@@ -2,9 +2,6 @@ package com.yhy.http.pigeon.spring.starter.register;
 
 import com.yhy.http.pigeon.Pigeon;
 import com.yhy.http.pigeon.annotation.Header;
-import com.yhy.http.pigeon.internal.ssl.VoidSSLHostnameVerifier;
-import com.yhy.http.pigeon.internal.ssl.VoidSSLSocketFactory;
-import com.yhy.http.pigeon.internal.ssl.VoidSSLX509TrustManager;
 import com.yhy.http.pigeon.spring.converter.SpringConverter;
 import com.yhy.http.pigeon.spring.delegate.SpringHeaderDelegate;
 import com.yhy.http.pigeon.spring.delegate.SpringInterceptorDelegate;
@@ -139,7 +136,7 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
         if (timeout > 0) {
             builder.timeout(timeout);
         }
-        if (sslSocketFactory != null && sslSocketFactory != VoidSSLSocketFactory.class && sslTrustManager != null && sslTrustManager != VoidSSLX509TrustManager.class && sslHostnameVerifier != null && sslHostnameVerifier != VoidSSLHostnameVerifier.class) {
+        if (sslSocketFactory != null && sslTrustManager != null && sslHostnameVerifier != null) {
             builder.https(getInstance(sslSocketFactory), getInstance(sslTrustManager), getInstance(sslHostnameVerifier));
         }
 
