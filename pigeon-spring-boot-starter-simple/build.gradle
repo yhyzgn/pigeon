@@ -1,6 +1,6 @@
 plugins {
-    id 'org.springframework.boot' version '2.5.0'
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'org.springframework.boot' version '2.7.11'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
     id "java"
 }
 
@@ -20,7 +20,7 @@ configurations {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
-    implementation 'com.tengyun.saas:lib-util:1.0.0-SNAPSHOT'
+    implementation 'com.yhyzgn.jakit:jakit-spring-boot-starter:1.0.6'
 
     implementation project(':pigeon-spring-boot-starter')
 //    implementation "${rootConfig.group}:${rootConfig.starter.artifact}:${rootConfig.starter.version}"

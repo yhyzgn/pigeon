@@ -23,9 +23,9 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 dependencies {
-    implementation 'org.springframework:spring-core:5.3.23'
-    implementation 'org.springframework:spring-context:5.3.23'
-    implementation 'org.springframework:spring-beans:5.3.23'
+    implementation 'org.springframework:spring-core:5.3.27'
+    implementation 'org.springframework:spring-context:5.3.27'
+    implementation 'org.springframework:spring-beans:5.3.27'
 
     api project(':pigeon')
 //    api "${rootConfig.group}:${rootConfig.pigeon.artifact}:${rootConfig.pigeon.version}"
@@ -38,14 +38,14 @@ test {
     useJUnitPlatform()
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.warnings = false
     options.deprecation = true
     options.compilerArgs += ["-parameters"]
 }
 
-tasks.withType(GenerateModuleMetadata) {
+tasks.withType(GenerateModuleMetadata).configureEach {
     enabled = false
 }
 
@@ -55,7 +55,7 @@ publish.dependsOn(publishToMavenLocal)
 // https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle/#packaging-executable.and-plain-archives
 jar {
     enabled true
-    classifier ''
+    archiveClassifier = ''
     afterEvaluate {
         manifest {
             attributes 'Implementation-Version': archiveVersion
@@ -94,13 +94,14 @@ javadoc {
     }
 }
 
-task sourceJar(type: Jar) {
-    classifier "sources"
+tasks.register('sourceJar', Jar) {
+    archiveClassifier = 'sources'
     from sourceSets.main.allJava
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier "javadoc"
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
+    archiveClassifier = 'javadoc'
     from javadoc.destinationDir
 }
 

@@ -12,13 +12,18 @@ version rootConfig.version
 allprojects {
     repositories {
         mavenLocal()
+        maven { url 'https://maven.aliyun.com/repository/public' }
+        maven { url 'https://maven.aliyun.com/repository/spring' }
+        maven { url 'https://maven.aliyun.com/repository/spring-plugin' }
         mavenCentral()
         gradlePluginPortal()
         google()
     }
 
-    //编译JAVA文件时采用UTF-8
-    tasks.withType(JavaCompile) {
-        options.encoding = "UTF-8"
+    // 编译 JAVA 文件时采用 UTF-8
+    tasks.withType(JavaCompile).tap {
+        configureEach {
+            options.encoding = "UTF-8"
+        }
     }
 }

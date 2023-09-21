@@ -1,13 +1,14 @@
 package com.yhy.http.pigeon.spring.starter.simple.controller;
 
-import com.tengyun.saas.lib.util.response.Res;
 import com.yhy.http.pigeon.spring.starter.simple.remote.NormalAPI;
 import com.yhy.http.pigeon.spring.starter.simple.utils.CodeUtils;
-import com.yhy.http.pigeon.spring.starter.simple.utils.SnowFlake;
+import com.yhy.jakit.util.id.SnowFlake;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 /**
  * Created on 2021-05-22 18:03
@@ -27,9 +28,10 @@ public class NormalController {
     private SnowFlake snowFlake;
 
     @GetMapping("/get")
-    public Res get() {
+    public Map<String, Object> get() {
         System.out.println(snowFlake.next());
         System.out.println(CodeUtils.next(6));
-        return normalAPI.get();
+        String[] codes = new String[]{"aaa", "bbb", "ccc"};
+        return normalAPI.get(codes);
     }
 }

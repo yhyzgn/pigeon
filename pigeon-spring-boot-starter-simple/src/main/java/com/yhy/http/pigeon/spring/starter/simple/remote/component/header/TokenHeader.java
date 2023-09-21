@@ -1,7 +1,7 @@
 package com.yhy.http.pigeon.spring.starter.simple.remote.component.header;
 
-import com.tengyun.saas.lib.util.core.RandUtils;
 import com.yhy.http.pigeon.annotation.Header;
+import com.yhy.jakit.util.RandUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -29,7 +29,7 @@ public class TokenHeader implements Header.Dynamic {
         log.info("autowired applicationContext = {}", context);
 
         Map<String, String> result = new HashMap<>();
-        result.put("Token", RandUtils.get(32));
+        result.put("Token", RandUtils.getCode(32));
         return result;
     }
 }

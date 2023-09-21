@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -41,8 +43,8 @@ public class RequestBuilder {
     private RequestBody body;
 
     private final Map<String, String> pathParamMap;
-    private final Map<String, String> queryParamMap;
-    private final Map<String, String> fieldParamMap;
+    private final Map<String, List<String>> queryParamMap;
+    private final Map<String, List<String>> fieldParamMap;
 
     RequestBuilder(String method, HttpUrl host, @Nullable String relativeUrl, @Nullable Headers headers, @Nullable MediaType contentType, boolean hasBody, boolean isForm, boolean isMultipart) {
         this.method = method;
@@ -90,11 +92,11 @@ public class RequestBuilder {
     }
 
     public void addQueryParam(String name, String value, boolean encoded) {
-        queryParamMap.put(name, dispatchEncode(value, encoded));
+        queryParamMap.computeIfAbsent(name, k -> new ArrayList<>()).add(dispatchEncode(value, encoded));
     }
 
     public void addFiled(String name, String value, boolean encoded) {
-        fieldParamMap.put(name, dispatchEncode(value, encoded));
+        fieldParamMap.computeIfAbsent(name, k -> new ArrayList<>()).add(dispatchEncode(value, encoded));
     }
 
     public void addPart(Headers headers, RequestBody body) {
@@ -132,16 +134,16 @@ public class RequestBuilder {
 
         if (Utils.isNotEmpty(queryParamMap)) {
             // 带参数的url
-            for (Map.Entry<String, String> et : queryParamMap.entrySet()) {
-                urlBuilder.addEncodedQueryParameter(et.getKey(), et.getValue());
-            }
+            queryParamMap.forEach((name, values) -> {
+                values.forEach(val -> urlBuilder.addEncodedQueryParameter(name, val));
+            });
         }
         HttpUrl url = urlBuilder.build();
 
         if (null != formBuilder && Utils.isNotEmpty(fieldParamMap)) {
-            for (Map.Entry<String, String> et : fieldParamMap.entrySet()) {
-                formBuilder.addEncoded(et.getKey(), et.getValue());
-            }
+            fieldParamMap.forEach((name, values) -> {
+                values.forEach(val -> formBuilder.addEncoded(name, val));
+            });
         }
 
         if (null == body) {

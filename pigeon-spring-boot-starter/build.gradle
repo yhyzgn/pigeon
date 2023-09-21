@@ -1,8 +1,8 @@
 import java.text.SimpleDateFormat
 
 plugins {
-    id 'org.springframework.boot' version '2.5.0'
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'org.springframework.boot' version '2.7.11'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
     id "java-library"
     id "maven-publish"
     id "signing"
@@ -39,14 +39,14 @@ test {
     useJUnitPlatform()
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.warnings = false
     options.deprecation = true
     options.compilerArgs += ["-parameters"]
 }
 
-tasks.withType(GenerateModuleMetadata) {
+tasks.withType(GenerateModuleMetadata).configureEach {
     enabled = false
 }
 
@@ -56,7 +56,7 @@ publish.dependsOn(publishToMavenLocal)
 // https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle/#packaging-executable.and-plain-archives
 jar {
     enabled true
-    classifier ''
+    archiveClassifier = ''
     afterEvaluate {
         manifest {
             attributes 'Implementation-Version': archiveVersion
@@ -95,13 +95,14 @@ javadoc {
     }
 }
 
-task sourceJar(type: Jar) {
-    classifier "sources"
+tasks.register('sourceJar', Jar) {
+    archiveClassifier = 'sources'
     from sourceSets.main.allJava
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier "javadoc"
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
+    archiveClassifier = 'javadoc'
     from javadoc.destinationDir
 }
 

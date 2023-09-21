@@ -1,6 +1,6 @@
 package com.yhy.http.pigeon.spring.starter.simple.utils;
 
-import com.tengyun.saas.lib.util.core.Assert;
+import org.springframework.util.Assert;
 
 /**
  * 行政区划工具类

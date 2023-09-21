@@ -1,10 +1,12 @@
 package com.yhy.http.pigeon.spring.starter.simple.remote;
 
-import com.tengyun.saas.lib.util.response.Res;
 import com.yhy.http.pigeon.annotation.Header;
 import com.yhy.http.pigeon.annotation.method.GET;
+import com.yhy.http.pigeon.annotation.param.Query;
 import com.yhy.http.pigeon.spring.starter.annotation.Pigeon;
 import com.yhy.http.pigeon.spring.starter.simple.remote.component.header.TokenHeader;
+
+import java.util.Map;
 
 /**
  * Created on 2021-05-22 18:01
@@ -19,5 +21,5 @@ public interface NormalAPI {
     @GET("/get")
     @Header(dynamic = TokenHeader.class)
     @Header(pairName = "Remote-Property", pairValue = "${remote.header}")
-    Res get();
+    Map<String, Object> get(@Query("codes") String[] codes);
 }

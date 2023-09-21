@@ -36,14 +36,14 @@ dependencies {
     testImplementation 'org.slf4j:slf4j-simple:2.0.3'
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.warnings = false
     options.deprecation = true
     options.compilerArgs += ["-parameters"]
 }
 
-tasks.withType(GenerateModuleMetadata) {
+tasks.withType(GenerateModuleMetadata).configureEach {
     enabled = false
 }
 
@@ -52,7 +52,7 @@ compileJava.dependsOn(clean)
 // https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle/#packaging-executable.and-plain-archives
 jar {
     enabled true
-    classifier ''
+    archiveClassifier = ''
     afterEvaluate {
         manifest {
             attributes 'Implementation-Version': archiveVersion
@@ -91,7 +91,7 @@ javadoc {
     }
 }
 
-task replaceVersion() {
+tasks.register('replaceVersion') {
     ant.replaceregexp(
             file: "./src/main/java/com/yhy/http/pigeon/utils/Utils.java",
             match: "public final static String VERSION = \"(.+)\"",
@@ -101,13 +101,14 @@ task replaceVersion() {
     )
 }
 
-task sourceJar(type: Jar) {
-    classifier "sources"
+tasks.register('sourceJar', Jar) {
+    archiveClassifier = 'sources'
     from sourceSets.main.allJava
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier "javadoc"
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
+    archiveClassifier = 'javadoc'
     from javadoc.destinationDir
 }
 
