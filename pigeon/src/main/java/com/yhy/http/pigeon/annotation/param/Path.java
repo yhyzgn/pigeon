@@ -9,7 +9,7 @@ import java.lang.annotation.*;
  * version: 1.0.0 <br>
  * desc   : Path 参数 <br>
  * <p>
- * - @GET("/api/get/path/{id}/{count}") <br>
+ * - @Get("/api/get/path/{id}/{count}") <br>
  * - Map&lt;String, Object&gt; path(@Path("id") String alias, @Path int count, String remark); <br>
  */
 @Target(ElementType.PARAMETER)

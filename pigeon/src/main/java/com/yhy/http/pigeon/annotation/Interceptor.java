@@ -9,7 +9,7 @@ import java.lang.annotation.*;
  * version: 1.0.0 <br>
  * desc   : 拦截器 <br>
  * <p>
- * - @GET("/api/get") <br>
+ * - @Get("/api/get") <br>
  * - @Interceptor(TestInterceptor.class) <br>
  * - Map&lt;String, Object&gt; get(String name, int age); <br>
  */
@@ -19,7 +19,17 @@ import java.lang.annotation.*;
 @Repeatable(Interceptors.class)
 public @interface Interceptor {
 
+    /**
+     * 拦截器类
+     *
+     * @return 拦截器类
+     */
     Class<? extends okhttp3.Interceptor> value();
 
+    /**
+     * 是否网络请求拦截器
+     *
+     * @return 是否网络请求拦截器
+     */
     boolean net() default true;
 }

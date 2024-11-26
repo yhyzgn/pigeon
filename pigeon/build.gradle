@@ -9,6 +9,7 @@ plugins {
 apply from: "../ext.gradle"
 
 def rootConfig = rootProject.ext
+def libVersion = rootConfig.lib
 
 group rootConfig.group
 version rootConfig.pigeon.version
@@ -19,21 +20,23 @@ configurations {
     }
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
 dependencies {
-    api 'com.squareup.okhttp3:okhttp:5.0.0-alpha.2'
-    api 'com.fasterxml.jackson.core:jackson-core:2.13.4'
-    api 'com.fasterxml.jackson.core:jackson-databind:2.14.0-rc1'
-    api 'com.google.code.gson:gson:2.9.0'
-    api 'com.google.guava:guava:31.1-jre'
-    api 'org.jetbrains:annotations:23.0.0'
+    api "com.squareup.okhttp3:okhttp:${libVersion.okhttp}"
+    api "com.fasterxml.jackson.core:jackson-core:${libVersion.jackson}"
+    api "com.fasterxml.jackson.core:jackson-databind:${libVersion.jackson}"
+    api "com.google.code.gson:gson:${libVersion.gson}"
+    api "com.google.guava:guava:${libVersion.guava}"
+    api "org.jetbrains:annotations:${libVersion.jetbrains}"
+    api "com.alibaba:transmittable-thread-local:${libVersion.ttl}"
 
-    implementation 'org.slf4j:slf4j-api:2.0.3'
+    implementation "org.slf4j:slf4j-api:${libVersion.slf4j}"
 
-    testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.slf4j:slf4j-simple:2.0.3'
+    compileOnly "org.projectlombok:lombok:${libVersion.lombok}"
+    annotationProcessor "org.projectlombok:lombok:${libVersion.lombok}"
+
+    testImplementation platform("org.junit:junit-bom:${libVersion.junit}")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testImplementation "org.slf4j:slf4j-simple:${libVersion.slf4j}"
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -175,14 +178,14 @@ publishing {
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-            credentials {
-                username = ossrhUsername
-                password = ossrhPassword
-            }
+//            credentials {
+//                username = ossrhUsername
+//                password = ossrhPassword
+//            }
         }
     }
 }
 
-signing {
-    sign publishing.publications.mavenJava
-}
+//signing {
+//    sign publishing.publications.mavenJava
+//}

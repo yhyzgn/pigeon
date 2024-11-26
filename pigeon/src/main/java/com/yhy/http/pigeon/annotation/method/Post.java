@@ -7,15 +7,15 @@ import java.lang.annotation.*;
  * e-mail : yhyzgn@gmail.com <br>
  * time   : 2019-09-02 15:52 <br>
  * version: 1.0.0 <br>
- * desc   : patch请求 <br>
+ * desc   : post请求 <br>
  * <p>
- * - @PATCH("/api/patch") <br>
- * - String patch(); <br>
+ * - @Post("/api/post") <br>
+ * - String post(); <br>
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface PATCH {
+public @interface Post {
 
     /**
      * api子路径

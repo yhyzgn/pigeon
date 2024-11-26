@@ -27,8 +27,8 @@ public interface CallAdapter<R, T> {
         @Nullable
         public abstract CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Pigeon pigeon);
 
-        protected static Type getParameterUpperBound(int index, ParameterizedType type) {
-            return Utils.getParameterUpperBound(index, type);
+        protected static Type getFirstParameterUpperBound(ParameterizedType type) {
+            return Utils.getParameterUpperBound(0, type);
         }
 
         protected static Class<?> getRawType(Type type) {

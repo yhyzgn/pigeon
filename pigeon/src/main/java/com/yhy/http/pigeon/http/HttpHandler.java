@@ -51,7 +51,7 @@ public abstract class HttpHandler<Res, Ret> extends HttpMethod<Ret> {
     }
 
     private static <Res> Converter<ResponseBody, Res> createResponseConverter(Pigeon pigeon, Annotation[] annotations, Type responseType) {
-        return (Converter<ResponseBody, Res>) pigeon.responseConverter(responseType, annotations);
+        return pigeon.responseConverter(responseType, annotations);
     }
 
     private static <Res, Ret> CallAdapter<Res, Ret> createCallAdapter(Pigeon pigeon, Annotation[] annotations, Type returnType) {

@@ -3,7 +3,7 @@ package pigeon.post;
 import com.yhy.http.pigeon.annotation.Form;
 import com.yhy.http.pigeon.annotation.Header;
 import com.yhy.http.pigeon.annotation.Interceptor;
-import com.yhy.http.pigeon.annotation.method.POST;
+import com.yhy.http.pigeon.annotation.method.Post;
 import com.yhy.http.pigeon.annotation.param.Body;
 import com.yhy.http.pigeon.annotation.param.Field;
 import com.yhy.http.pigeon.annotation.param.Path;
@@ -23,31 +23,31 @@ import java.util.Map;
  */
 public interface Api {
 
-    @POST("/api/post/noParam")
+    @Post("/api/post/noParam")
     String noParam();
 
-    @POST("/api/post/normal")
+    @Post("/api/post/normal")
     @Interceptor(TestInterceptor.class)
     Map<String, Object> normal(String name, int age);
 
-    @POST("/api/post/annotation")
+    @Post("/api/post/annotation")
     @Form
     Map<String, Object> annotation(@Query String name, int age, @Field("remark") String ext);
 
-    @POST("/api/post/path/{id}/{count}")
+    @Post("/api/post/path/{id}/{count}")
     Map<String, Object> path(@Path("id") String alias, @Path int count, String remark);
 
-    @POST("/api/post/cat")
+    @Post("/api/post/cat")
     Cat cat(@Body Cat cat);
 
-    @POST("/api/post/cat")
+    @Post("/api/post/cat")
     @Form
     Cat mp(@Header Map<String, Object> header, @Field Map<String, Object> params);
 
-    @POST
+    @Post
     @Form
     Rmt<String> form(@Header Map<String, Object> header, @Field String field);
 
-    @POST
+    @Post
     Rmt<Cat> body(@Header Map<String, Object> header, @Body Map<String, Object> body);
 }

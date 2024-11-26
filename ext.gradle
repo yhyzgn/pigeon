@@ -6,34 +6,47 @@ ext {
             release : 'https://oss.sonatype.org/service/local/staging/deploy/maven2/',
             snapshot: 'https://oss.sonatype.org/content/repositories/snapshots/'
     ] as LinkedHashMap
+    lib = [
+            jetbrains: "26.0.1",
+            spring   : "6.2.0",
+            jackson  : "2.18.1",
+            okhttp   : "4.12.0",
+            slf4j    : "2.0.16",
+            logback  : "1.5.12",
+            ttl      : "2.14.5",
+            gson     : "2.11.0",
+            guava    : "33.3.1-jre",
+            lombok   : "1.18.36",
+            junit    : "5.11.3",
+    ]
     pigeon = [
             artifact   : 'pigeon',
-            version    : '1.6.0',
+            version    : '2.0.0',
             description: 'Java http client with OkHttp3.'
     ] as LinkedHashMap
     spring = [
             artifact   : 'pigeon-spring',
-            version    : '1.1.0',
+            version    : '2.0.0',
             description: 'Spring supported.'
     ] as LinkedHashMap
     starterAbstract = [
             artifact   : 'pigeon-spring-starter-abstract',
-            version    : '1.1.0',
+            version    : '2.0.0',
             description: 'Spring boot supported abstractly.'
     ] as LinkedHashMap
     starter = [
             artifact   : 'pigeon-spring-boot-starter',
-            version    : '1.3.0',
+            version    : '2.0.0',
             description: 'Spring boot starter.'
     ] as LinkedHashMap
     starterSimple = [
             artifact   : 'pigeon-spring-boot-starter-simple',
-            version    : '1.0.0',
+            version    : '2.0.0',
             description: 'Spring boot starter simple.'
     ] as LinkedHashMap
     starterSimpleApi = [
             artifact   : 'pigeon-spring-boot-starter-simple-api',
-            version    : '1.0.0',
+            version    : '2.0.0',
             description: 'Spring boot starter simple api.'
     ] as LinkedHashMap
 }

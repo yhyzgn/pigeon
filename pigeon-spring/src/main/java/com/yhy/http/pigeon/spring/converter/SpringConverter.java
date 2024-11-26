@@ -6,7 +6,6 @@ import com.yhy.http.pigeon.internal.converter.JacksonConverter;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.core.env.Environment;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.regex.Pattern;
@@ -33,16 +32,11 @@ public class SpringConverter extends JacksonConverter {
         return new StringPlaceholderConverter<>(environment);
     }
 
-    private static final class StringPlaceholderConverter<T> implements Converter<T, String> {
-        private final Environment environment;
-
-        public StringPlaceholderConverter(Environment environment) {
-            this.environment = environment;
-        }
+    private record StringPlaceholderConverter<T>(Environment environment) implements Converter<T, String> {
 
         @Nullable
         @Override
-        public String convert(T from) throws IOException {
+        public String convert(T from) {
             String text = from.toString();
             // 判断处理 Spring 配置变量 ${xxx.xxx}
             if (Pattern.matches("^\\$\\{\\s*[0-9a-zA-Z\\-_.]+\\s*}$", text)) {

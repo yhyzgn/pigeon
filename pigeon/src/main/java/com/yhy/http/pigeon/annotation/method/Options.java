@@ -7,15 +7,15 @@ import java.lang.annotation.*;
  * e-mail : yhyzgn@gmail.com <br>
  * time   : 2019-09-02 15:52 <br>
  * version: 1.0.0 <br>
- * desc   : post请求 <br>
+ * desc   : options请求 <br>
  * <p>
- * - @POST("/api/post") <br>
- * - String post(); <br>
+ * - @Options("/api/options") <br>
+ * - String options(); <br>
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface POST {
+public @interface Options {
 
     /**
      * api子路径

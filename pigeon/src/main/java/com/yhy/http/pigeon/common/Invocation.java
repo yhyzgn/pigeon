@@ -13,21 +13,10 @@ import java.util.Objects;
  * version: 1.0.0
  * desc   :
  */
-public class Invocation {
-    private final Method method;
-    private final List<?> arguments;
-
+public record Invocation(Method method, List<?> arguments) {
     public Invocation(Method method, List<?> arguments) {
         this.method = method;
         this.arguments = Collections.unmodifiableList(arguments);
-    }
-
-    public Method method() {
-        return method;
-    }
-
-    public List<?> arguments() {
-        return arguments;
     }
 
     @Override

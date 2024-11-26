@@ -3,6 +3,7 @@ package com.yhy.http.pigeon.common;
 import com.yhy.http.pigeon.converter.Converter;
 import com.yhy.http.pigeon.http.request.RequestFactory;
 import com.yhy.http.pigeon.utils.Utils;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -24,6 +25,7 @@ import java.util.Objects;
  * version: 1.0.0
  * desc   : 全世界最老实的人总是踏实肯干
  */
+@Slf4j
 public class OkCall<T> implements Call<T> {
     private final RequestFactory requestFactory;
     private final OkHttpClient.Builder client;
@@ -135,7 +137,7 @@ public class OkCall<T> implements Call<T> {
                 }
 
                 @Override
-                public void onResponse(@NotNull okhttp3.Call call, @NotNull okhttp3.Response rawResponse) throws IOException {
+                public void onResponse(@NotNull okhttp3.Call call, @NotNull okhttp3.Response rawResponse) {
                     Response<T> response;
                     try {
                         response = parseResponse(rawResponse);
@@ -146,7 +148,7 @@ public class OkCall<T> implements Call<T> {
                     try {
                         callback.onResponse(OkCall.this, response);
                     } catch (Throwable t) {
-                        t.printStackTrace();
+                        log.error("", t);
                     }
                 }
 
@@ -154,7 +156,7 @@ public class OkCall<T> implements Call<T> {
                     try {
                         callback.onFailure(OkCall.this, e);
                     } catch (Throwable t) {
-                        t.printStackTrace();
+                        log.error("", t);
                     }
                 }
             });
@@ -195,12 +197,12 @@ public class OkCall<T> implements Call<T> {
     }
 
     private okhttp3.Call createRawCall() {
-        Request request = null;
+        Request request;
         try {
             request = requestFactory.create(client, args);
             return client.build().newCall(request);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("", e);
         }
         return null;
     }
@@ -209,6 +211,7 @@ public class OkCall<T> implements Call<T> {
         ResponseBody rawBody = rawResponse.body();
 
         // Remove the body's source (the only stateful object) so we can pass the response along.
+        assert rawBody != null;
         rawResponse = rawResponse.newBuilder()
                 .body(new NoContentResponseBody(rawBody.contentType(), rawBody.contentLength()))
                 .build();
@@ -262,7 +265,7 @@ public class OkCall<T> implements Call<T> {
         }
 
         @Override
-        public BufferedSource source() {
+        public @NotNull BufferedSource source() {
             throw new IllegalStateException("Cannot read raw response body of a converted body.");
         }
     }
@@ -277,7 +280,7 @@ public class OkCall<T> implements Call<T> {
             this.delegate = delegate;
             this.delegateSource = Okio.buffer(new ForwardingSource(delegate.source()) {
                 @Override
-                public long read(Buffer sink, long byteCount) throws IOException {
+                public long read(@NotNull Buffer sink, long byteCount) throws IOException {
                     try {
                         return super.read(sink, byteCount);
                     } catch (IOException e) {
@@ -299,7 +302,7 @@ public class OkCall<T> implements Call<T> {
         }
 
         @Override
-        public BufferedSource source() {
+        public @NotNull BufferedSource source() {
             return delegateSource;
         }
 

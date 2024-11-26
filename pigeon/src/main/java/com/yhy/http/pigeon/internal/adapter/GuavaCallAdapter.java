@@ -29,27 +29,17 @@ public class GuavaCallAdapter extends CallAdapter.Factory {
         if (getRawType(returnType) != Response.class) {
             return new BodyCallAdapter<>(returnType);
         }
-        Type responseType = getParameterUpperBound(0, (ParameterizedType) returnType);
+        Type responseType = getFirstParameterUpperBound((ParameterizedType) returnType);
         return new ResponseCallAdapter<>(responseType);
     }
 
-    private static final class BodyCallAdapter<R> implements CallAdapter<R, R> {
-        private final Type responseType;
-
-        BodyCallAdapter(Type responseType) {
-            this.responseType = responseType;
-        }
-
-        @Override
-        public Type responseType() {
-            return responseType;
-        }
+    private record BodyCallAdapter<R>(Type responseType) implements CallAdapter<R, R> {
 
         @Override
         public R adapt(Call<R> call, Object[] args) throws Exception {
-            ListenableFuture<R> future = new AbstractFuture<R>() {
+            ListenableFuture<R> future = new AbstractFuture<>() {
                 {
-                    call.enqueue(new Callback<R>() {
+                    call.enqueue(new Callback<>() {
                         @Override
                         public void onResponse(Call<R> call, Response<R> response) {
                             if (response.isSuccessful()) {
@@ -76,23 +66,13 @@ public class GuavaCallAdapter extends CallAdapter.Factory {
         }
     }
 
-    private static final class ResponseCallAdapter<R> implements CallAdapter<R, Response<R>> {
-        private final Type responseType;
-
-        ResponseCallAdapter(Type responseType) {
-            this.responseType = responseType;
-        }
-
-        @Override
-        public Type responseType() {
-            return responseType;
-        }
+    private record ResponseCallAdapter<R>(Type responseType) implements CallAdapter<R, Response<R>> {
 
         @Override
         public Response<R> adapt(Call<R> call, Object[] args) throws Exception {
-            ListenableFuture<Response<R>> future = new AbstractFuture<Response<R>>() {
+            ListenableFuture<Response<R>> future = new AbstractFuture<>() {
                 {
-                    call.enqueue(new Callback<R>() {
+                    call.enqueue(new Callback<>() {
                         @Override
                         public void onResponse(Call<R> call, Response<R> response) {
                             set(response);

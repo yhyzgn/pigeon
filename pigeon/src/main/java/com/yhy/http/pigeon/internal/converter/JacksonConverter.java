@@ -60,19 +60,10 @@ public class JacksonConverter extends Converter.Factory {
         return new StringConverter<>();
     }
 
-    private static final class JacksonRequestBodyConverter<T> implements Converter<T, RequestBody> {
+    private record JacksonRequestBodyConverter<T>(ObjectMapper mapper, JavaType type) implements Converter<T, RequestBody> {
         private static final MediaType MEDIA_TYPE = MediaType.get("application/json; charset=UTF-8");
         private static final Charset UTF_8 = StandardCharsets.UTF_8;
 
-        private final ObjectMapper mapper;
-        private final JavaType type;
-
-        private JacksonRequestBodyConverter(ObjectMapper mapper, JavaType type) {
-            this.mapper = mapper;
-            this.type = type;
-        }
-
-        @SuppressWarnings("deprecation")
         @Override
         public @NotNull RequestBody convert(T from) throws IOException {
             Buffer buffer = new Buffer();
@@ -80,18 +71,11 @@ public class JacksonConverter extends Converter.Factory {
             JsonGenerator gen = mapper.writer().forType(type).createGenerator(writer);
             mapper.writeValue(gen, from);
             gen.close();
-            return RequestBody.create(MEDIA_TYPE, buffer.readByteArray());
+            return RequestBody.create(buffer.readByteArray(), MEDIA_TYPE);
         }
     }
 
-    private static final class JacksonResponseBodyConverter<T> implements Converter<ResponseBody, T> {
-        private final ObjectMapper mapper;
-        private final JavaType type;
-
-        private JacksonResponseBodyConverter(ObjectMapper mapper, JavaType type) {
-            this.mapper = mapper;
-            this.type = type;
-        }
+    private record JacksonResponseBodyConverter<T>(ObjectMapper mapper, JavaType type) implements Converter<ResponseBody, T> {
 
         @SuppressWarnings("unchecked")
         @Nullable
@@ -109,7 +93,7 @@ public class JacksonConverter extends Converter.Factory {
 
         @Nullable
         @Override
-        public String convert(T from) throws IOException {
+        public String convert(T from) {
             return from.toString();
         }
     }

@@ -3,6 +3,7 @@ package com.yhy.http.pigeon.common;
 import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -19,10 +20,13 @@ public class SystemClock {
 
     private final long period;
     private final AtomicLong now;
+    private final ThreadFactory factory;
 
     private SystemClock(long period) {
         this.period = period;
         this.now = new AtomicLong(System.currentTimeMillis());
+        this.factory = Thread.ofVirtual().name(THREAD_NAME, 0).factory();
+        
         schedule();
     }
 
@@ -35,11 +39,7 @@ public class SystemClock {
     }
 
     private void schedule() {
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(runnable -> {
-            Thread thread = new Thread(runnable, THREAD_NAME);
-            thread.setDaemon(true);
-            return thread;
-        });
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(factory);
         executor.scheduleAtFixedRate(() -> {
             now.set(System.currentTimeMillis());
         }, period, period, TimeUnit.MILLISECONDS);

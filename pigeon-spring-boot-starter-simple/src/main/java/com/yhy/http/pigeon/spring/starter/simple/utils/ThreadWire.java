@@ -1,16 +1,18 @@
 package com.yhy.http.pigeon.spring.starter.simple.utils;
 
+import com.alibaba.ttl.TransmittableThreadLocal;
+
 import java.lang.ref.WeakReference;
 
 public class ThreadWire<T> {
-    // 弱引用的ThreadLocal
+    // 弱引用的 ThreadLocal
     private WeakReference<ThreadLocal<T>> ref;
 
     /**
      * 无参数构造方法
      */
     public ThreadWire() {
-        ref = new WeakReference<>(new ThreadLocal<>());
+        ref = new WeakReference<>(new TransmittableThreadLocal<>());
     }
 
     /**
@@ -19,7 +21,7 @@ public class ThreadWire<T> {
      * @param t 初始值
      */
     public ThreadWire(T t) {
-        ref = new WeakReference<>(ThreadLocal.withInitial(() -> t));
+        ref = new WeakReference<>(TransmittableThreadLocal.withInitial(() -> t));
     }
 
     /**

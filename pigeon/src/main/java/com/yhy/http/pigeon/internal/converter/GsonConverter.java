@@ -2,6 +2,7 @@ package com.yhy.http.pigeon.internal.converter;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
+import com.google.gson.Strictness;
 import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
@@ -61,19 +62,10 @@ public class GsonConverter extends Converter.Factory {
         return new StringConverter<>();
     }
 
-    private static final class GsonRequestBodyConverter<T> implements Converter<T, RequestBody> {
+    private record GsonRequestBodyConverter<T>(Gson gson, TypeAdapter<T> adapter) implements Converter<T, RequestBody> {
         private static final MediaType MEDIA_TYPE = MediaType.get("application/json; charset=UTF-8");
         private static final Charset UTF_8 = StandardCharsets.UTF_8;
 
-        private final Gson gson;
-        private final TypeAdapter<T> adapter;
-
-        GsonRequestBodyConverter(Gson gson, TypeAdapter<T> adapter) {
-            this.gson = gson;
-            this.adapter = adapter;
-        }
-
-        @SuppressWarnings("deprecation")
         @Override
         public RequestBody convert(T from) throws IOException {
             Buffer buffer = new Buffer();
@@ -81,32 +73,23 @@ public class GsonConverter extends Converter.Factory {
             JsonWriter jsonWriter = gson.newJsonWriter(writer);
             adapter.write(jsonWriter, from);
             jsonWriter.close();
-            return RequestBody.create(MEDIA_TYPE, buffer.readByteArray());
+            return RequestBody.create(buffer.readByteArray(), MEDIA_TYPE);
         }
     }
 
-    private static final class GsonResponseBodyConverter<T> implements Converter<ResponseBody, T> {
-        private final Gson gson;
-        private final TypeAdapter<T> adapter;
-
-        GsonResponseBodyConverter(Gson gson, TypeAdapter<T> adapter) {
-            this.gson = gson;
-            this.adapter = adapter;
-        }
+    private record GsonResponseBodyConverter<T>(Gson gson, TypeAdapter<T> adapter) implements Converter<ResponseBody, T> {
 
         @Nullable
         @Override
         public T convert(ResponseBody from) throws IOException {
             JsonReader jsonReader = gson.newJsonReader(from.charStream());
-            jsonReader.setLenient(true);
-            try {
+            jsonReader.setStrictness(Strictness.LENIENT);
+            try (from) {
                 T result = adapter.read(jsonReader);
                 if (jsonReader.peek() != JsonToken.END_DOCUMENT) {
                     throw new JsonIOException("JSON document was not fully consumed.");
                 }
                 return result;
-            } finally {
-                from.close();
             }
         }
     }
@@ -115,7 +98,7 @@ public class GsonConverter extends Converter.Factory {
 
         @Nullable
         @Override
-        public String convert(T from) throws IOException {
+        public String convert(T from) {
             return from.toString();
         }
     }

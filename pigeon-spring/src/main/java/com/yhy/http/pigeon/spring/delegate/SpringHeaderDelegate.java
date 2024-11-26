@@ -2,7 +2,7 @@ package com.yhy.http.pigeon.spring.delegate;
 
 import com.yhy.http.pigeon.annotation.Header;
 import com.yhy.http.pigeon.delegate.HeaderDelegate;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,14 +15,14 @@ import org.springframework.context.annotation.Configuration;
  * @version 1.0.0
  * @since 1.0.0
  */
+@RequiredArgsConstructor
 @Configuration
 @SuppressWarnings("SpringFacetCodeInspection")
 public class SpringHeaderDelegate implements HeaderDelegate {
-    @Autowired
-    private ApplicationContext context;
+    private final ApplicationContext context;
 
     @Override
-    public <T extends Header.Dynamic> T apply(Class<T> clazz) throws Exception {
+    public <T extends Header.Dynamic> T apply(Class<T> clazz) {
         return context.getBean(clazz);
     }
 }

@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -107,7 +106,7 @@ public class RequestBuilder {
         multipartBuilder.addPart(part);
     }
 
-    public void setBody(RequestBody body) {
+    public void body(RequestBody body) {
         this.body = body;
     }
 
@@ -115,7 +114,6 @@ public class RequestBuilder {
         requestBuilder.tag(cls, value);
     }
 
-    @SuppressWarnings("deprecation")
     public Request.Builder get() {
         HttpUrl.Builder urlBuilder = host.newBuilder();
 
@@ -134,16 +132,12 @@ public class RequestBuilder {
 
         if (Utils.isNotEmpty(queryParamMap)) {
             // 带参数的url
-            queryParamMap.forEach((name, values) -> {
-                values.forEach(val -> urlBuilder.addEncodedQueryParameter(name, val));
-            });
+            queryParamMap.forEach((name, values) -> values.forEach(val -> urlBuilder.addEncodedQueryParameter(name, val)));
         }
         HttpUrl url = urlBuilder.build();
 
         if (null != formBuilder && Utils.isNotEmpty(fieldParamMap)) {
-            fieldParamMap.forEach((name, values) -> {
-                values.forEach(val -> formBuilder.addEncoded(name, val));
-            });
+            fieldParamMap.forEach((name, values) -> values.forEach(val -> formBuilder.addEncoded(name, val)));
         }
 
         if (null == body) {
@@ -153,7 +147,7 @@ public class RequestBuilder {
                 body = multipartBuilder.build();
             } else if (hasBody) {
                 // 如果强行有body，则设置个空body
-                body = RequestBody.create(MediaType.parse("application/json"), new byte[0]);
+                body = RequestBody.create(new byte[0], MediaType.parse("application/json"));
             }
         }
 
@@ -171,12 +165,7 @@ public class RequestBuilder {
     }
 
     private String dispatchEncode(String value, boolean encoded) {
-        try {
-            return encoded ? value : URLEncoder.encode(value, StandardCharsets.UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return encoded ? value : URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
     private static class ContentTypeOverridingRequestBody extends RequestBody {

@@ -5,10 +5,10 @@ import com.yhy.http.pigeon.annotation.Header;
 import com.yhy.http.pigeon.spring.converter.SpringConverter;
 import com.yhy.http.pigeon.spring.delegate.SpringHeaderDelegate;
 import com.yhy.http.pigeon.spring.delegate.SpringInterceptorDelegate;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.Interceptor;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.FactoryBean;
@@ -33,29 +33,42 @@ import java.util.Map;
  * @version 1.0.0
  * @since 1.0.0
  */
+@Slf4j
 public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean, ApplicationContextAware {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PigeonFactoryBean.class);
-
     private ApplicationContext context;
-
     private SpringConverter springConverter;
 
+    @Setter
     private Class<? extends Annotation> pigeonAnnotation;
+    @Setter
     private Class<?> pigeonInterface;
+    @Setter
     private String baseURL;
+    @Setter
     private Map<String, String> header;
+    @Setter
     private List<Class<? extends Interceptor>> interceptors;
+    @Setter
     private List<Class<? extends Interceptor>> netInterceptors;
+    @Setter
     private long timeout;
+    @Setter
     private boolean logging;
+    @Setter
     private boolean shouldHeaderDelegate;
+    @Setter
     private boolean shouldInterceptorDelegate;
+    @Setter
     private Class<? extends SSLSocketFactory> sslSocketFactory;
+    @Setter
     private Class<? extends X509TrustManager> sslTrustManager;
+    @Setter
     private Class<? extends HostnameVerifier> sslHostnameVerifier;
-
+    @Setter
     private List<Class<? extends Header.Dynamic>> globalHeaderList;
+    @Setter
     private List<Class<? extends Interceptor>> globalInterceptorList;
+    @Setter
     private List<Class<? extends Interceptor>> globalNetInterceptorList;
 
     @Override
@@ -65,7 +78,7 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
     }
 
     @Override
-    public Object getObject() throws Exception {
+    public Object getObject() {
         return getTarget();
     }
 
@@ -75,20 +88,20 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         Assert.notNull(pigeonAnnotation, "The returned value of enableAnnotation() can not be null");
         String annotationClassName = pigeonAnnotation.getSimpleName();
         Assert.hasText(baseURL, "@" + annotationClassName + " [baseURL] can not be empty or null.");
-        LOGGER.info("@" + annotationClassName + " properties for [{}] set complete.", pigeonInterface);
+        log.info("@{} properties for [{}] set complete.", annotationClassName, pigeonInterface);
     }
 
     @SuppressWarnings("unchecked")
     <T> T getTarget() {
         Pigeon.Builder builder = new Pigeon.Builder()
-            .baseURL(baseURL)
-            .logging(logging)
-            .addConverterFactory(springConverter)
-            .methodReuseEnabled(false);
+                .baseURL(baseURL)
+                .logging(logging)
+                .addConverterFactory(springConverter)
+                .methodReuseEnabled(false);
 
         SpringHeaderDelegate headerDelegate = context.getBean(SpringHeaderDelegate.class);
         SpringInterceptorDelegate interceptorDelegate = context.getBean(SpringInterceptorDelegate.class);
@@ -98,7 +111,7 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
                 try {
                     builder.header(headerDelegate.apply(item));
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("", e);
                 }
             });
         }
@@ -108,7 +121,7 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
                 try {
                     builder.interceptor(interceptorDelegate.apply(item));
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("", e);
                 }
             });
         }
@@ -118,7 +131,7 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
                 try {
                     builder.netInterceptor(interceptorDelegate.apply(item));
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("", e);
                 }
             });
         }
@@ -156,69 +169,5 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
         } catch (NoSuchBeanDefinitionException e) {
             return BeanUtils.instantiateClass(clazz);
         }
-    }
-
-    public void setPigeonAnnotation(Class<? extends Annotation> pigeonAnnotation) {
-        this.pigeonAnnotation = pigeonAnnotation;
-    }
-
-    public void setPigeonInterface(Class<?> pigeonInterface) {
-        this.pigeonInterface = pigeonInterface;
-    }
-
-    public void setBaseURL(String baseURL) {
-        this.baseURL = baseURL;
-    }
-
-    public void setHeader(Map<String, String> header) {
-        this.header = header;
-    }
-
-    public void setInterceptors(List<Class<? extends Interceptor>> interceptors) {
-        this.interceptors = interceptors;
-    }
-
-    public void setNetInterceptors(List<Class<? extends Interceptor>> netInterceptors) {
-        this.netInterceptors = netInterceptors;
-    }
-
-    public void setTimeout(long timeout) {
-        this.timeout = timeout;
-    }
-
-    public void setLogging(boolean logging) {
-        this.logging = logging;
-    }
-
-    public void setShouldHeaderDelegate(boolean shouldHeaderDelegate) {
-        this.shouldHeaderDelegate = shouldHeaderDelegate;
-    }
-
-    public void setShouldInterceptorDelegate(boolean shouldInterceptorDelegate) {
-        this.shouldInterceptorDelegate = shouldInterceptorDelegate;
-    }
-
-    public void setSslSocketFactory(Class<? extends SSLSocketFactory> sslSocketFactory) {
-        this.sslSocketFactory = sslSocketFactory;
-    }
-
-    public void setSslTrustManager(Class<? extends X509TrustManager> sslTrustManager) {
-        this.sslTrustManager = sslTrustManager;
-    }
-
-    public void setSslHostnameVerifier(Class<? extends HostnameVerifier> sslHostnameVerifier) {
-        this.sslHostnameVerifier = sslHostnameVerifier;
-    }
-
-    public void setGlobalHeaderList(List<Class<? extends Header.Dynamic>> globalHeaderList) {
-        this.globalHeaderList = globalHeaderList;
-    }
-
-    public void setGlobalInterceptorList(List<Class<? extends Interceptor>> globalInterceptorList) {
-        this.globalInterceptorList = globalInterceptorList;
-    }
-
-    public void setGlobalNetInterceptorList(List<Class<? extends Interceptor>> globalNetInterceptorList) {
-        this.globalNetInterceptorList = globalNetInterceptorList;
     }
 }

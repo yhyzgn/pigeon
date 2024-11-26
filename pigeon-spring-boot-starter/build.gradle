@@ -1,8 +1,8 @@
 import java.text.SimpleDateFormat
 
 plugins {
-    id 'org.springframework.boot' version '2.7.11'
-    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
     id "java-library"
     id "maven-publish"
     id "signing"
@@ -11,6 +11,7 @@ plugins {
 apply from: "../ext.gradle"
 
 def rootConfig = rootProject.ext
+def libVersion = rootConfig.lib
 
 group rootConfig.group
 version rootConfig.starter.version
@@ -21,18 +22,19 @@ configurations {
     }
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-autoconfigure'
 
     api project(':pigeon-spring-starter-abstract')
-//    api "${rootConfig.group}:${rootConfig.starterAbstract.artifact}:${rootConfig.starterAbstract.version}"
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+    implementation "org.slf4j:slf4j-api:${libVersion.slf4j}"
+
+    compileOnly "org.projectlombok:lombok:${libVersion.lombok}"
+    annotationProcessor "org.projectlombok:lombok:${libVersion.lombok}"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:${libVersion.junit}"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${libVersion.junit}"
 }
 
 test {
@@ -166,14 +168,14 @@ publishing {
             def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-            credentials {
-                username = ossrhUsername
-                password = ossrhPassword
-            }
+//            credentials {
+//                username = ossrhUsername
+//                password = ossrhPassword
+//            }
         }
     }
 }
 
-signing {
-    sign publishing.publications.mavenJava
-}
+//signing {
+//    sign publishing.publications.mavenJava
+//}

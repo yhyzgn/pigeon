@@ -14,5 +14,10 @@ import java.lang.annotation.*;
 @Documented
 public @interface Host {
 
+    /**
+     * Host 地址
+     *
+     * @return Host 地址
+     */
     String value() default "";
 }

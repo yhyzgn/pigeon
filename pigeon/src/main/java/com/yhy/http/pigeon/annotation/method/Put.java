@@ -7,15 +7,15 @@ import java.lang.annotation.*;
  * e-mail : yhyzgn@gmail.com <br>
  * time   : 2019-09-02 15:52 <br>
  * version: 1.0.0 <br>
- * desc   : delete请求 <br>
+ * desc   : put请求 <br>
  * <p>
- * - @DELETE("/api/delete") <br>
- * - String delete(); <br>
+ * - @Put("/api/put") <br>
+ * - String put(); <br>
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface DELETE {
+public @interface Put {
 
     /**
      * api子路径

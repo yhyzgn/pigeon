@@ -14,6 +14,7 @@ import com.yhy.http.pigeon.http.request.param.ParameterHandler;
 import com.yhy.http.pigeon.internal.delegate.ConstructorHeaderDelegate;
 import com.yhy.http.pigeon.internal.delegate.ConstructorInterceptorDelegate;
 import com.yhy.http.pigeon.utils.Utils;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,7 +36,7 @@ import java.util.regex.Pattern;
  * version: 1.0.0
  * desc   :
  */
-@SuppressWarnings("deprecation")
+@Slf4j
 public class RequestFactory {
     private final Method method;
     private final HttpUrl host;
@@ -98,7 +99,7 @@ public class RequestFactory {
         }
 
         String relUrl = relativeUrl;
-        if(host.uri().getPath().endsWith("/") && relUrl.startsWith("/")) {
+        if (host.uri().getPath().endsWith("/") && relUrl.startsWith("/")) {
             relUrl = relUrl.substring(1);
         }
         RequestBuilder builder = new RequestBuilder(httpMethod, host, relUrl, headers, contentType, hasBody, isForm, isMultipart);
@@ -123,13 +124,7 @@ public class RequestFactory {
         // 动态 header
         if (null != dynamicHeaders) {
             dynamicHeaders.forEach(dynamic -> {
-                String name = dynamic.name();
-                String value = dynamic.value();
-                if (null != name && null != value) {
-                    bld.header(name, value);
-                }
-
-                // 新式动态请求头
+                // 动态请求头
                 Map<String, String> dmh = dynamic.pairs(method);
                 if (null != dmh && !dmh.isEmpty()) {
                     dmh.forEach((k, v) -> {
@@ -156,8 +151,6 @@ public class RequestFactory {
         private final Method method;
         private final Annotation[] methodAnnotations;
         private final Parameter[] parameters;
-        private final Type[] parameterTypes;
-        private final Annotation[][] parameterAnnotations;
         private String httpMethod;
         private boolean hasBody;
         private final okhttp3.Headers.Builder headersBuilder;
@@ -174,12 +167,13 @@ public class RequestFactory {
         private final List<Header.Dynamic> dynamicHeaders;
 
         Builder(Pigeon pigeon, Method method) {
+            Type[] parameterTypes = method.getGenericParameterTypes();
+            Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+
             this.pigeon = pigeon;
             this.method = method;
             this.methodAnnotations = method.getAnnotations();
             this.parameters = method.getParameters();
-            this.parameterTypes = method.getGenericParameterTypes();
-            this.parameterAnnotations = method.getParameterAnnotations();
             this.headersBuilder = new okhttp3.Headers.Builder();
             this.dynamicHeaders = new ArrayList<>();
             this.netInterceptors = new ArrayList<>();
@@ -191,14 +185,14 @@ public class RequestFactory {
                 parseMethodAnnotation(annotation);
             }
             if (httpMethod == null) {
-                throw Utils.methodError(method, "HTTP method annotation is required (e.g., @GET, @POST, etc.).");
+                throw Utils.methodError(method, "HTTP method annotation is required (e.g., @Get, @Post, etc.).");
             }
             if (!hasBody) {
                 if (isMultipart) {
-                    throw Utils.methodError(method, "Multipart can only be specified on HTTP methods with request body (e.g., @POST).");
+                    throw Utils.methodError(method, "Multipart can only be specified on HTTP methods with request body (e.g., @Post).");
                 }
                 if (isForm) {
-                    throw Utils.methodError(method, "Form can only be specified on HTTP methods with request body (e.g., @POST).");
+                    throw Utils.methodError(method, "Form can only be specified on HTTP methods with request body (e.g., @Post).");
                 }
             }
 
@@ -218,7 +212,7 @@ public class RequestFactory {
             Type type = parameter.getParameterizedType();
 
             ParameterHandler<?> handler = null;
-            if (null != annotations && annotations.length > 0) {
+            if (annotations.length > 0) {
                 for (Annotation annotation : annotations) {
                     if (null != handler) {
                         throw Utils.parameterError(method, index, "Multiple param annotations found, but only one allowed.");
@@ -249,11 +243,10 @@ public class RequestFactory {
                 } else {
                     throw Utils.parameterError(method, index, "@Url must be okhttp3.HttpUrl, String, java.net.URI type.");
                 }
-            } else if (annotation instanceof Path) {
+            } else if (annotation instanceof Path path) {
                 if (relativeUrl == null) {
                     throw Utils.parameterError(method, index, "@Path can only be used with relative url on @%s", httpMethod);
                 }
-                Path path = (Path) annotation;
                 String name = path.value();
                 if (Utils.isEmpty(name)) {
                     // 如果未指定name，则以参数名称为准
@@ -262,18 +255,16 @@ public class RequestFactory {
                 validatePathName(index, name);
                 Converter<?, String> converter = pigeon.stringConverter(type, annotations);
                 return new ParameterHandler.Path<>(method, index, name, path.defaultValue(), path.encoded(), converter);
-            } else if (annotation instanceof Query) {
-                Query query = (Query) annotation;
+            } else if (annotation instanceof Query query) {
                 String name = query.value();
                 if (Utils.isEmpty(name)) {
                     name = parameter.getName();
                 }
                 return parseParameterQuery(type, name, query.defaultValue(), query.encoded(), index, annotations);
-            } else if (annotation instanceof Field) {
+            } else if (annotation instanceof Field field) {
                 if (!isForm) {
                     throw Utils.parameterError(method, index, "@Field parameters can only be used with form encoding.");
                 }
-                Field field = (Field) annotation;
                 String name = field.value();
                 if (Utils.isEmpty(name)) {
                     name = parameter.getName();
@@ -282,10 +273,9 @@ public class RequestFactory {
 
                 Class<?> rawType = Utils.getRawType(type);
                 if (Iterable.class.isAssignableFrom(rawType)) {
-                    if (!(type instanceof ParameterizedType)) {
+                    if (!(type instanceof ParameterizedType parameterizedType)) {
                         throw Utils.parameterError(method, index, rawType.getSimpleName() + " must include generic type (e.g., " + rawType.getSimpleName() + "<String>)");
                     }
-                    ParameterizedType parameterizedType = (ParameterizedType) type;
                     Type iterableType = Utils.getParameterUpperBound(0, parameterizedType);
                     Converter<?, String> converter = pigeon.stringConverter(iterableType, annotations);
                     return new ParameterHandler.Field<>(name, field.defaultValue(), encoded, converter).iterable();
@@ -302,11 +292,10 @@ public class RequestFactory {
                         throw Utils.parameterError(method, index, "@Field Map parameter type must be Map.");
                     }
                     Type mapType = Utils.getSupertype(type, rawParameterType, Map.class);
-                    if (!(mapType instanceof ParameterizedType)) {
+                    if (!(mapType instanceof ParameterizedType parameterizedType)) {
                         throw Utils.parameterError(method, index, "Map must include generic types (e.g., Map<String, Object>)");
                     }
 
-                    ParameterizedType parameterizedType = (ParameterizedType) mapType;
                     Type keyType = Utils.getParameterUpperBound(0, parameterizedType);
                     if (String.class != keyType) {
                         throw Utils.parameterError(method, index, "@Field Map keys must be of type String: " + keyType);
@@ -318,15 +307,14 @@ public class RequestFactory {
                     Converter<?, String> converter = pigeon.stringConverter(type, annotations);
                     return new ParameterHandler.Field<>(name, field.defaultValue(), encoded, converter);
                 }
-            } else if (annotation instanceof Header) {
-                String name = ((Header) annotation).value();
+            } else if (annotation instanceof Header header) {
+                String name = header.value();
 
                 Class<?> rawType = Utils.getRawType(type);
                 if (Iterable.class.isAssignableFrom(rawType)) {
-                    if (!(type instanceof ParameterizedType)) {
+                    if (!(type instanceof ParameterizedType parameterizedType)) {
                         throw Utils.parameterError(method, index, rawType.getSimpleName() + " must include generic type (e.g., " + rawType.getSimpleName() + "<String>)");
                     }
-                    ParameterizedType parameterizedType = (ParameterizedType) type;
                     Type iterableType = Utils.getParameterUpperBound(0, parameterizedType);
                     Converter<?, String> converter = pigeon.stringConverter(iterableType, annotations);
                     return new ParameterHandler.Header<>(name, converter).iterable();
@@ -340,11 +328,10 @@ public class RequestFactory {
                         throw Utils.parameterError(method, index, "@Header Map parameter type must be Map.");
                     }
                     Type mapType = Utils.getSupertype(type, rawParameterType, Map.class);
-                    if (!(mapType instanceof ParameterizedType)) {
+                    if (!(mapType instanceof ParameterizedType parameterizedType)) {
                         throw Utils.parameterError(method, index, "Map must include generic types (e.g., Map<String, Object>)");
                     }
 
-                    ParameterizedType parameterizedType = (ParameterizedType) mapType;
                     Type keyType = Utils.getParameterUpperBound(0, parameterizedType);
                     if (String.class != keyType) {
                         throw Utils.parameterError(method, index, "@Header Map keys must be of type String: " + keyType);
@@ -356,12 +343,11 @@ public class RequestFactory {
                     Converter<?, String> converter = pigeon.stringConverter(type, annotations);
                     return new ParameterHandler.Header<>(name, converter);
                 }
-            } else if (annotation instanceof Part) {
+            } else if (annotation instanceof Part part) {
                 if (!isMultipart) {
                     throw Utils.parameterError(method, index, "@Part parameters can only be used with multipart encoding.");
                 }
 
-                Part part = (Part) annotation;
                 String name = part.value();
                 String encoding = part.encoding();
 
@@ -369,10 +355,9 @@ public class RequestFactory {
                 if (Utils.isEmpty(name)) {
                     // 未指定name
                     if (Iterable.class.isAssignableFrom(rawType)) {
-                        if (!(type instanceof ParameterizedType)) {
+                        if (!(type instanceof ParameterizedType parameterizedType)) {
                             throw Utils.parameterError(method, index, rawType.getSimpleName() + " must include generic type (e.g., " + rawType.getSimpleName() + "<String>)");
                         }
-                        ParameterizedType parameterizedType = (ParameterizedType) type;
                         Type iterableType = Utils.getParameterUpperBound(0, parameterizedType);
                         if (!MultipartBody.Part.class.isAssignableFrom(Utils.getRawType(iterableType))) {
                             throw Utils.parameterError(method, index, "@Part annotation must supply a name or use MultipartBody.Part parameter type.");
@@ -392,11 +377,10 @@ public class RequestFactory {
                             throw Utils.parameterError(method, index, "@Part Map parameter type must be Map.");
                         }
                         Type mapType = Utils.getSupertype(type, rawParameterType, Map.class);
-                        if (!(mapType instanceof ParameterizedType)) {
+                        if (!(mapType instanceof ParameterizedType parameterizedType)) {
                             throw Utils.parameterError(method, index, "Map must include generic types (e.g., Map<String, Object>)");
                         }
 
-                        ParameterizedType parameterizedType = (ParameterizedType) mapType;
                         Type keyType = Utils.getParameterUpperBound(0, parameterizedType);
                         if (String.class != keyType) {
                             throw Utils.parameterError(method, index, "@Part Map keys must be of type String: " + keyType);
@@ -414,10 +398,9 @@ public class RequestFactory {
                 } else {
                     okhttp3.Headers headers = okhttp3.Headers.of("Content-Disposition", "form-data; name=\"" + name + "\"", "Content-Transfer-Encoding", part.encoding());
                     if (Iterable.class.isAssignableFrom(rawType)) {
-                        if (!(type instanceof ParameterizedType)) {
+                        if (!(type instanceof ParameterizedType parameterizedType)) {
                             throw Utils.parameterError(method, index, rawType.getSimpleName() + " must include generic type (e.g., " + rawType.getSimpleName() + "<String>)");
                         }
-                        ParameterizedType parameterizedType = (ParameterizedType) type;
                         Type iterableType = Utils.getParameterUpperBound(0, parameterizedType);
                         if (MultipartBody.Part.class.isAssignableFrom(Utils.getRawType(iterableType))) {
                             throw Utils.parameterError(method, index, "@Part parameters using the MultipartBody.Part must not include a part name in the annotation.");
@@ -439,11 +422,10 @@ public class RequestFactory {
                             throw Utils.parameterError(method, index, "@Part Map parameter type must be Map.");
                         }
                         Type mapType = Utils.getSupertype(type, rawParameterType, Map.class);
-                        if (!(mapType instanceof ParameterizedType)) {
+                        if (!(mapType instanceof ParameterizedType parameterizedType)) {
                             throw Utils.parameterError(method, index, "Map must include generic types (e.g., Map<String, Object>)");
                         }
 
-                        ParameterizedType parameterizedType = (ParameterizedType) mapType;
                         Type keyType = Utils.getParameterUpperBound(0, parameterizedType);
                         if (String.class != keyType) {
                             throw Utils.parameterError(method, index, "@Part Map keys must be of type String: " + keyType);
@@ -470,7 +452,7 @@ public class RequestFactory {
                 Class<?> tagType = Utils.getRawType(type);
                 for (int i = index - 1; i >= 0; i--) {
                     ParameterHandler<?> otherHandler = parameterHandlers[i];
-                    if (otherHandler instanceof ParameterHandler.Tag && ((ParameterHandler.Tag) otherHandler).clazz.equals(tagType)) {
+                    if (otherHandler instanceof ParameterHandler.Tag<?> parameterTag && parameterTag.clazz.equals(tagType)) {
                         throw Utils.parameterError(method, index, "@Tag type " + tagType.getName() + " is duplicate of parameter #" + (i + 1) + " and would always overwrite its value.");
                     }
                 }
@@ -482,10 +464,9 @@ public class RequestFactory {
         private ParameterHandler<?> parseParameterQuery(Type type, String name, String defaultValue, boolean encoded, int index, Annotation[] annotations) {
             Class<?> rawType = Utils.getRawType(type);
             if (Iterable.class.isAssignableFrom(rawType)) {
-                if (!(type instanceof ParameterizedType)) {
+                if (!(type instanceof ParameterizedType parameterizedType)) {
                     throw Utils.parameterError(method, index, rawType.getSimpleName() + " must include generic type (e.g., " + rawType.getSimpleName() + "<String>)");
                 }
-                ParameterizedType parameterizedType = (ParameterizedType) type;
                 Type iterableType = Utils.getParameterUpperBound(0, parameterizedType);
                 Converter<?, String> converter = pigeon.stringConverter(iterableType, annotations);
                 return new ParameterHandler.Query<>(name, defaultValue, encoded, converter).iterable();
@@ -495,10 +476,9 @@ public class RequestFactory {
                 return new ParameterHandler.Query<>(name, defaultValue, encoded, converter).array();
             } else if (Map.class.isAssignableFrom(rawType)) {
                 Type mapType = Utils.getSupertype(type, rawType, Map.class);
-                if (!(mapType instanceof ParameterizedType)) {
+                if (!(mapType instanceof ParameterizedType parameterizedType)) {
                     throw Utils.parameterError(method, index, "Map must include generic types (e.g., Map<String, Object>)");
                 }
-                ParameterizedType parameterizedType = (ParameterizedType) mapType;
                 Type keyType = Utils.getParameterUpperBound(0, parameterizedType);
                 if (String.class != keyType) {
                     throw Utils.parameterError(method, index, "@Query Map keys must be of type String: " + keyType);
@@ -513,22 +493,22 @@ public class RequestFactory {
         }
 
         private void parseMethodAnnotation(Annotation annotation) {
-            if (annotation instanceof GET) {
-                parseHttpMethodAndPath("GET", ((GET) annotation).value(), false);
-            } else if (annotation instanceof POST) {
-                parseHttpMethodAndPath("POST", ((POST) annotation).value(), true);
-            } else if (annotation instanceof DELETE) {
-                parseHttpMethodAndPath("DELETE", ((DELETE) annotation).value(), false);
-            } else if (annotation instanceof HEAD) {
-                parseHttpMethodAndPath("HEAD", ((HEAD) annotation).value(), false);
-            } else if (annotation instanceof OPTIONS) {
-                parseHttpMethodAndPath("OPTIONS", ((OPTIONS) annotation).value(), false);
-            } else if (annotation instanceof PATCH) {
-                parseHttpMethodAndPath("PATCH", ((PATCH) annotation).value(), true);
-            } else if (annotation instanceof PUT) {
-                parseHttpMethodAndPath("PUT", ((PUT) annotation).value(), true);
-            } else if (annotation instanceof TRACE) {
-                parseHttpMethodAndPath("TRACE", ((TRACE) annotation).value(), false);
+            if (annotation instanceof Get) {
+                parseHttpMethodAndPath("Get", ((Get) annotation).value(), false);
+            } else if (annotation instanceof Post) {
+                parseHttpMethodAndPath("Post", ((Post) annotation).value(), true);
+            } else if (annotation instanceof Delete) {
+                parseHttpMethodAndPath("Delete", ((Delete) annotation).value(), false);
+            } else if (annotation instanceof Head) {
+                parseHttpMethodAndPath("Head", ((Head) annotation).value(), false);
+            } else if (annotation instanceof Options) {
+                parseHttpMethodAndPath("Options", ((Options) annotation).value(), false);
+            } else if (annotation instanceof Patch) {
+                parseHttpMethodAndPath("Patch", ((Patch) annotation).value(), true);
+            } else if (annotation instanceof Put) {
+                parseHttpMethodAndPath("Put", ((Put) annotation).value(), true);
+            } else if (annotation instanceof Trace) {
+                parseHttpMethodAndPath("Trace", ((Trace) annotation).value(), false);
             } else if (annotation instanceof Header) {
                 parseHeader((Header) annotation);
             } else if (annotation instanceof Headers) {
@@ -582,7 +562,7 @@ public class RequestFactory {
                 // 先检查value
                 if (Utils.isNotEmpty(header.value())) {
                     int index = header.value().indexOf(":");
-                    if (index <= 0 || ":".equals(header.value())) {
+                    if (index <= 0 || Objects.equals(":", header.value())) {
                         throw Utils.methodError(method, "@Header value must be in the form \"Name: Value\". Found: \"%s\"", header.value());
                     }
                     headerName = header.value().substring(0, index).trim();
@@ -595,14 +575,7 @@ public class RequestFactory {
                     }
                     try {
                         Header.Dynamic headerDynamic = delegate.apply(pairClass);
-                        headerName = headerDynamic.name();
-                        headerValue = headerDynamic.value();
-
-                        if (null != headerName && null != headerValue) {
-                            headersBuilder.add(headerName, headerValue);
-                        }
-
-                        // 新式动态请求头
+                        // 动态请求头
                         Map<String, String> dmh = headerDynamic.pairs(method);
                         if (null != dmh && !dmh.isEmpty()) {
                             dmh.forEach((k, v) -> {
@@ -633,7 +606,7 @@ public class RequestFactory {
                 try {
                     headerValue = converter.convert(headerValue);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("", e);
                 }
                 if (null != headerValue) {
                     headersBuilder.add(headerName, headerValue);

@@ -27,7 +27,7 @@ public abstract class ParameterHandler<T> {
     public abstract void apply(RequestBuilder builder, @Nullable T value) throws IOException;
 
     public final ParameterHandler<Iterable<T>> iterable() {
-        return new ParameterHandler<Iterable<T>>() {
+        return new ParameterHandler<>() {
             @Override
             public void apply(RequestBuilder builder, @Nullable Iterable<T> values) throws IOException {
                 if (values == null) return; // Skip null values.
@@ -39,12 +39,12 @@ public abstract class ParameterHandler<T> {
     }
 
     public final ParameterHandler<Object> array() {
-        return new ParameterHandler<Object>() {
+        return new ParameterHandler<>() {
             @Override
             public void apply(RequestBuilder builder, @Nullable Object values) throws IOException {
                 if (values == null) return; // Skip null values.
                 for (int i = 0, size = Array.getLength(values); i < size; i++) {
-                    //noinspection unchecked
+                    // noinspection unchecked
                     ParameterHandler.this.apply(builder, (T) Array.get(values, i));
                 }
             }
@@ -61,7 +61,7 @@ public abstract class ParameterHandler<T> {
         }
 
         @Override
-        public void apply(RequestBuilder builder, @Nullable Object value) throws IOException {
+        public void apply(RequestBuilder builder, @Nullable Object value) {
             if (null == value) {
                 throw Utils.parameterError(method, index, "@Url parameter is null.");
             }
@@ -392,7 +392,7 @@ public abstract class ParameterHandler<T> {
                 throw Utils.parameterError(method, index, "Body parameter value must not be null.");
             }
             RequestBody body = converter.convert(value);
-            builder.setBody(body);
+            builder.body(body);
         }
     }
 

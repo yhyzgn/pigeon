@@ -9,10 +9,10 @@ import java.lang.annotation.*;
  * version: 1.0.0 <br>
  * desc   : URL 参数 <br>
  * <p>
- * - @GET("/api/get") <br>
+ * - @Get("/api/get") <br>
  * - Map&lt;String, Object&gt; get(@Query String name, int age, @Query("remark") String ext); <br>
  * <p>
- * - @GET("/api/get") <br>
+ * - @Get("/api/get") <br>
  * - Map&lt;String, Object&gt; get(@Header Map&lt;String, Object&gt; header, @Query Map&lt;String, Object&gt; params); <br>
  */
 @Target(ElementType.PARAMETER)

@@ -4,10 +4,9 @@ import com.yhy.http.pigeon.annotation.Header;
 import com.yhy.http.pigeon.internal.ssl.VoidSSLHostnameVerifier;
 import com.yhy.http.pigeon.internal.ssl.VoidSSLSocketFactory;
 import com.yhy.http.pigeon.internal.ssl.VoidSSLX509TrustManager;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.Interceptor;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -46,9 +45,8 @@ import java.util.stream.Stream;
  * @version 1.0.0
  * @since 1.0.0
  */
+@Slf4j
 public abstract class AbstractPigeonAutoRegister implements ImportBeanDefinitionRegistrar, ResourceLoaderAware, EnvironmentAware {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPigeonAutoRegister.class);
-
     protected Environment environment;
     protected ResourceLoader resourceLoader;
 
@@ -109,11 +107,9 @@ public abstract class AbstractPigeonAutoRegister implements ImportBeanDefinition
 
     private void registerDefaultConfiguration(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
         Map<String, Object> attributes = metadata.getAnnotationAttributes(enableAnnotation.getCanonicalName());
-        LOGGER.info("Loading global configuration for @" + pigeonAnnotation.getSimpleName() + " from @" + enableAnnotation.getSimpleName() + ": {}", attributes);
+        log.info("Loading global configuration for @{} from @{}: {}", pigeonAnnotation.getSimpleName(), enableAnnotation.getSimpleName(), attributes);
         if (!CollectionUtils.isEmpty(attributes)) {
-            attributes.forEach((name, value) -> {
-                LOGGER.debug("Loaded global configuration for @" + pigeonAnnotation.getSimpleName() + " from @" + enableAnnotation.getSimpleName() + " {} = {}", name, value);
-            });
+            attributes.forEach((name, value) -> log.debug("Loaded global configuration for @{} from @{} {} = {}", pigeonAnnotation.getSimpleName(), enableAnnotation.getSimpleName(), name, value));
             // 加载...
             // 这里是全局配置
             AnnotationAttributes[] annotationAttributes = (AnnotationAttributes[]) attributes.get("interceptor");
@@ -129,7 +125,7 @@ public abstract class AbstractPigeonAutoRegister implements ImportBeanDefinition
             sslTrustManager = getSSLTrustManager(attributes);
             sslHostnameVerifier = getSSLHostnameVerifier(attributes);
         }
-        LOGGER.info("The global configuration for @" + pigeonAnnotation.getSimpleName() + " from @" + enableAnnotation.getSimpleName() + " loaded.");
+        log.info("The global configuration for @{} from @{} loaded.", pigeonAnnotation.getSimpleName(), enableAnnotation.getSimpleName());
     }
 
     private void registerHttpAgents(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
@@ -141,12 +137,11 @@ public abstract class AbstractPigeonAutoRegister implements ImportBeanDefinition
         for (String pkg : basePackages) {
             Set<BeanDefinition> candidates = scanner.findCandidateComponents(pkg);
             for (BeanDefinition candidate : candidates) {
-                if (candidate instanceof AnnotatedBeanDefinition) {
-                    AnnotatedBeanDefinition definition = (AnnotatedBeanDefinition) candidate;
+                if (candidate instanceof AnnotatedBeanDefinition definition) {
                     AnnotationMetadata meta = definition.getMetadata();
                     Assert.isTrue(meta.isInterface(), "@" + pigeonAnnotation.getSimpleName() + " can only be specified on an interface.");
                     Map<String, Object> attrs = meta.getAnnotationAttributes(pigeonAnnotation.getCanonicalName());
-                    LOGGER.info("Scanning @" + pigeonAnnotation.getSimpleName() + " candidate [{}], attrs = {}", candidate.getBeanClassName(), attrs);
+                    log.info("Scanning @{} candidate [{}], attrs = {}", pigeonAnnotation.getSimpleName(), candidate.getBeanClassName(), attrs);
 
                     registerHttpAgent(registry, meta, attrs);
                 }
@@ -216,7 +211,7 @@ public abstract class AbstractPigeonAutoRegister implements ImportBeanDefinition
             if (CollectionUtils.isEmpty(temp)) {
                 temp = header;
             } else if (!CollectionUtils.isEmpty(header)) {
-                header.forEach(temp::put);
+                temp.putAll(header);
             }
             return temp;
         }

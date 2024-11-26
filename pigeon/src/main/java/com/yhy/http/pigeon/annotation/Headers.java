@@ -14,5 +14,10 @@ import java.lang.annotation.*;
 @Documented
 public @interface Headers {
 
+    /**
+     * Headers to be added to the request.
+     *
+     * @return Headers to be added to the request.
+     */
     Header[] value() default {};
 }

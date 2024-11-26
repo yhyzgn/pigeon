@@ -7,15 +7,15 @@ import java.lang.annotation.*;
  * e-mail : yhyzgn@gmail.com <br>
  * time   : 2019-09-02 15:52 <br>
  * version: 1.0.0 <br>
- * desc   : head请求 <br>
+ * desc   : patch请求 <br>
  * <p>
- * - @HEAD("/api/head") <br>
- * - String head(); <br>
+ * - @Patch("/api/patch") <br>
+ * - String patch(); <br>
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface HEAD {
+public @interface Patch {
 
     /**
      * api子路径

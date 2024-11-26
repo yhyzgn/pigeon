@@ -14,5 +14,10 @@ import java.lang.annotation.*;
 @Documented
 public @interface Interceptors {
 
+    /**
+     * Interceptor 数组
+     *
+     * @return Interceptor 数组
+     */
     Interceptor[] value() default {};
 }

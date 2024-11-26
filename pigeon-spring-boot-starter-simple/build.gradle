@@ -1,12 +1,13 @@
 plugins {
-    id 'org.springframework.boot' version '2.7.11'
-    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+    id 'org.springframework.boot'
+    id 'io.spring.dependency-management'
     id "java"
 }
 
 apply from: "../ext.gradle"
 
 def rootConfig = rootProject.ext
+def libVersion = rootConfig.lib
 
 group rootConfig.group
 version rootConfig.starterSimple.version
@@ -23,13 +24,12 @@ dependencies {
     implementation 'com.yhyzgn.jakit:jakit-spring-boot-starter:1.0.6'
 
     implementation project(':pigeon-spring-boot-starter')
-//    implementation "${rootConfig.group}:${rootConfig.starter.artifact}:${rootConfig.starter.version}"
 
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    compileOnly "org.projectlombok:lombok:${libVersion.lombok}"
+    annotationProcessor "org.projectlombok:lombok:${libVersion.lombok}"
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+    testImplementation platform("org.junit:junit-bom:${libVersion.junit}")
+    testImplementation "org.junit.jupiter:junit-jupiter"
 }
 
 test {

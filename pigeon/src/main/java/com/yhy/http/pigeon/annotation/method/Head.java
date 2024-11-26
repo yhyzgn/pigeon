@@ -5,17 +5,17 @@ import java.lang.annotation.*;
 /**
  * author : 颜洪毅 <br>
  * e-mail : yhyzgn@gmail.com <br>
- * time   : 2019-09-02 15:50 <br>
+ * time   : 2019-09-02 15:52 <br>
  * version: 1.0.0 <br>
- * desc   : get请求 <br>
+ * desc   : head请求 <br>
  * <p>
- * - @GET("/api/get") <br>
- * - String get(); <br>
+ * - @Head("/api/head") <br>
+ * - String head(); <br>
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface GET {
+public @interface Head {
 
     /**
      * api子路径

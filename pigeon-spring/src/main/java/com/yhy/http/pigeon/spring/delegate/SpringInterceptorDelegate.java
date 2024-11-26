@@ -1,8 +1,8 @@
 package com.yhy.http.pigeon.spring.delegate;
 
 import com.yhy.http.pigeon.delegate.InterceptorDelegate;
+import lombok.RequiredArgsConstructor;
 import okhttp3.Interceptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,14 +15,14 @@ import org.springframework.context.annotation.Configuration;
  * @version 1.0.0
  * @since 1.0.0
  */
+@RequiredArgsConstructor
 @Configuration
 @SuppressWarnings("SpringFacetCodeInspection")
 public class SpringInterceptorDelegate implements InterceptorDelegate {
-    @Autowired
-    private ApplicationContext context;
+    private final ApplicationContext context;
 
     @Override
-    public <T extends Interceptor> T apply(Class<T> clazz) throws Exception {
+    public <T extends Interceptor> T apply(Class<T> clazz) {
         return context.getBean(clazz);
     }
 }

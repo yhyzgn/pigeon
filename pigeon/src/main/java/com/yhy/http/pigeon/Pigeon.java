@@ -216,30 +216,30 @@ public class Pigeon {
     private OkHttpClient.Builder newBuilder() {
         OkHttpClient ok = client.build();
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
-            .dispatcher(ok.dispatcher())
-            .connectionPool(ok.connectionPool())
-            .eventListenerFactory(ok.eventListenerFactory())
-            .retryOnConnectionFailure(ok.retryOnConnectionFailure())
-            .authenticator(ok.authenticator())
-            .followRedirects(ok.followRedirects())
-            .followSslRedirects(ok.followSslRedirects())
-            .cookieJar(ok.cookieJar())
-            .cache(ok.cache())
-            .dns(ok.dns())
-            .proxy(ok.proxy())
-            .proxySelector(ok.proxySelector())
-            .proxyAuthenticator(ok.proxyAuthenticator())
-            .socketFactory(ok.socketFactory())
-            .connectionSpecs(ok.connectionSpecs())
-            .protocols(ok.protocols())
-            .hostnameVerifier(ok.hostnameVerifier())
-            .certificatePinner(ok.certificatePinner())
-            .callTimeout(Duration.ofMillis(ok.callTimeoutMillis()))
-            .connectTimeout(Duration.ofMillis(ok.connectTimeoutMillis()))
-            .readTimeout(Duration.ofMillis(ok.readTimeoutMillis()))
-            .writeTimeout(Duration.ofMillis(ok.writeTimeoutMillis()))
-            .pingInterval(Duration.ofMillis(ok.pingIntervalMillis()))
-            .certificatePinner(ok.certificatePinner());
+                .dispatcher(ok.dispatcher())
+                .connectionPool(ok.connectionPool())
+                .eventListenerFactory(ok.eventListenerFactory())
+                .retryOnConnectionFailure(ok.retryOnConnectionFailure())
+                .authenticator(ok.authenticator())
+                .followRedirects(ok.followRedirects())
+                .followSslRedirects(ok.followSslRedirects())
+                .cookieJar(ok.cookieJar())
+                .cache(ok.cache())
+                .dns(ok.dns())
+                .proxy(ok.proxy())
+                .proxySelector(ok.proxySelector())
+                .proxyAuthenticator(ok.proxyAuthenticator())
+                .socketFactory(ok.socketFactory())
+                .connectionSpecs(ok.connectionSpecs())
+                .protocols(ok.protocols())
+                .hostnameVerifier(ok.hostnameVerifier())
+                .certificatePinner(ok.certificatePinner())
+                .callTimeout(Duration.ofMillis(ok.callTimeoutMillis()))
+                .connectTimeout(Duration.ofMillis(ok.connectTimeoutMillis()))
+                .readTimeout(Duration.ofMillis(ok.readTimeoutMillis()))
+                .writeTimeout(Duration.ofMillis(ok.writeTimeoutMillis()))
+                .pingInterval(Duration.ofMillis(ok.pingIntervalMillis()))
+                .certificatePinner(ok.certificatePinner());
 
         // 配置 ssl
         if (null != sslSocketFactory && null != sslTrustManager && null != sslHostnameVerifier) {
@@ -249,6 +249,7 @@ public class Pigeon {
         return builder;
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     public static class Builder {
         private HttpUrl host;
         private final List<Interceptor> netInterceptors = new ArrayList<>();
@@ -369,18 +370,6 @@ public class Pigeon {
             return this;
         }
 
-        /**
-         * Reuse parsed method
-         *
-         * @param enabled enabled
-         * @return builder
-         * @deprecated Use {@link #methodReuseEnabled(boolean enabled)} in instead.
-         */
-        @Deprecated
-        public Builder methodCache(boolean enabled) {
-            return methodReuseEnabled(enabled);
-        }
-
         public Builder methodReuseEnabled(boolean enabled) {
             this.methodReuseEnabled = enabled;
             return this;
@@ -391,9 +380,9 @@ public class Pigeon {
                 throw new IllegalStateException("host can not be null.");
             }
 
-            // 默认Adapter和Converter需要添加在最前面，后边需要从后往前查找
-            adapterFactories.add(0, new GuavaCallAdapter());
-            converterFactories.add(0, new JacksonConverter());
+            // 默认 Adapter 和 Converter 需要添加在最前面，后边需要从后往前查找
+            adapterFactories.addFirst(new GuavaCallAdapter());
+            converterFactories.addFirst(new JacksonConverter());
 
             if (null == client) {
                 client = new OkHttpClient.Builder();

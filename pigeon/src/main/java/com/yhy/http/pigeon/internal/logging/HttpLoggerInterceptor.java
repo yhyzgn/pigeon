@@ -26,7 +26,6 @@ public class HttpLoggerInterceptor implements Interceptor {
     private final static Logger LOGGER = LoggerFactory.getLogger(HttpLoggerInterceptor.class);
     private final static SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss E", Locale.getDefault());
 
-    @SuppressWarnings("deprecation")
     @NotNull
     @Override
     public Response intercept(@NotNull Chain chain) throws IOException {
@@ -85,7 +84,7 @@ public class HttpLoggerInterceptor implements Interceptor {
 
             // 重组 Response
             // 须移除 Content-Encoding，因为当前 body 已解压
-            wrapResponse = response.newBuilder().removeHeader("Content-Encoding").body(ResponseBody.create(contentType, content)).build();
+            wrapResponse = response.newBuilder().removeHeader("Content-Encoding").body(ResponseBody.create(content, contentType)).build();
         }
 
         // 结束时间
@@ -108,9 +107,7 @@ public class HttpLoggerInterceptor implements Interceptor {
                 .append(System.lineSeparator())
                 .append("├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
                 .append(System.lineSeparator());
-        lines.lines().forEach(item -> {
-            sb.append("│ ").append(item.msg.contains("{}") ? String.format(item.msg.replace("{}", "%s"), item.args) : item.msg).append(System.lineSeparator());
-        });
+        lines.lines().forEach(item -> sb.append("│ ").append(item.msg.contains("{}") ? String.format(item.msg.replace("{}", "%s"), item.args) : item.msg).append(System.lineSeparator()));
         sb.append("└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────");
         LOGGER.info(sb.toString());
     }
@@ -121,6 +118,7 @@ public class HttpLoggerInterceptor implements Interceptor {
         return buffer.readUtf8();
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static class LogLines {
         private static final List<LogLine> lines = new ArrayList<>();
 

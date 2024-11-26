@@ -1,23 +1,30 @@
 plugins {
+    id "org.zeroturnaround.gradle.jrebel" version "1.2.0" apply false
+    id 'org.springframework.boot' version '3.4.0' apply false
+    id 'io.spring.dependency-management' version '1.1.6' apply false
     id 'java'
 }
 
 apply from: 'ext.gradle'
 
 def rootConfig = rootProject.ext
-
 group rootConfig.group
 version rootConfig.version
 
 allprojects {
-    repositories {
-        mavenLocal()
-        maven { url 'https://maven.aliyun.com/repository/public' }
-        maven { url 'https://maven.aliyun.com/repository/spring' }
-        maven { url 'https://maven.aliyun.com/repository/spring-plugin' }
-        mavenCentral()
-        gradlePluginPortal()
-        google()
+    java {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+
+    configurations.configureEach {
+        exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
+        exclude group: "org.apache.tomcat.embed", module: "tomcat-embed-el"
+        exclude group: "commons-logging", module: "commons-logging"
+    }
+
+    configurations.configureEach {
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
     }
 
     // 编译 JAVA 文件时采用 UTF-8
@@ -26,4 +33,6 @@ allprojects {
             options.encoding = "UTF-8"
         }
     }
+
+    apply plugin: 'org.zeroturnaround.gradle.jrebel'
 }

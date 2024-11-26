@@ -11,10 +11,10 @@ import java.util.Map;
  * version: 1.0.0 <br>
  * desc   : Header 参数 <br>
  * <p>
- * - @GET <br>
+ * - @Get <br>
  * - String get(@Header MapMap&lt;String, ?&gt; header); <br>
  * <p>
- * - @POST <br>
+ * - @Post <br>
  * - @Header(pairName = "Secret", pairValue = "ab12") <br>
  * - MapMap&lt;String, Object&gt; body(@Header MapMap&lt;String, Object&gt; header, @Body MapMap&lt;String, Object&gt; body); <br>
  */
@@ -23,30 +23,47 @@ import java.util.Map;
 @Documented
 @Repeatable(Headers.class)
 public @interface Header {
+
+    /**
+     * Header name
+     *
+     * @return header name
+     */
     String value() default "";
 
+    /**
+     * Header pair name
+     *
+     * @return header pair name
+     */
     String pairName() default "";
 
+    /**
+     * Header pair value
+     *
+     * @return header pair value
+     */
     String pairValue() default "";
 
+    /**
+     * Header support dynamic value
+     *
+     * @return header support dynamic value
+     */
     Class<? extends Dynamic> dynamic() default Dynamic.class;
 
     /**
      * Header support dynamic value
-     * Must disable 'methodCache' of 'Pigeon' by way {@link com.yhy.http.pigeon.Pigeon.Builder#methodCache(boolean)} while using 'Header.Dynamic'
+     * Must disable 'methodCache' of 'Pigeon' by way {@link com.yhy.http.pigeon.Pigeon.Builder#methodReuseEnabled(boolean)} while using 'Header.Dynamic'
      */
     interface Dynamic {
 
-        @Deprecated
-        default String name() {
-            return null;
-        }
-
-        @Deprecated
-        default String value() {
-            return null;
-        }
-
+        /**
+         * Get header pairs dynamically
+         *
+         * @param method method
+         * @return header pairs
+         */
         Map<String, String> pairs(Method method);
     }
 }
