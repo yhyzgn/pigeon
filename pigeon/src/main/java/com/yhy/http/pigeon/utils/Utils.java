@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * author : 颜洪毅
@@ -228,6 +229,16 @@ public class Utils {
         Buffer buffer = new Buffer();
         rawBody.source().readAll(buffer);
         return ResponseBody.create(buffer, rawBody.contentType(), rawBody.contentLength());
+    }
+
+    /**
+     * 判断处理 Spring 配置变量 ${xxx.xxx}
+     *
+     * @param value 配置值
+     * @return true 表示存在 Spring 配置变量，false 表示不存在
+     */
+    public static boolean isSpringPlaceholdersPresent(String value) {
+        return isEmpty(value) && Pattern.matches(".*?\\$\\{\\s*[0-9a-zA-Z\\-_.]+\\s*?}.*", value);
     }
 
     private static Type resolveTypeVariable(Type context, Class<?> contextRawType, TypeVariable<?> unknown) {

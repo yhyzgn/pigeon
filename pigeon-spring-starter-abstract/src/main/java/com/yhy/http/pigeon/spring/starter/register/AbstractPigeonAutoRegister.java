@@ -4,6 +4,7 @@ import com.yhy.http.pigeon.annotation.Header;
 import com.yhy.http.pigeon.internal.ssl.VoidSSLHostnameVerifier;
 import com.yhy.http.pigeon.internal.ssl.VoidSSLSocketFactory;
 import com.yhy.http.pigeon.internal.ssl.VoidSSLX509TrustManager;
+import com.yhy.http.pigeon.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Interceptor;
 import org.jetbrains.annotations.NotNull;
@@ -319,8 +320,10 @@ public abstract class AbstractPigeonAutoRegister implements ImportBeanDefinition
     }
 
     private String resolve(String value) {
-        if (StringUtils.hasText(value)) {
-            return this.environment.resolvePlaceholders(value);
+        // 解析占位符
+        // 判断处理 Spring 配置变量 ${xxx.xxx}
+        if (Utils.isSpringPlaceholdersPresent(value)) {
+            return environment.resolvePlaceholders(value);
         }
         return value;
     }
