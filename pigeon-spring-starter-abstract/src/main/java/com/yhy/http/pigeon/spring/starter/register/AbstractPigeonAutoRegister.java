@@ -174,10 +174,11 @@ public abstract class AbstractPigeonAutoRegister implements ImportBeanDefinition
         builder.addPropertyValue("globalInterceptorList", globalInterceptorList());
         builder.addPropertyValue("globalNetInterceptorList", globalNetInterceptorList());
         builder.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
+        builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+        builder.setPrimary((Boolean) attrs.get("primary"));
 
         AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
         String alias = StringUtils.hasText(qualifier) ? qualifier : StringUtils.hasText(name) ? name : className + pigeonAnnotation.getSimpleName();
-        beanDefinition.setPrimary((Boolean) attrs.get("primary"));
 
         // 注入 bean
         BeanDefinitionHolder holder = new BeanDefinitionHolder(beanDefinition, className, new String[]{alias});
@@ -322,7 +323,7 @@ public abstract class AbstractPigeonAutoRegister implements ImportBeanDefinition
     private String resolve(String value) {
         // 解析占位符
         // 判断处理 Spring 配置变量 ${xxx.xxx}
-        if (Utils.isSpringPlaceholdersPresent(value)) {
+        if (Utils.isPlaceholdersPresent(value)) {
             return environment.resolvePlaceholders(value);
         }
         return value;

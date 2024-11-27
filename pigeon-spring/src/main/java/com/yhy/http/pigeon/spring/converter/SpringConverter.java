@@ -39,7 +39,7 @@ public class SpringConverter extends JacksonConverter {
         public String convert(T from) {
             String text = from.toString();
             // 判断处理 Spring 配置变量 ${xxx.xxx}
-            if (Utils.isSpringPlaceholdersPresent(text)) {
+            if (Utils.isPlaceholdersPresent(text)) {
                 return environment.resolvePlaceholders(text);
             }
             return text;

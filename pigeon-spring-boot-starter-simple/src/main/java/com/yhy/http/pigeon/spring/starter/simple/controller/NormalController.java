@@ -24,12 +24,12 @@ public class NormalController {
     @Autowired
     private NormalAPI normalAPI;
 
-    @Autowired
-    private SnowFlake snowFlake;
+    // @Autowired
+    // private SnowFlake snowFlake;
 
     @GetMapping("/get")
     public Map<String, Object> get() {
-        System.out.println(snowFlake.next());
+        // System.out.println(snowFlake.next());
         System.out.println(CodeUtils.next(6));
         String[] codes = new String[]{"aaa", "bbb", "ccc"};
         return normalAPI.get(codes);

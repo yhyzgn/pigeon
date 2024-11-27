@@ -18,12 +18,6 @@ allprojects {
     }
 
     configurations.configureEach {
-        exclude group: "org.springframework.boot", module: "spring-boot-starter-tomcat"
-        exclude group: "org.apache.tomcat.embed", module: "tomcat-embed-el"
-        exclude group: "commons-logging", module: "commons-logging"
-    }
-
-    configurations.configureEach {
         resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
     }
 

@@ -68,14 +68,16 @@ public class RequestFactory {
         host = Optional.ofNullable(builder.host).orElse(builder.pigeon.host());
         headerMap = builder.pigeon.headers();
 
+        // 拦截器按顺序合并，保证先执行局部拦截器，后执行全局拦截器
         netInterceptors = builder.netInterceptors;
         if (!builder.pigeon.netInterceptors().isEmpty()) {
-            netInterceptors.addAll(0, builder.pigeon.netInterceptors());
+            netInterceptors.addAll(builder.pigeon.netInterceptors().reversed());
         }
         interceptors = builder.interceptors;
         if (!builder.pigeon.interceptors().isEmpty()) {
-            interceptors.addAll(0, builder.pigeon.interceptors());
+            interceptors.addAll(builder.pigeon.interceptors().reversed());
         }
+        // 优先使用局部 header，其次才是全局 header
         dynamicHeaders = builder.dynamicHeaders;
         if (!builder.pigeon.dynamicHeaders().isEmpty()) {
             dynamicHeaders.addAll(0, builder.pigeon.dynamicHeaders());

@@ -12,6 +12,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -161,7 +162,7 @@ public class RequestBuilder {
         return requestBuilder
                 .url(url)
                 .headers(headersBuilder.build())
-                .method(method, body);
+                .method(method.toUpperCase(Locale.ROOT), body);
     }
 
     private String dispatchEncode(String value, boolean encoded) {

@@ -232,13 +232,13 @@ public class Utils {
     }
 
     /**
-     * 判断处理 Spring 配置变量 ${xxx.xxx}
+     * 判断处理配置变量 ${xxx.xxx}
      *
      * @param value 配置值
-     * @return true 表示存在 Spring 配置变量，false 表示不存在
+     * @return true 表示存在置变量，false 表示不存在
      */
-    public static boolean isSpringPlaceholdersPresent(String value) {
-        return isEmpty(value) && Pattern.matches(".*?\\$\\{\\s*[0-9a-zA-Z\\-_.]+\\s*?}.*", value);
+    public static boolean isPlaceholdersPresent(String value) {
+        return !isEmpty(value) && Pattern.matches(".*?\\$\\{\\s*[0-9a-zA-Z\\-_.]+\\s*?}.*", value);
     }
 
     private static Type resolveTypeVariable(Type context, Class<?> contextRawType, TypeVariable<?> unknown) {
