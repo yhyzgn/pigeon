@@ -1,5 +1,5 @@
 ext {
-    group = 'com.yhyzgn.http'
+    group = 'com.yhyzgn.http.jdk8'
     version = '0.0.1-SNAPSHOT'
     url = 'github.com/yhyzgn/pigeon' as Object
     repository = [
