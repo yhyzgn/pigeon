@@ -3,7 +3,8 @@ import java.text.SimpleDateFormat
 plugins {
     id "java-library"
     id "maven-publish"
-    id "signing"
+    id 'org.kordamp.gradle.pomchecker'
+    id 'org.jreleaser'
 }
 
 apply from: "../ext.gradle"
@@ -50,8 +51,6 @@ tasks.withType(GenerateModuleMetadata).configureEach {
     enabled = false
 }
 
-compileJava.dependsOn(clean)
-
 // https://docs.spring.io/spring-boot/docs/current/gradle-plugin/reference/htmlsingle/#packaging-executable.and-plain-archives
 jar {
     enabled true
@@ -88,9 +87,19 @@ javadoc {
     // 编码一定要配置否则直接出错
     options.encoding = "UTF-8"
     options.charSet = "UTF-8"
-    // java9
+    // java9+
     if (JavaVersion.current().isJava9Compatible()) {
         options.addBooleanOption('html5', true)
+    }
+    // java8
+    if (JavaVersion.current().isJava8Compatible()) {
+        tasks.withType(Javadoc).tap {
+            configureEach {
+                // disable the crazy super-strict doclint tool in Java 8
+                // noinspection SpellCheckingInspection
+                options.addStringOption('Xdoclint:none', '-quiet')
+            }
+        }
     }
 }
 
@@ -114,22 +123,6 @@ tasks.register('javadocJar', Jar) {
     archiveClassifier = 'javadoc'
     from javadoc.destinationDir
 }
-
-javadoc {
-    afterEvaluate {
-        configure(options) {
-            encoding "UTF-8"
-            charSet 'UTF-8'
-            author true
-            version true
-            failOnError false
-            links "http://docs.oracle.com/javase/8/docs/api"
-        }
-    }
-}
-
-compileJava.dependsOn(clean, replaceVersion)
-publish.dependsOn(publishToMavenLocal)
 
 java {
     withJavadocJar()
@@ -169,23 +162,64 @@ publishing {
                     developerConnection = "scm:git:https://${rootConfig.url}.git"
                 }
             }
+
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
         }
     }
 
     repositories {
         maven {
-            name "oss"
-            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-//            credentials {
-//                username = ossrhUsername
-//                password = ossrhPassword
-//            }
+            url = layout.buildDirectory.dir('staging-deploy')
         }
     }
 }
 
-//signing {
-//    sign publishing.publications.mavenJava
-//}
+jreleaser {
+    gitRootSearch = true
+    signing(({
+        active = 'ALWAYS'
+        armored = true
+        mode = 'FILE'
+        publicKey = '../ext/public.pgp'
+        secretKey = '../ext/private.pgp'
+    } as Closure<Void>))
+    deploy {
+        maven {
+            mavenCentral(({
+                sonatype {
+                    active = 'ALWAYS'
+                    url = 'https://central.sonatype.com/api/v1/publisher'
+                    stagingRepository('build/staging-deploy')
+                }
+            } as Closure<Void>))
+        }
+    }
+}
+
+jreleaserConfig.dependsOn(build)
+jreleaserFullRelease.dependsOn(publish)
+
+// build 后自动创建 build/jreleaser 文件夹
+tasks.build.doLast {
+    def subDir = file("$buildDir/jreleaser")
+    if (!subDir.exists()) {
+        subDir.mkdirs() // 创建目录及其父目录
+        println "Subdirectory created at: ${subDir.absolutePath}"
+    }
+}
+
+// publish 前自动创建 build/staging-deploy 文件夹
+tasks.publish.doFirst {
+    def subDir = file("$buildDir/staging-deploy")
+    if (!subDir.exists()) {
+        subDir.mkdirs() // 创建目录及其父目录
+        println "Subdirectory created at: ${subDir.absolutePath}"
+    }
+}
