@@ -2,10 +2,6 @@ ext {
     group = 'com.yhyzgn.http.jdk8'
     version = '0.0.1-SNAPSHOT'
     url = 'github.com/yhyzgn/pigeon' as Object
-    repository = [
-            release : 'https://oss.sonatype.org/service/local/staging/deploy/maven2/',
-            snapshot: 'https://oss.sonatype.org/content/repositories/snapshots/'
-    ] as LinkedHashMap
     lib = [
             jetbrains: "26.0.1",
             spring   : "6.2.0",
@@ -21,22 +17,22 @@ ext {
     ]
     pigeon = [
             artifact   : 'pigeon',
-            version    : '2.0.0',
+            version    : '2.0.1',
             description: 'Java http client with OkHttp3.'
     ] as LinkedHashMap
     spring = [
             artifact   : 'pigeon-spring',
-            version    : '2.0.0',
+            version    : '2.0.1',
             description: 'Spring supported.'
     ] as LinkedHashMap
     starterAbstract = [
             artifact   : 'pigeon-spring-starter-abstract',
-            version    : '2.0.0',
+            version    : '2.0.1',
             description: 'Spring boot supported abstractly.'
     ] as LinkedHashMap
     starter = [
             artifact   : 'pigeon-spring-boot-starter',
-            version    : '2.0.0',
+            version    : '2.0.1',
             description: 'Spring boot starter.'
     ] as LinkedHashMap
     starterSimple = [
