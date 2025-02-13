@@ -188,8 +188,8 @@ jreleaser {
         active = 'ALWAYS'
         armored = true
         mode = 'FILE'
-        publicKey = '../ext/public.pgp'
-        secretKey = '../ext/private.pgp'
+        publicKey = "${rootDir}/ext/public.pgp"
+        secretKey = "${rootDir}/ext/private.pgp"
     } as Closure<Void>))
     deploy {
         maven {
@@ -204,23 +204,23 @@ jreleaser {
     }
 }
 
-//jreleaserConfig.dependsOn(build)
-//jreleaserFullRelease.dependsOn(publish)
-//
-//// build 后自动创建 build/jreleaser 文件夹
-//tasks.build.doLast {
-//    def subDir = file("$buildDir/jreleaser")
-//    if (!subDir.exists()) {
-//        subDir.mkdirs() // 创建目录及其父目录
-//        println "Subdirectory created at: ${subDir.absolutePath}"
-//    }
-//}
-//
-//// publish 前自动创建 build/staging-deploy 文件夹
-//tasks.publish.doFirst {
-//    def subDir = file("$buildDir/staging-deploy")
-//    if (!subDir.exists()) {
-//        subDir.mkdirs() // 创建目录及其父目录
-//        println "Subdirectory created at: ${subDir.absolutePath}"
-//    }
-//}
+jreleaserConfig.dependsOn(build)
+jreleaserFullRelease.dependsOn(publish)
+
+// build 后自动创建 build/jreleaser 文件夹
+tasks.build.doLast {
+    def subDir = file("$buildDir/jreleaser")
+    if (!subDir.exists()) {
+        subDir.mkdirs() // 创建目录及其父目录
+        println "Subdirectory created at: ${subDir.absolutePath}"
+    }
+}
+
+// publish 前自动创建 build/staging-deploy 文件夹
+tasks.publish.doFirst {
+    def subDir = file("$buildDir/staging-deploy")
+    if (!subDir.exists()) {
+        subDir.mkdirs() // 创建目录及其父目录
+        println "Subdirectory created at: ${subDir.absolutePath}"
+    }
+}
