@@ -42,7 +42,7 @@ public class HttpLoggerInterceptor implements Interceptor {
 
         LogLines lines = LogLines.start("-- Request starting at {} --", FORMAT.format(new Date())).line("url : {}", url).line("method : {}", method);
 
-        lines.line("").line("-- Request Header --");
+        lines.empty().line("-- Request Header --");
         while (it.hasNext()) {
             String name = it.next();
             String value = headers.get(name);
@@ -150,7 +150,7 @@ public class HttpLoggerInterceptor implements Interceptor {
 
         private LogLine(String msg, Object... args) {
             this.msg = msg;
-            this.args = args;
+            this.args = null == args || args.length == 0 ? null : args;
         }
     }
 }
