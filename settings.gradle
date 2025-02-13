@@ -4,8 +4,10 @@ pluginManagement {
     println "aliyun pluginManagement"
     repositories {
         mavenLocal()
-//        maven { url "https://maven.aliyun.com/repository/gradle-plugin" }
-//        maven { url "https://maven.aliyun.com/repository/spring-plugin" }
+        maven { url 'https://maven.aliyun.com/repository/public/' }
+        maven { url "https://mirrors.cloud.tencent.com/nexus/repository/maven-public/" }
+        maven { url "https://maven.aliyun.com/repository/gradle-plugin" }
+        maven { url "https://maven.aliyun.com/repository/spring-plugin" }
         mavenCentral()
         gradlePluginPortal()
     }
@@ -17,6 +19,7 @@ dependencyResolutionManagement {
     repositories {
         mavenLocal()
         maven { url 'https://maven.aliyun.com/repository/public/' }
+        maven { url "https://mirrors.cloud.tencent.com/nexus/repository/maven-public/" }
         maven { url 'https://maven.aliyun.com/repository/central/' }
         maven { url 'https://maven.aliyun.com/repository/spring/' }
         maven { url 'https://maven.aliyun.com/repository/apache-snapshots/' }

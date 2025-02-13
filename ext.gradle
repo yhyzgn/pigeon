@@ -1,52 +1,52 @@
 ext {
-    group = 'com.yhyzgn.http'
-    version = '0.0.1-SNAPSHOT'
-    url = 'github.com/yhyzgn/pigeon' as Object
+    group = "com.yhyzgn.http"
+    version = "2.0.1"
+    url = "github.com/yhyzgn/pigeon" as Object
     repository = [
-            release : 'https://oss.sonatype.org/service/local/staging/deploy/maven2/',
-            snapshot: 'https://oss.sonatype.org/content/repositories/snapshots/'
+            release : "https://oss.sonatype.org/service/local/staging/deploy/maven2/",
+            snapshot: "https://oss.sonatype.org/content/repositories/snapshots/"
     ] as LinkedHashMap
     lib = [
-            jetbrains: "26.0.1",
-            spring   : "6.2.0",
-            jackson  : "2.18.1",
+            jetbrains: "26.0.2",
+            spring   : "6.2.2",
+            jackson  : "2.18.2",
             okhttp   : "4.12.0",
             slf4j    : "2.0.16",
             logback  : "1.5.12",
             ttl      : "2.14.5",
-            gson     : "2.11.0",
-            guava    : "33.3.1-jre",
+            gson     : "2.12.1",
+            guava    : "33.4.0-jre",
             lombok   : "1.18.36",
-            junit    : "5.11.3",
+            junit    : "5.11.4",
     ]
     pigeon = [
-            artifact   : 'pigeon',
-            version    : '2.0.0',
-            description: 'Java http client with OkHttp3.'
+            artifact   : "pigeon",
+            version    : "${version}",
+            description: "Java http client with OkHttp3."
     ] as LinkedHashMap
     spring = [
-            artifact   : 'pigeon-spring',
-            version    : '2.0.0',
-            description: 'Spring supported.'
+            artifact   : "pigeon-spring",
+            version    : "${version}",
+            description: "Spring supported."
     ] as LinkedHashMap
     starterAbstract = [
-            artifact   : 'pigeon-spring-starter-abstract',
-            version    : '2.0.0',
-            description: 'Spring boot supported abstractly.'
+            artifact   : "pigeon-spring-starter-abstract",
+            version    : "${version}",
+            description: "Spring boot supported abstractly."
     ] as LinkedHashMap
     starter = [
-            artifact   : 'pigeon-spring-boot-starter',
-            version    : '2.0.0',
-            description: 'Spring boot starter.'
+            artifact   : "pigeon-spring-boot-starter",
+            version    : "${version}",
+            description: "Spring boot starter."
     ] as LinkedHashMap
     starterSimple = [
-            artifact   : 'pigeon-spring-boot-starter-simple',
-            version    : '2.0.0',
-            description: 'Spring boot starter simple.'
+            artifact   : "pigeon-spring-boot-starter-simple",
+            version    : "${version}",
+            description: "Spring boot starter simple."
     ] as LinkedHashMap
     starterSimpleApi = [
-            artifact   : 'pigeon-spring-boot-starter-simple-api',
-            version    : '2.0.0',
-            description: 'Spring boot starter simple api.'
+            artifact   : "pigeon-spring-boot-starter-simple-api",
+            version    : "${version}",
+            description: "Spring boot starter simple api."
     ] as LinkedHashMap
 }
