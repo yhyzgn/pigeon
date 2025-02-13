@@ -3,6 +3,7 @@ package com.yhy.http.pigeon.spring.starter.simple.remote;
 import com.yhy.http.pigeon.annotation.Header;
 import com.yhy.http.pigeon.annotation.Interceptor;
 import com.yhy.http.pigeon.annotation.method.Get;
+import com.yhy.http.pigeon.annotation.param.Path;
 import com.yhy.http.pigeon.annotation.param.Query;
 import com.yhy.http.pigeon.spring.starter.annotation.Pigeon;
 import com.yhy.http.pigeon.spring.starter.simple.remote.component.header.TokenHeader;
@@ -20,9 +21,9 @@ import java.util.Map;
 @Pigeon(baseURL = "http://localhost:8888/api/normal")
 public interface NormalAPI {
 
-    @Get("/get")
+    @Get("/get/{id}")
     @Header(dynamic = TokenHeader.class)
     @Header(pairName = "Remote-Property", pairValue = "${remote.header}")
     @Interceptor(TokenInterceptor.class)
-    Map<String, Object> get(@Query("codes") String[] codes);
+    Map<String, Object> get(@Query("codes") String[] codes, @Path("id") @Header("Get-Id") Integer id);
 }

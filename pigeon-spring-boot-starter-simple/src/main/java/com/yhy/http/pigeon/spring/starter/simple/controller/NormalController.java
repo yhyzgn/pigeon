@@ -32,6 +32,6 @@ public class NormalController {
         // System.out.println(snowFlake.next());
         System.out.println(CodeUtils.next(6));
         String[] codes = new String[]{"aaa", "bbb", "ccc"};
-        return normalAPI.get(codes);
+        return normalAPI.get(codes, 9527);
     }
 }

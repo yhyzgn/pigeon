@@ -2,10 +2,7 @@ package com.yhy.http.pigeon.spring.starter.simple.api.controller;
 
 import com.yhy.jakit.util.internal.Maps;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -21,9 +18,9 @@ import java.util.Map;
 @RequestMapping("/api/normal")
 public class NormalController {
 
-    @GetMapping("/get")
-    public Map<String, Object> get(@RequestHeader(value = "Token", required = false) String token, String[] codes) {
-        log.info("token = {}, codes = {}", token, codes);
+    @GetMapping("/get/{id}")
+    public Map<String, Object> get(@RequestHeader(value = "Token", required = false) String token, String[] codes, @RequestHeader("Get-Id") Integer getId, @PathVariable Integer id) {
+        log.info("token = {}, codes = {}, getId = {}, id = {}", token, codes, getId, id);
         return Maps.of("code", 200, "message", "成功", "data", codes);
     }
 }

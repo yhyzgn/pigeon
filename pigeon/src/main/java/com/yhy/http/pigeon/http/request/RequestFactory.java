@@ -1,5 +1,6 @@
 package com.yhy.http.pigeon.http.request;
 
+import com.google.common.collect.Lists;
 import com.yhy.http.pigeon.Pigeon;
 import com.yhy.http.pigeon.annotation.Headers;
 import com.yhy.http.pigeon.annotation.Interceptor;
@@ -28,6 +29,7 @@ import java.net.URI;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * author : 颜洪毅
@@ -47,7 +49,7 @@ public class RequestFactory {
     private final boolean hasBody;
     private final boolean isForm;
     private final boolean isMultipart;
-    private final ParameterHandler<?>[] parameterHandlers;
+    private final List<List<ParameterHandler<?>>> parameterHandlers;
     private final List<okhttp3.Interceptor> netInterceptors;
     private final List<okhttp3.Interceptor> interceptors;
     private final Map<String, String> headerMap;
@@ -94,10 +96,11 @@ public class RequestFactory {
         }
 
         @SuppressWarnings("unchecked")
-        ParameterHandler<Object>[] handlers = (ParameterHandler<Object>[]) parameterHandlers;
+        List<List<ParameterHandler<Object>>> handlers = parameterHandlers.stream().map(it -> it.stream().map(dd -> (ParameterHandler<Object>) dd).collect(Collectors.toList())).toList();
+
         int argsCount = args.length;
-        if (argsCount != handlers.length) {
-            throw new IllegalArgumentException("Argument count (" + argsCount + ") doesn't match expected count (" + handlers.length + ")");
+        if (argsCount != handlers.size()) {
+            throw new IllegalArgumentException("Argument count (" + argsCount + ") doesn't match expected count (" + handlers.size() + ")");
         }
 
         String relUrl = relativeUrl;
@@ -109,7 +112,9 @@ public class RequestFactory {
         List<Object> argsList = new ArrayList<>(argsCount);
         for (int i = 0; i < argsCount; i++) {
             argsList.add(args[i]);
-            handlers[i].apply(builder, args[i]);
+            for (ParameterHandler<Object> handler : handlers.get(i)) {
+                handler.apply(builder, args[i]);
+            }
         }
 
         Request.Builder bld = builder.get().tag(Invocation.class, Invocation.of(method, argsList));
@@ -163,7 +168,7 @@ public class RequestFactory {
         private HttpUrl host;
         private String relativeUrl;
         private Set<String> relativeUrlParamNames;
-        private ParameterHandler<?>[] parameterHandlers;
+        private List<List<ParameterHandler<?>>> parameterHandlers;
         private final List<okhttp3.Interceptor> netInterceptors;
         private final List<okhttp3.Interceptor> interceptors;
         private final List<Header.Dynamic> dynamicHeaders;
@@ -199,35 +204,23 @@ public class RequestFactory {
             }
 
             int paramCount = parameters.length;
-            parameterHandlers = new ParameterHandler<?>[paramCount];
+            parameterHandlers = new ArrayList<>(paramCount);
             for (int i = 0, last = paramCount - 1; i < paramCount; i++) {
-                parameterHandlers[i] = parseParameter(i, i == last);
+                parameterHandlers.add(i, parseParameter(i, i == last));
             }
 
             return new RequestFactory(this);
         }
 
         @Nullable
-        private ParameterHandler<?> parseParameter(int index, boolean last) {
+        private List<ParameterHandler<?>> parseParameter(int index, boolean last) {
             Parameter parameter = parameters[index];
             Annotation[] annotations = parameter.getAnnotations();
             Type type = parameter.getParameterizedType();
-
-            ParameterHandler<?> handler = null;
             if (annotations.length > 0) {
-                for (Annotation annotation : annotations) {
-                    if (null != handler) {
-                        throw Utils.parameterError(method, index, "Multiple param annotations found, but only one allowed.");
-                    }
-                    handler = parseParameterAnnotation(index, type, parameter, annotations, annotation);
-                }
-            } else {
-                handler = parseParameterParameter(index, type, parameter);
+                return Arrays.stream(annotations).map(annotation -> parseParameterAnnotation(index, type, parameter, annotations, annotation)).collect(Collectors.toList());
             }
-            if (null == handler && last) {
-                throw Utils.parameterError(method, index, "No param annotation found.");
-            }
-            return handler;
+            return Lists.newArrayList(parseParameterParameter(index, type, parameter));
         }
 
         private ParameterHandler<?> parseParameterParameter(int index, Type type, Parameter parameter) {
@@ -453,10 +446,12 @@ public class RequestFactory {
             } else if (annotation instanceof Tag) {
                 Class<?> tagType = Utils.getRawType(type);
                 for (int i = index - 1; i >= 0; i--) {
-                    ParameterHandler<?> otherHandler = parameterHandlers[i];
-                    if (otherHandler instanceof ParameterHandler.Tag<?> parameterTag && parameterTag.clazz.equals(tagType)) {
-                        throw Utils.parameterError(method, index, "@Tag type " + tagType.getName() + " is duplicate of parameter #" + (i + 1) + " and would always overwrite its value.");
-                    }
+                    int constI = i;
+                    parameterHandlers.get(i).forEach(otherHandler -> {
+                        if (otherHandler instanceof ParameterHandler.Tag<?> parameterTag && parameterTag.clazz.equals(tagType)) {
+                            throw Utils.parameterError(method, index, "@Tag type " + tagType.getName() + " is duplicate of parameter #" + (constI + 1) + " and would always overwrite its value.");
+                        }
+                    });
                 }
                 return new ParameterHandler.Tag<>(tagType);
             }
