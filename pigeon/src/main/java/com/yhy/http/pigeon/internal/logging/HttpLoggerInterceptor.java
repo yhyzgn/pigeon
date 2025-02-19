@@ -107,7 +107,10 @@ public class HttpLoggerInterceptor implements Interceptor {
                 .append(System.lineSeparator())
                 .append("├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────")
                 .append(System.lineSeparator());
-        lines.lines().forEach(item -> sb.append("│ ").append(item.msg.contains("{}") ? String.format(item.msg.replace("{}", "%s"), item.args) : item.msg).append(System.lineSeparator()));
+        lines.lines().stream()
+                .filter(Objects::nonNull)
+                .peek(item -> item.msg = Optional.ofNullable(item.msg).orElse(""))
+                .forEach(item -> sb.append("│ ").append(item.msg.contains("{}") ? String.format(item.msg.replace("{}", "%s"), item.args) : item.msg).append(System.lineSeparator()));
         sb.append("└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────");
         LOGGER.info(sb.toString());
     }
