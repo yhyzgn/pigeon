@@ -7,6 +7,7 @@ import com.yhy.http.pigeon.common.https.TrustAllHost;
 import com.yhy.http.pigeon.internal.ssl.VoidSSLSocketFactory;
 import com.yhy.http.pigeon.spring.delegate.SpringHeaderDelegate;
 import com.yhy.http.pigeon.spring.delegate.SpringInterceptorDelegate;
+import com.yhy.http.pigeon.spring.delegate.SpringMethodAnnotationDelegate;
 import com.yhy.http.pigeon.spring.starter.config.PigeonStarterAutoConfiguration;
 import com.yhy.http.pigeon.spring.starter.register.PigeonAutoRegister;
 import org.springframework.context.annotation.Import;
@@ -30,7 +31,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import({PigeonAutoRegister.class, SpringHeaderDelegate.class, SpringInterceptorDelegate.class, PigeonStarterAutoConfiguration.class})
+@Import({PigeonAutoRegister.class, PigeonStarterAutoConfiguration.class, SpringHeaderDelegate.class, SpringInterceptorDelegate.class, SpringMethodAnnotationDelegate.class})
 public @interface EnablePigeon {
 
     @AliasFor("basePackages")
