@@ -44,7 +44,7 @@ public class JacksonConverter extends Converter.Factory {
     }
 
     @Override
-    public @Nullable Converter<?, RequestBody> requestBodyConverter(Type type, Annotation[] methodAnnotations, Annotation[] parameterAnnotations, Pigeon pigeon) {
+    public @Nullable Converter<?, RequestBody> requestBodyConverter(Type type, Annotation[] parameterAnnotations, Pigeon pigeon) {
         JavaType javaType = mapper.getTypeFactory().constructType(type);
         return new JacksonRequestBodyConverter<>(mapper, javaType);
     }

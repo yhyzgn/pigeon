@@ -18,9 +18,10 @@ import java.util.Map;
  * - @Header(pairName = "Secret", pairValue = "ab12") <br>
  * - MapMap&lt;String, Object&gt; body(@Header MapMap&lt;String, Object&gt; header, @Body MapMap&lt;String, Object&gt; body); <br>
  */
-@Target({ElementType.METHOD, ElementType.PARAMETER})
+@Target({ElementType.METHOD, ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Inherited
 @Repeatable(Headers.class)
 public @interface Header {
 

@@ -1,5 +1,10 @@
 package com.yhy.http.pigeon.spring.starter.annotation;
 
+import com.yhy.http.pigeon.annotation.Header;
+import com.yhy.http.pigeon.annotation.Interceptor;
+import com.yhy.http.pigeon.common.https.TrustAllCerts;
+import com.yhy.http.pigeon.common.https.TrustAllHost;
+import com.yhy.http.pigeon.internal.ssl.VoidSSLSocketFactory;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
 
@@ -34,9 +39,9 @@ public @interface Pigeon {
 
     String baseURL() default "";
 
-    PigeonHeader[] header() default {};
+    Header[] header() default {};
 
-    PigeonInterceptor[] interceptor() default {};
+    Interceptor[] interceptor() default {};
 
     String timeout() default "6000";
 
@@ -48,9 +53,9 @@ public @interface Pigeon {
 
     String shouldInterceptorDelegate() default "true";
 
-    Class<? extends SSLSocketFactory> sslSocketFactory() default SSLSocketFactory.class;
+    Class<? extends SSLSocketFactory> sslSocketFactory() default VoidSSLSocketFactory.class;
 
-    Class<? extends X509TrustManager> sslTrustManager() default X509TrustManager.class;
+    Class<? extends X509TrustManager> sslTrustManager() default TrustAllCerts.class;
 
-    Class<? extends HostnameVerifier> sslHostnameVerifier() default HostnameVerifier.class;
+    Class<? extends HostnameVerifier> sslHostnameVerifier() default TrustAllHost.class;
 }

@@ -26,7 +26,7 @@ public interface Converter<F, T> {
     abstract class Factory {
 
         @Nullable
-        public Converter<?, RequestBody> requestBodyConverter(Type type, Annotation[] methodAnnotations, Annotation[] parameterAnnotations, Pigeon pigeon) {
+        public Converter<?, RequestBody> requestBodyConverter(Type type, Annotation[] annotations, Pigeon pigeon) {
             return null;
         }
 

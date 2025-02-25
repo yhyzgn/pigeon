@@ -209,7 +209,7 @@ public abstract class AbstractPigeonAutoRegister implements ImportBeanDefinition
         AnnotationAttributes[] headers = (AnnotationAttributes[]) attrs.get("header");
         if (null != headers && headers.length > 0) {
             // key 重复时以后者为准
-            Map<String, String> temp = Stream.of(headers).collect(Collectors.toMap(attr -> attr.getString("name"), attr -> resolve((String) attr.get("value")), (k1, k2) -> k2));
+            Map<String, String> temp = Stream.of(headers).collect(Collectors.toMap(attr -> attr.getString("pairName"), attr -> resolve((String) attr.get("pairValue")), (k1, k2) -> k2));
             if (CollectionUtils.isEmpty(temp)) {
                 temp = header;
             } else if (!CollectionUtils.isEmpty(header)) {

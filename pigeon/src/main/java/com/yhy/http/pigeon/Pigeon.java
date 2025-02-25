@@ -5,6 +5,7 @@ import com.yhy.http.pigeon.annotation.Header;
 import com.yhy.http.pigeon.converter.Converter;
 import com.yhy.http.pigeon.delegate.HeaderDelegate;
 import com.yhy.http.pigeon.delegate.InterceptorDelegate;
+import com.yhy.http.pigeon.delegate.MethodAnnotationDelegate;
 import com.yhy.http.pigeon.http.HttpMethod;
 import com.yhy.http.pigeon.internal.adapter.GuavaCallAdapter;
 import com.yhy.http.pigeon.internal.converter.JacksonConverter;
@@ -47,6 +48,7 @@ public class Pigeon {
     private final List<Converter.Factory> converterFactories;
     private final HeaderDelegate headerDelegate;
     private final InterceptorDelegate interceptorDelegate;
+    private final MethodAnnotationDelegate methodAnnotationDelegate;
     private final OkHttpClient.Builder client;
     private final boolean methodReuseEnabled;
 
@@ -63,6 +65,7 @@ public class Pigeon {
         this.converterFactories = builder.converterFactories;
         this.headerDelegate = builder.headerDelegate;
         this.interceptorDelegate = builder.interceptorDelegate;
+        this.methodAnnotationDelegate = builder.methodAnnotationDelegate;
         this.client = builder.client;
         this.methodReuseEnabled = builder.methodReuseEnabled;
     }
@@ -100,6 +103,10 @@ public class Pigeon {
         return interceptorDelegate;
     }
 
+    public MethodAnnotationDelegate methodAnnotationDelegate() {
+        return methodAnnotationDelegate;
+    }
+
     public CallAdapter<?, ?> adapter(Type returnType, Annotation[] annotations) {
         return findCallAdapter(returnType, annotations);
     }
@@ -108,8 +115,8 @@ public class Pigeon {
         return findStringConverter(type, annotations);
     }
 
-    public <T> Converter<T, RequestBody> requestConverter(Type type, Annotation[] methodAnnotations, Annotation[] parameterAnnotations) {
-        return findRequestConverter(type, methodAnnotations, parameterAnnotations);
+    public <T> Converter<T, RequestBody> requestConverter(Type type, Annotation[] parameterAnnotations) {
+        return findRequestConverter(type, parameterAnnotations);
     }
 
     public <T> Converter<ResponseBody, T> responseConverter(Type responseType, Annotation[] annotations) {
@@ -133,11 +140,11 @@ public class Pigeon {
         });
     }
 
-    private <T> Converter<T, RequestBody> findRequestConverter(Type type, Annotation[] annotations, Annotation[] parameterAnnotations) {
+    private <T> Converter<T, RequestBody> findRequestConverter(Type type, Annotation[] annotations) {
         Converter<T, RequestBody> converter;
         // 从后向前查找
         for (int i = converterFactories.size() - 1; i >= 0; i--) {
-            converter = (Converter<T, RequestBody>) converterFactories.get(i).requestBodyConverter(type, annotations, parameterAnnotations, this);
+            converter = (Converter<T, RequestBody>) converterFactories.get(i).requestBodyConverter(type, annotations, this);
             if (null != converter) {
                 return converter;
             }
@@ -260,6 +267,7 @@ public class Pigeon {
         private final List<Converter.Factory> converterFactories = new ArrayList<>();
         private HeaderDelegate headerDelegate;
         private InterceptorDelegate interceptorDelegate;
+        private MethodAnnotationDelegate methodAnnotationDelegate;
         private OkHttpClient.Builder client;
         private boolean logging = true;
         private boolean methodReuseEnabled = true;
@@ -330,6 +338,17 @@ public class Pigeon {
          */
         public Builder delegate(InterceptorDelegate delegate) {
             this.interceptorDelegate = delegate;
+            return this;
+        }
+
+        /**
+         * 方法注解解析器
+         *
+         * @param delegate 解析器
+         * @return builder
+         */
+        public Builder delegate(MethodAnnotationDelegate delegate) {
+            this.methodAnnotationDelegate = delegate;
             return this;
         }
 

@@ -11,9 +11,11 @@ import com.yhy.http.pigeon.common.Invocation;
 import com.yhy.http.pigeon.converter.Converter;
 import com.yhy.http.pigeon.delegate.HeaderDelegate;
 import com.yhy.http.pigeon.delegate.InterceptorDelegate;
+import com.yhy.http.pigeon.delegate.MethodAnnotationDelegate;
 import com.yhy.http.pigeon.http.request.param.ParameterHandler;
 import com.yhy.http.pigeon.internal.delegate.ConstructorHeaderDelegate;
 import com.yhy.http.pigeon.internal.delegate.ConstructorInterceptorDelegate;
+import com.yhy.http.pigeon.internal.delegate.ConstructorMethodAnnotationDelegate;
 import com.yhy.http.pigeon.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -54,6 +56,7 @@ public class RequestFactory {
     private final List<okhttp3.Interceptor> interceptors;
     private final Map<String, String> headerMap;
     private final List<Header.Dynamic> dynamicHeaders;
+    private final MethodAnnotationDelegate methodAnnotationDelegate;
 
     public RequestFactory(Builder builder) {
         method = builder.method;
@@ -65,6 +68,7 @@ public class RequestFactory {
         isForm = builder.isForm;
         isMultipart = builder.isMultipart;
         parameterHandlers = builder.parameterHandlers;
+        methodAnnotationDelegate = builder.methodAnnotationDelegate;
 
         // 合并全局配置和当前配置
         host = Optional.ofNullable(builder.host).orElse(builder.pigeon.host());
@@ -156,7 +160,7 @@ public class RequestFactory {
 
         private final Pigeon pigeon;
         private final Method method;
-        private final Annotation[] methodAnnotations;
+        private final MethodAnnotationDelegate methodAnnotationDelegate;
         private final Parameter[] parameters;
         private String httpMethod;
         private boolean hasBody;
@@ -179,7 +183,7 @@ public class RequestFactory {
 
             this.pigeon = pigeon;
             this.method = method;
-            this.methodAnnotations = method.getAnnotations();
+            this.methodAnnotationDelegate = Optional.ofNullable(pigeon.methodAnnotationDelegate()).orElse(ConstructorMethodAnnotationDelegate.create());
             this.parameters = method.getParameters();
             this.headersBuilder = new okhttp3.Headers.Builder();
             this.dynamicHeaders = new ArrayList<>();
@@ -188,9 +192,8 @@ public class RequestFactory {
         }
 
         RequestFactory build() {
-            for (Annotation annotation : methodAnnotations) {
-                parseMethodAnnotation(annotation);
-            }
+            parseMethodAnnotation();
+
             if (httpMethod == null) {
                 throw Utils.methodError(method, "HTTP method annotation is required (e.g., @Get, @Post, etc.).");
             }
@@ -385,7 +388,7 @@ public class RequestFactory {
                             throw Utils.parameterError(method, index, "@Part Map values cannot be MultipartBody.Part. Use @Part List<Part> or a different value type instead.");
                         }
 
-                        Converter<?, RequestBody> valueConverter = pigeon.requestConverter(valueType, annotations, methodAnnotations);
+                        Converter<?, RequestBody> valueConverter = pigeon.requestConverter(valueType, annotations);
                         return new ParameterHandler.PartMap<>(method, index, valueConverter, encoding);
                     } else {
                         throw Utils.parameterError(method, index, "@Part annotation must supply a name or use MultipartBody.Part parameter type.");
@@ -400,14 +403,14 @@ public class RequestFactory {
                         if (MultipartBody.Part.class.isAssignableFrom(Utils.getRawType(iterableType))) {
                             throw Utils.parameterError(method, index, "@Part parameters using the MultipartBody.Part must not include a part name in the annotation.");
                         }
-                        Converter<?, RequestBody> converter = pigeon.requestConverter(iterableType, annotations, methodAnnotations);
+                        Converter<?, RequestBody> converter = pigeon.requestConverter(iterableType, annotations);
                         return new ParameterHandler.Part<>(method, index, headers, converter).iterable();
                     } else if (rawType.isArray()) {
                         Class<?> arrayComponentType = boxIfPrimitive(rawType.getComponentType());
                         if (MultipartBody.Part.class.isAssignableFrom(arrayComponentType)) {
                             throw Utils.parameterError(method, index, "@Part parameters using the MultipartBody.Part must not include a part name in the annotation.");
                         }
-                        Converter<?, RequestBody> converter = pigeon.requestConverter(arrayComponentType, annotations, methodAnnotations);
+                        Converter<?, RequestBody> converter = pigeon.requestConverter(arrayComponentType, annotations);
                         return new ParameterHandler.Part<>(method, index, headers, converter).array();
                     } else if (MultipartBody.Part.class.isAssignableFrom(rawType)) {
                         throw Utils.parameterError(method, index, "@Part parameters using the MultipartBody.Part must not include a part name in the annotation.");
@@ -430,10 +433,10 @@ public class RequestFactory {
                             throw Utils.parameterError(method, index, "@Part Map values cannot be MultipartBody.Part. Use @Part List<Part> or a different value type instead.");
                         }
 
-                        Converter<?, RequestBody> valueConverter = pigeon.requestConverter(valueType, annotations, methodAnnotations);
+                        Converter<?, RequestBody> valueConverter = pigeon.requestConverter(valueType, annotations);
                         return new ParameterHandler.PartMap<>(method, index, valueConverter, encoding);
                     } else {
-                        Converter<?, RequestBody> converter = pigeon.requestConverter(type, annotations, methodAnnotations);
+                        Converter<?, RequestBody> converter = pigeon.requestConverter(type, annotations);
                         return new ParameterHandler.Part<>(method, index, headers, converter);
                     }
                 }
@@ -441,7 +444,7 @@ public class RequestFactory {
                 if (isForm || isMultipart) {
                     throw Utils.parameterError(method, index, "@Body parameters cannot be used with form or multi-part encoding.");
                 }
-                Converter<?, RequestBody> converter = pigeon.requestConverter(type, annotations, methodAnnotations);
+                Converter<?, RequestBody> converter = pigeon.requestConverter(type, annotations);
                 return new ParameterHandler.Body<>(method, index, converter);
             } else if (annotation instanceof Tag) {
                 Class<?> tagType = Utils.getRawType(type);
@@ -489,44 +492,68 @@ public class RequestFactory {
             }
         }
 
-        private void parseMethodAnnotation(Annotation annotation) {
-            if (annotation instanceof Get) {
-                parseHttpMethodAndPath("Get", ((Get) annotation).value(), false);
-            } else if (annotation instanceof Post) {
-                parseHttpMethodAndPath("Post", ((Post) annotation).value(), true);
-            } else if (annotation instanceof Delete) {
-                parseHttpMethodAndPath("Delete", ((Delete) annotation).value(), false);
-            } else if (annotation instanceof Head) {
-                parseHttpMethodAndPath("Head", ((Head) annotation).value(), false);
-            } else if (annotation instanceof Options) {
-                parseHttpMethodAndPath("Options", ((Options) annotation).value(), false);
-            } else if (annotation instanceof Patch) {
-                parseHttpMethodAndPath("Patch", ((Patch) annotation).value(), true);
-            } else if (annotation instanceof Put) {
-                parseHttpMethodAndPath("Put", ((Put) annotation).value(), true);
-            } else if (annotation instanceof Trace) {
-                parseHttpMethodAndPath("Trace", ((Trace) annotation).value(), false);
-            } else if (annotation instanceof Header) {
-                parseHeader((Header) annotation);
-            } else if (annotation instanceof Headers) {
-                parseHeader(((Headers) annotation).value());
-            } else if (annotation instanceof Multipart) {
+        private void parseMethodAnnotation() {
+            methodAnnotationDelegate.apply(method, Get.class).ifPresent(annotation -> {
+                parseHttpMethodAndPath("GET", annotation.value(), false);
+            });
+
+            methodAnnotationDelegate.apply(method, Post.class).ifPresent(annotation -> {
+                parseHttpMethodAndPath("POST", annotation.value(), true);
+            });
+
+            methodAnnotationDelegate.apply(method, Delete.class).ifPresent(annotation -> {
+                parseHttpMethodAndPath("DELETE", annotation.value(), false);
+            });
+
+            methodAnnotationDelegate.apply(method, Head.class).ifPresent(annotation -> {
+                parseHttpMethodAndPath("HEAD", annotation.value(), false);
+            });
+
+            methodAnnotationDelegate.apply(method, Options.class).ifPresent(annotation -> {
+                parseHttpMethodAndPath("OPTIONS", annotation.value(), false);
+            });
+
+            methodAnnotationDelegate.apply(method, Patch.class).ifPresent(annotation -> {
+                parseHttpMethodAndPath("PATCH", annotation.value(), true);
+            });
+
+            methodAnnotationDelegate.apply(method, Put.class).ifPresent(annotation -> {
+                parseHttpMethodAndPath("PUT", annotation.value(), true);
+            });
+
+            methodAnnotationDelegate.apply(method, Trace.class).ifPresent(annotation -> {
+                parseHttpMethodAndPath("TRACE", annotation.value(), false);
+            });
+
+            methodAnnotationDelegate.apply(method, Header.class).ifPresent(this::parseHeader);
+
+            methodAnnotationDelegate.apply(method, Headers.class).ifPresent(annotation -> {
+                parseHeader(annotation.value());
+            });
+
+            methodAnnotationDelegate.apply(method, Multipart.class).ifPresent(annotation -> {
                 if (isForm) {
                     throw Utils.methodError(method, "Only one encoding annotation is allowed.");
                 }
                 isMultipart = true;
-            } else if (annotation instanceof Form) {
+            });
+
+            methodAnnotationDelegate.apply(method, Form.class).ifPresent(annotation -> {
                 if (isMultipart) {
                     throw Utils.methodError(method, "Only one encoding annotation is allowed.");
                 }
                 isForm = true;
-            } else if (annotation instanceof Host) {
-                host = HttpUrl.get(((Host) annotation).value());
-            } else if (annotation instanceof Interceptor) {
-                parseInterceptors(((Interceptor) annotation));
-            } else if (annotation instanceof Interceptors) {
-                parseInterceptors(((Interceptors) annotation).value());
-            }
+            });
+
+            methodAnnotationDelegate.apply(method, Host.class).ifPresent(annotation -> {
+                host = HttpUrl.get(annotation.value());
+            });
+
+            methodAnnotationDelegate.apply(method, Interceptor.class).ifPresent(this::parseInterceptors);
+
+            methodAnnotationDelegate.apply(method, Interceptors.class).ifPresent(annotation -> {
+                parseInterceptors(annotation.value());
+            });
         }
 
         private void parseInterceptors(Interceptor... annotation) {
@@ -616,7 +643,7 @@ public class RequestFactory {
             if (null != this.httpMethod) {
                 throw Utils.methodError(method, "Only one http method is allowed, but found : %s and %s", this.httpMethod, httpMethod);
             }
-            this.httpMethod = httpMethod;
+            this.httpMethod = httpMethod.toUpperCase(Locale.ROOT);
             this.hasBody = hasBody;
 
             if (null == url) {

@@ -44,7 +44,7 @@ public class GsonConverter extends Converter.Factory {
 
     @Nullable
     @Override
-    public Converter<?, RequestBody> requestBodyConverter(Type type, Annotation[] methodAnnotations, Annotation[] parameterAnnotations, Pigeon pigeon) {
+    public Converter<?, RequestBody> requestBodyConverter(Type type, Annotation[] parameterAnnotations, Pigeon pigeon) {
         TypeAdapter<?> adapter = gson.getAdapter(TypeToken.get(type));
         return new GsonRequestBodyConverter<>(gson, adapter);
     }
