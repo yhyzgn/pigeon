@@ -493,65 +493,65 @@ public class RequestFactory {
         }
 
         private void parseMethodAnnotation() {
-            methodAnnotationDelegate.apply(method, Get.class).ifPresent(annotation -> {
+            methodAnnotationDelegate.apply(method, Get.class).forEach(annotation -> {
                 parseHttpMethodAndPath("GET", annotation.value(), false);
             });
 
-            methodAnnotationDelegate.apply(method, Post.class).ifPresent(annotation -> {
+            methodAnnotationDelegate.apply(method, Post.class).forEach(annotation -> {
                 parseHttpMethodAndPath("POST", annotation.value(), true);
             });
 
-            methodAnnotationDelegate.apply(method, Delete.class).ifPresent(annotation -> {
+            methodAnnotationDelegate.apply(method, Delete.class).forEach(annotation -> {
                 parseHttpMethodAndPath("DELETE", annotation.value(), false);
             });
 
-            methodAnnotationDelegate.apply(method, Head.class).ifPresent(annotation -> {
+            methodAnnotationDelegate.apply(method, Head.class).forEach(annotation -> {
                 parseHttpMethodAndPath("HEAD", annotation.value(), false);
             });
 
-            methodAnnotationDelegate.apply(method, Options.class).ifPresent(annotation -> {
+            methodAnnotationDelegate.apply(method, Options.class).forEach(annotation -> {
                 parseHttpMethodAndPath("OPTIONS", annotation.value(), false);
             });
 
-            methodAnnotationDelegate.apply(method, Patch.class).ifPresent(annotation -> {
+            methodAnnotationDelegate.apply(method, Patch.class).forEach(annotation -> {
                 parseHttpMethodAndPath("PATCH", annotation.value(), true);
             });
 
-            methodAnnotationDelegate.apply(method, Put.class).ifPresent(annotation -> {
+            methodAnnotationDelegate.apply(method, Put.class).forEach(annotation -> {
                 parseHttpMethodAndPath("PUT", annotation.value(), true);
             });
 
-            methodAnnotationDelegate.apply(method, Trace.class).ifPresent(annotation -> {
+            methodAnnotationDelegate.apply(method, Trace.class).forEach(annotation -> {
                 parseHttpMethodAndPath("TRACE", annotation.value(), false);
             });
 
-            methodAnnotationDelegate.apply(method, Header.class).ifPresent(this::parseHeader);
+            methodAnnotationDelegate.apply(method, Header.class).forEach(this::parseHeader);
 
-            methodAnnotationDelegate.apply(method, Headers.class).ifPresent(annotation -> {
+            methodAnnotationDelegate.apply(method, Headers.class).forEach(annotation -> {
                 parseHeader(annotation.value());
             });
 
-            methodAnnotationDelegate.apply(method, Multipart.class).ifPresent(annotation -> {
+            methodAnnotationDelegate.apply(method, Multipart.class).forEach(annotation -> {
                 if (isForm) {
                     throw Utils.methodError(method, "Only one encoding annotation is allowed.");
                 }
                 isMultipart = true;
             });
 
-            methodAnnotationDelegate.apply(method, Form.class).ifPresent(annotation -> {
+            methodAnnotationDelegate.apply(method, Form.class).forEach(annotation -> {
                 if (isMultipart) {
                     throw Utils.methodError(method, "Only one encoding annotation is allowed.");
                 }
                 isForm = true;
             });
 
-            methodAnnotationDelegate.apply(method, Host.class).ifPresent(annotation -> {
+            methodAnnotationDelegate.apply(method, Host.class).forEach(annotation -> {
                 host = HttpUrl.get(annotation.value());
             });
 
-            methodAnnotationDelegate.apply(method, Interceptor.class).ifPresent(this::parseInterceptors);
+            methodAnnotationDelegate.apply(method, Interceptor.class).forEach(this::parseInterceptors);
 
-            methodAnnotationDelegate.apply(method, Interceptors.class).ifPresent(annotation -> {
+            methodAnnotationDelegate.apply(method, Interceptors.class).forEach(annotation -> {
                 parseInterceptors(annotation.value());
             });
         }

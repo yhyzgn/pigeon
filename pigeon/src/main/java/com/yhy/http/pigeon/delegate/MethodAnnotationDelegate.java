@@ -2,7 +2,7 @@ package com.yhy.http.pigeon.delegate;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Optional;
+import java.util.List;
 
 /**
  * method 注解提取接口
@@ -22,5 +22,5 @@ public interface MethodAnnotationDelegate {
      * @param annotationClass 注解类
      * @return 注解实例
      */
-    <T extends Annotation> Optional<T> apply(Method method, Class<T> annotationClass);
+    <T extends Annotation> List<T> apply(Method method, Class<T> annotationClass);
 }
