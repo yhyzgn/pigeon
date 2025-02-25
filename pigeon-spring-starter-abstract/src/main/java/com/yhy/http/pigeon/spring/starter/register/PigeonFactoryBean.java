@@ -5,6 +5,7 @@ import com.yhy.http.pigeon.annotation.Header;
 import com.yhy.http.pigeon.spring.converter.SpringConverter;
 import com.yhy.http.pigeon.spring.delegate.SpringHeaderDelegate;
 import com.yhy.http.pigeon.spring.delegate.SpringInterceptorDelegate;
+import com.yhy.http.pigeon.spring.delegate.SpringMethodAnnotationDelegate;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Interceptor;
@@ -105,6 +106,7 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
 
         SpringHeaderDelegate headerDelegate = context.getBean(SpringHeaderDelegate.class);
         SpringInterceptorDelegate interceptorDelegate = context.getBean(SpringInterceptorDelegate.class);
+        SpringMethodAnnotationDelegate methodAnnotationDelegate = context.getBean(SpringMethodAnnotationDelegate.class);
 
         if (!CollectionUtils.isEmpty(globalHeaderList)) {
             globalHeaderList.forEach(item -> {
@@ -159,6 +161,8 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
         if (shouldInterceptorDelegate) {
             builder.delegate(interceptorDelegate);
         }
+
+        builder.delegate(methodAnnotationDelegate);
 
         return (T) builder.methodReuseEnabled(false).build().create(pigeonInterface);
     }
