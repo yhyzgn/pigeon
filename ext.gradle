@@ -1,6 +1,6 @@
 ext {
     group = "com.yhyzgn.http"
-    version = "2.0.6"
+    version = "2.0.7"
     url = "github.com/yhyzgn/pigeon" as Object
     repository = [
             release : "https://oss.sonatype.org/service/local/staging/deploy/maven2/",

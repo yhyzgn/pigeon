@@ -1,5 +1,6 @@
 package com.yhy.http.pigeon.spring.starter.register;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yhy.http.pigeon.Pigeon;
 import com.yhy.http.pigeon.annotation.Header;
 import com.yhy.http.pigeon.spring.converter.SpringConverter;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.env.Environment;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -36,9 +38,8 @@ import java.util.Map;
  */
 @Slf4j
 public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean, ApplicationContextAware {
-    private ApplicationContext context;
-    private SpringConverter springConverter;
-
+    @Setter
+    private Environment environment;
     @Setter
     private Class<? extends Annotation> pigeonAnnotation;
     @Setter
@@ -72,14 +73,21 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
     @Setter
     private List<Class<? extends Interceptor>> globalNetInterceptorList;
 
+    private ApplicationContext context;
+    private ObjectMapper objectMapper;
+    private SpringConverter springConverter;
+
     @Override
     public void setApplicationContext(@NotNull ApplicationContext context) throws BeansException {
         this.context = context;
-        this.springConverter = new SpringConverter(context.getEnvironment());
     }
 
     @Override
     public Object getObject() {
+        if (null == springConverter) {
+            objectMapper = context.getBean(ObjectMapper.class);
+            springConverter = new SpringConverter(objectMapper, environment);
+        }
         return getTarget();
     }
 

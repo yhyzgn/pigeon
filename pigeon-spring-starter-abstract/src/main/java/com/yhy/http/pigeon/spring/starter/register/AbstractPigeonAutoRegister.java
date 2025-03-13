@@ -157,6 +157,7 @@ public abstract class AbstractPigeonAutoRegister implements ImportBeanDefinition
         String qualifier = getQualifier(attrs);
         AnnotationAttributes[] interceptors = (AnnotationAttributes[]) attrs.get("interceptor");
 
+        builder.addPropertyValue("environment", environment);
         builder.addPropertyValue("pigeonAnnotation", pigeonAnnotation);
         builder.addPropertyValue("pigeonInterface", className);
         builder.addPropertyValue("baseURL", getBaseURL(attrs));

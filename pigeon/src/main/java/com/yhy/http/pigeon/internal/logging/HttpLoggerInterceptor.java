@@ -112,7 +112,7 @@ public class HttpLoggerInterceptor implements Interceptor {
                 .peek(item -> item.msg = Optional.ofNullable(item.msg).orElse(""))
                 .forEach(item -> sb.append("│ ").append(item.msg.contains("{}") ? String.format(item.msg.replace("{}", "%s"), item.args) : item.msg).append(System.lineSeparator()));
         sb.append("└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────");
-        LOGGER.info(sb.toString());
+        LOGGER.debug(sb.toString());
     }
 
     private String requestBodyToString(RequestBody body) throws IOException {
