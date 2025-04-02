@@ -9,6 +9,7 @@ import com.yhy.http.pigeon.spring.delegate.SpringInterceptorDelegate;
 import com.yhy.http.pigeon.spring.delegate.SpringMethodAnnotationDelegate;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Dispatcher;
 import okhttp3.Interceptor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
@@ -76,6 +77,7 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
     private ApplicationContext context;
     private ObjectMapper objectMapper;
     private SpringConverter springConverter;
+    private Dispatcher dispatcher;
 
     @Override
     public void setApplicationContext(@NotNull ApplicationContext context) throws BeansException {
@@ -87,6 +89,9 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
         if (null == springConverter) {
             objectMapper = context.getBean(ObjectMapper.class);
             springConverter = new SpringConverter(objectMapper, environment);
+        }
+        if (null == dispatcher) {
+            dispatcher = context.getBean(Dispatcher.class);
         }
         return getTarget();
     }
@@ -109,6 +114,7 @@ public class PigeonFactoryBean implements FactoryBean<Object>, InitializingBean,
         Pigeon.Builder builder = new Pigeon.Builder()
                 .baseURL(baseURL)
                 .logging(logging)
+                .dispatcher(dispatcher)
                 .addConverterFactory(springConverter)
                 .methodReuseEnabled(false);
 

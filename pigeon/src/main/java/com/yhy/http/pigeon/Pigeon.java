@@ -265,6 +265,7 @@ public class Pigeon {
         private final List<Header.Dynamic> dynamicHeaders = new ArrayList<>();
         private final List<CallAdapter.Factory> adapterFactories = new ArrayList<>();
         private final List<Converter.Factory> converterFactories = new ArrayList<>();
+        private Dispatcher dispatcher;
         private HeaderDelegate headerDelegate;
         private InterceptorDelegate interceptorDelegate;
         private MethodAnnotationDelegate methodAnnotationDelegate;
@@ -293,6 +294,17 @@ public class Pigeon {
 
         public Builder netInterceptor(Interceptor interceptor) {
             this.netInterceptors.add(interceptor);
+            return this;
+        }
+
+        /**
+         * 配置分发器
+         *
+         * @param dispatcher 分发器
+         * @return builder
+         */
+        public Builder dispatcher(Dispatcher dispatcher) {
+            this.dispatcher = dispatcher;
             return this;
         }
 
@@ -405,6 +417,10 @@ public class Pigeon {
 
             if (null == client) {
                 client = new OkHttpClient.Builder();
+            }
+
+            if (null != dispatcher) {
+                client.dispatcher(dispatcher);
             }
 
             // 配置 ssl
