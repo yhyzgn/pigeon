@@ -1,12 +1,13 @@
 import java.text.SimpleDateFormat
+import com.vanniktech.maven.publish.JavaLibrary
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
     id 'org.springframework.boot'
     id 'io.spring.dependency-management'
     id "java-library"
-    id "maven-publish"
-    id 'org.kordamp.gradle.pomchecker'
-    id 'org.jreleaser'
+    id "com.vanniktech.maven.publish"
 }
 
 apply from: "../ext.gradle"
@@ -116,100 +117,38 @@ tasks.register('javadocJar', Jar) {
     from javadoc.destinationDir
 }
 
-java {
-    withJavadocJar()
-    withSourcesJar()
-}
+mavenPublishing {
+    configure(new JavaLibrary(new JavadocJar.Javadoc(), true))
+    // or when publishing to https://central.sonatype.com/
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId = rootConfig.group
-            artifactId = rootConfig.starter.artifact
-            version = rootConfig.starter.version
-            from components.java
+    signAllPublications()
 
-            pom {
-                name = rootConfig.starter.artifact
-                description = rootConfig.starter.description
-                url = "https://${rootConfig.url}"
-                licenses {
-                    license {
-                        name = 'Apache License, Version 2.0'
-                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        distribution = 'repo'
-                        comments = 'A business-friendly OSS license'
-                    }
-                }
-                developers {
-                    developer {
-                        name = 'yhyzgn'
-                        email = 'yhyzgn@gmail.com'
-                        url = "https://github.com/yhyzgn/"
-                    }
-                }
-                scm {
-                    url = "https://${rootConfig.url}.git"
-                    connection = "scm:git:https://${rootConfig.url}.git"
-                    developerConnection = "scm:git:https://${rootConfig.url}.git"
-                }
-            }
+    coordinates("${group}", "${project.name}", "${version}")
 
-            versionMapping {
-                usage('java-api') {
-                    fromResolutionOf('runtimeClasspath')
-                }
-                usage('java-runtime') {
-                    fromResolutionResult()
-                }
+    pom {
+        name = "${project.name}"
+        description = "Http client based on OkHttp and Jackson."
+        inceptionYear = "2020"
+        url = "https://github.com/yhyzgn/pigeon/"
+        licenses {
+            license {
+                name = "The Apache License, Version 2.0"
+                url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                distribution = "http://www.apache.org/licenses/LICENSE-2.0.txt"
             }
         }
-    }
-
-    repositories {
-        maven {
-            url = layout.buildDirectory.dir('staging-deploy')
+        developers {
+            developer {
+                id = "yhyzgn"
+                name = "yhyzgn"
+                url = "https://github.com/yhyzgn/"
+            }
         }
-    }
-}
-
-jreleaser {
-    gitRootSearch = true
-    signing(({
-        active = 'ALWAYS'
-        armored = true
-        mode = 'FILE'
-        publicKey = "${rootDir}/ext/public.pgp"
-        secretKey = "${rootDir}/ext/private.pgp"
-    } as Closure<Void>))
-    deploy {
-        maven {
-            mavenCentral(({
-                sonatype {
-                    active = 'ALWAYS'
-                    url = 'https://central.sonatype.com/api/v1/publisher'
-                    stagingRepository('build/staging-deploy')
-                }
-            } as Closure<Void>))
+        scm {
+            url = "https://github.com/yhyzgn/pigeon/"
+            connection = "scm:git:git://github.com/yhyzgn/pigeon.git"
+            developerConnection = "scm:git:ssh://git@github.com/yhyzgn/pigeon.git"
         }
-    }
-}
-
-jreleaserFullRelease.dependsOn(publish)
-
-tasks.compileJava.doFirst {
-    def subDir = file("$buildDir/jreleaser")
-    if (!subDir.exists()) {
-        subDir.mkdirs() // 创建目录及其父目录
-        println "Subdirectory created at: ${subDir.absolutePath}"
-    }
-}
-
-// publish 前自动创建 build/staging-deploy 文件夹 和 build/jreleaser 文件夹
-tasks.publish.doFirst {
-    def subDir = file("$buildDir/staging-deploy")
-    if (!subDir.exists()) {
-        subDir.mkdirs() // 创建目录及其父目录
-        println "Subdirectory created at: ${subDir.absolutePath}"
     }
 }

@@ -44,3 +44,8 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+// 在 samples 模块的 build.gradle 中
+tasks.withType(PublishToMavenRepository).configureEach {
+    enabled = false
+}
