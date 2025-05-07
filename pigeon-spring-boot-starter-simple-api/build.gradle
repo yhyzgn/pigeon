@@ -4,8 +4,6 @@ plugins {
     id "java"
 }
 
-apply from: "../ext.gradle"
-
 def rootConfig = rootProject.ext
 def libVersion = rootConfig.lib
 

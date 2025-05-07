@@ -1,16 +1,10 @@
 import java.text.SimpleDateFormat
-import com.vanniktech.maven.publish.JavaLibrary
-import com.vanniktech.maven.publish.JavadocJar
-import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
     id 'org.springframework.boot'
     id 'io.spring.dependency-management'
     id "java-library"
-    id "com.vanniktech.maven.publish"
 }
-
-apply from: "../ext.gradle"
 
 def rootConfig = rootProject.ext
 def libVersion = rootConfig.lib
@@ -115,40 +109,4 @@ tasks.register('javadocJar', Jar) {
     dependsOn javadoc
     archiveClassifier = 'javadoc'
     from javadoc.destinationDir
-}
-
-mavenPublishing {
-    configure(new JavaLibrary(new JavadocJar.Javadoc(), true))
-    // or when publishing to https://central.sonatype.com/
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-
-    signAllPublications()
-
-    coordinates("${group}", "${project.name}", "${version}")
-
-    pom {
-        name = "${project.name}"
-        description = "Http client based on OkHttp and Jackson."
-        inceptionYear = "2020"
-        url = "https://github.com/yhyzgn/pigeon/"
-        licenses {
-            license {
-                name = "The Apache License, Version 2.0"
-                url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-                distribution = "http://www.apache.org/licenses/LICENSE-2.0.txt"
-            }
-        }
-        developers {
-            developer {
-                id = "yhyzgn"
-                name = "yhyzgn"
-                url = "https://github.com/yhyzgn/"
-            }
-        }
-        scm {
-            url = "https://github.com/yhyzgn/pigeon/"
-            connection = "scm:git:git://github.com/yhyzgn/pigeon.git"
-            developerConnection = "scm:git:ssh://git@github.com/yhyzgn/pigeon.git"
-        }
-    }
 }
