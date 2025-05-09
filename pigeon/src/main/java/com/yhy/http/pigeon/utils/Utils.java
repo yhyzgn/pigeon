@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  */
 public class Utils {
     private static final Type[] EMPTY_TYPE_ARRAY = new Type[0];
-    public final static String VERSION = "2.0.10";
+    public final static String VERSION = "2.0.12";
 
     public static boolean isEmpty(Object object) {
         switch (object) {
