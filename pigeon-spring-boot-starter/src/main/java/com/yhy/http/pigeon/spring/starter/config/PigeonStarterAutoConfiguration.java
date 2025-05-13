@@ -1,6 +1,7 @@
 package com.yhy.http.pigeon.spring.starter.config;
 
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Dispatcher;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -60,5 +61,11 @@ public class PigeonStarterAutoConfiguration {
     @ConditionalOnMissingBean
     public HostnameVerifier getHostnameVerifier() {
         return (s, sslSession) -> true;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public Dispatcher dispatcher() {
+        return new Dispatcher();
     }
 }
