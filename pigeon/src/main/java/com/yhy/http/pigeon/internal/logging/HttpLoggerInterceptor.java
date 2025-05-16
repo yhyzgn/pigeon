@@ -55,36 +55,38 @@ public class HttpLoggerInterceptor implements Interceptor {
             lines.line(requestBodyToString(reqBody).replace(System.lineSeparator(), System.lineSeparator() + "│ "));
         }
 
-        Response response = chain.proceed(request);
-        headers = response.headers();
-        names = headers.names();
-        it = names.iterator();
-        lines.empty().line("-- Response Header --");
-        lines.line("Status : {}", response.code());
-        while (it.hasNext()) {
-            String name = it.next();
-            String value = headers.get(name);
-            lines.line("{} : {}", name, value);
-        }
-
-        ResponseBody resBody = response.body();
-        Response wrapResponse = response;
-        if (null != resBody) {
-            MediaType contentType = resBody.contentType();
-            String encoding = Optional.ofNullable(response.header("Content-Encoding")).orElse("");
-            BufferedSource source;
-            if ("gzip".equals(encoding)) {
-                source = Okio.buffer(new GzipSource(resBody.source()));
-            } else {
-                source = resBody.source();
+        Response wrapResponse;
+        try (Response response = chain.proceed(request)) {
+            headers = response.headers();
+            names = headers.names();
+            it = names.iterator();
+            lines.empty().line("-- Response Header --");
+            lines.line("Status : {}", response.code());
+            while (it.hasNext()) {
+                String name = it.next();
+                String value = headers.get(name);
+                lines.line("{} : {}", name, value);
             }
-            String content = source.readUtf8();
-            lines.empty().line("-- Response Body --");
-            lines.line(content.replace(System.lineSeparator(), System.lineSeparator() + "│ "));
 
-            // 重组 Response
-            // 须移除 Content-Encoding，因为当前 body 已解压
-            wrapResponse = response.newBuilder().removeHeader("Content-Encoding").body(ResponseBody.create(content, contentType)).build();
+            ResponseBody resBody = response.body();
+            wrapResponse = response;
+            if (null != resBody) {
+                MediaType contentType = resBody.contentType();
+                String encoding = Optional.ofNullable(response.header("Content-Encoding")).orElse("");
+                BufferedSource source;
+                if ("gzip".equals(encoding)) {
+                    source = Okio.buffer(new GzipSource(resBody.source()));
+                } else {
+                    source = resBody.source();
+                }
+                String content = source.readUtf8();
+                lines.empty().line("-- Response Body --");
+                lines.line(content.replace(System.lineSeparator(), System.lineSeparator() + "│ "));
+
+                // 重组 Response
+                // 须移除 Content-Encoding，因为当前 body 已解压
+                wrapResponse = response.newBuilder().removeHeader("Content-Encoding").body(ResponseBody.create(content, contentType)).build();
+            }
         }
 
         // 结束时间
@@ -112,7 +114,7 @@ public class HttpLoggerInterceptor implements Interceptor {
                 .peek(item -> item.msg = Optional.ofNullable(item.msg).orElse(""))
                 .forEach(item -> sb.append("│ ").append(item.msg.contains("{}") ? String.format(item.msg.replace("{}", "%s"), item.args) : item.msg).append(System.lineSeparator()));
         sb.append("└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────");
-        LOGGER.debug(sb.toString());
+        LOGGER.info(sb.toString());
     }
 
     private String requestBodyToString(RequestBody body) throws IOException {

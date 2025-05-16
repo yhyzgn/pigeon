@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  */
 public class Utils {
     private static final Type[] EMPTY_TYPE_ARRAY = new Type[0];
-    public final static String VERSION = "2.0.14";
+    public final static String VERSION = "2.0.15";
 
     public static boolean isEmpty(Object object) {
         switch (object) {
@@ -67,6 +67,20 @@ public class Utils {
             return ((WildcardType) paramType).getLowerBounds()[0];
         }
         return paramType;
+    }
+
+    public static boolean isNumber(String text) {
+        if (text == null || text.isEmpty()) {
+            return false;
+        }
+        return Pattern.matches("^\\d+(\\.\\d+)?$", text);
+    }
+
+    public static boolean isBoolean(String text) {
+        if (text == null || text.isEmpty()) {
+            return false;
+        }
+        return text.equalsIgnoreCase("true") || text.equalsIgnoreCase("false");
     }
 
     public static boolean hasUnresolvableType(@Nullable Type type) {

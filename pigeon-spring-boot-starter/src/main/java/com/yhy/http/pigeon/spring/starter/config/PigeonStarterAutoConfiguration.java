@@ -1,5 +1,6 @@
 package com.yhy.http.pigeon.spring.starter.config;
 
+import com.alibaba.ttl.threadpool.TtlExecutors;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Dispatcher;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -11,6 +12,9 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * Created on 2022-10-17 23:32
@@ -66,6 +70,12 @@ public class PigeonStarterAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public Dispatcher dispatcher() {
-        return new Dispatcher();
+        return new Dispatcher(pigeonVirtualExecutor());
+    }
+
+    private ExecutorService pigeonVirtualExecutor() {
+        ThreadFactory factory = Thread.ofVirtual().name("Pigeon-VT-#", 1).factory();
+        ExecutorService virtualExecutor = Executors.newThreadPerTaskExecutor(factory);
+        return TtlExecutors.getTtlExecutorService(virtualExecutor);
     }
 }

@@ -239,26 +239,45 @@ public abstract class AbstractPigeonAutoRegister implements ImportBeanDefinition
 
     private long getTimeout(Map<String, Object> attrs) {
         // 优先使用 @Pigeon 作用域
-        long temp = Long.parseLong(resolve((String) attrs.get("timeout")));
-        return temp > 0 ? temp : timeout;
+        String str = resolve((String) attrs.get("timeout"));
+        if (Utils.isNumber(str)) {
+            long temp = Long.parseLong(str);
+            return temp > 0 ? temp : timeout;
+        }
+        return timeout;
     }
 
     private Boolean getLogging(Map<String, Object> attrs) {
         // logging == null 时为初始状态
         // 全局和局部同时开启时才启用
-        return (null == logging || logging) && Boolean.parseBoolean(resolve((String) attrs.get("logging")));
+        String str = resolve((String) attrs.get("logging"));
+        if (Utils.isBoolean(str)) {
+            boolean temp = Boolean.parseBoolean(str.toLowerCase());
+            return (null == logging || logging) && temp;
+        }
+        return false;
     }
 
     private Boolean getShouldHeaderDelegate(Map<String, Object> attrs) {
         // shouldHeaderDelegate == null 时为初始状态
         // 全局和局部同时开启时才启用
-        return (null == shouldHeaderDelegate || shouldHeaderDelegate) && Boolean.parseBoolean(resolve((String) attrs.get("shouldHeaderDelegate")));
+        String str = resolve((String) attrs.get("shouldHeaderDelegate"));
+        if (Utils.isBoolean(str)) {
+            boolean temp = Boolean.parseBoolean(str.toLowerCase());
+            return (null == shouldHeaderDelegate || shouldHeaderDelegate) && temp;
+        }
+        return false;
     }
 
     private Boolean getShouldInterceptorDelegate(Map<String, Object> attrs) {
         // shouldHeaderDelegate == null 时为初始状态
         // 全局和局部同时开启时才启用
-        return (null == shouldInterceptorDelegate || shouldInterceptorDelegate) && Boolean.parseBoolean(resolve((String) attrs.get("shouldInterceptorDelegate")));
+        String str = resolve((String) attrs.get("shouldInterceptorDelegate"));
+        if (Utils.isBoolean(str)) {
+            boolean temp = Boolean.parseBoolean(str.toLowerCase());
+            return (null == shouldInterceptorDelegate || shouldInterceptorDelegate) && temp;
+        }
+        return false;
     }
 
     @SuppressWarnings("unchecked")
