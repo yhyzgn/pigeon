@@ -391,7 +391,7 @@ public abstract class ParameterHandler<T> {
             if (value == null) {
                 throw Utils.parameterError(method, index, "Body parameter value must not be null.");
             }
-            RequestBody body = converter.convert(value);
+            RequestBody body = value instanceof RequestBody requestBody ? requestBody : converter.convert(value);
             builder.body(body);
         }
     }
