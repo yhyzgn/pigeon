@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -40,6 +41,8 @@ public class HttpLoggerInterceptor implements Interceptor {
         Set<String> names = headers.names();
         Iterator<String> it = names.iterator();
 
+        String requestContentType = request.header("Content-Type");
+
         LogLines lines = LogLines.start("-- Request starting at {} --", FORMAT.format(new Date())).line("url : {}", url).line("method : {}", method);
 
         lines.empty().line("-- Request Header --");
@@ -52,11 +55,12 @@ public class HttpLoggerInterceptor implements Interceptor {
         RequestBody reqBody = request.body();
         if (null != reqBody) {
             lines.empty().line("-- Request Body --");
-            lines.line(requestBodyToString(reqBody).replace(System.lineSeparator(), System.lineSeparator() + "│ "));
+            lines.line(requestBodyToString(requestContentType, reqBody).replace(System.lineSeparator(), System.lineSeparator() + "│ "));
         }
 
         Response wrapResponse;
         try (Response response = chain.proceed(request)) {
+            String responseContentTypeString = response.header("Content-Type");
             headers = response.headers();
             names = headers.names();
             it = names.iterator();
@@ -71,7 +75,10 @@ public class HttpLoggerInterceptor implements Interceptor {
             ResponseBody resBody = response.body();
             wrapResponse = response;
             if (null != resBody) {
-                MediaType contentType = resBody.contentType();
+                MediaType responseContentType = resBody.contentType();
+                if (null == responseContentTypeString || responseContentTypeString.isEmpty()) {
+                    responseContentTypeString = Optional.ofNullable(responseContentType).map(MediaType::toString).orElse("");
+                }
                 String encoding = Optional.ofNullable(response.header("Content-Encoding")).orElse("");
                 BufferedSource source;
                 if ("gzip".equals(encoding)) {
@@ -79,13 +86,16 @@ public class HttpLoggerInterceptor implements Interceptor {
                 } else {
                     source = resBody.source();
                 }
-                String content = source.readUtf8();
+
                 lines.empty().line("-- Response Body --");
+                byte[] bytes = source.readByteArray();
+
+                String content = responseToString(responseContentTypeString, bytes);
                 lines.line(content.replace(System.lineSeparator(), System.lineSeparator() + "│ "));
 
                 // 重组 Response
                 // 须移除 Content-Encoding，因为当前 body 已解压
-                wrapResponse = response.newBuilder().removeHeader("Content-Encoding").body(ResponseBody.create(content, contentType)).build();
+                wrapResponse = response.newBuilder().removeHeader("Content-Encoding").body(ResponseBody.create(bytes, responseContentType)).build();
             }
         }
 
@@ -117,10 +127,25 @@ public class HttpLoggerInterceptor implements Interceptor {
         LOGGER.info(sb.toString());
     }
 
-    private String requestBodyToString(RequestBody body) throws IOException {
+    private String requestBodyToString(String contentType, RequestBody body) throws IOException {
+        // 如果是二进制的 body，则直接返回 (binary body is not supported) 字符串
+        if (null == contentType || contentType.isEmpty()) {
+            contentType = Optional.ofNullable(body.contentType()).map(MediaType::toString).orElse("");
+        }
+        if (contentType.startsWith("application/octet-stream")) {
+            return "(binary body is not supported)";
+        }
+
         Buffer buffer = new Buffer();
         body.writeTo(buffer);
         return buffer.readUtf8();
+    }
+
+    private String responseToString(String contentType, byte[] bytes) throws IOException {
+        if (contentType.startsWith("application/octet-stream")) {
+            return "(binary body is not supported)";
+        }
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     @SuppressWarnings("SameParameterValue")
