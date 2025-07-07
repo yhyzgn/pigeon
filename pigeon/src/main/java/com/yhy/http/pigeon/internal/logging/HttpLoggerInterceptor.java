@@ -43,13 +43,13 @@ public class HttpLoggerInterceptor implements Interceptor {
 
         String requestContentType = request.header("Content-Type");
 
-        LogLines lines = LogLines.start("-- Request starting at {} --", FORMAT.format(new Date())).line("url : {}", url).line("method : {}", method);
+        LogLines lines = LogLines.start("-- Request starting at %s --", FORMAT.format(new Date())).line("url : %s", url).line("method : %s", method);
 
         lines.empty().line("-- Request Header --");
         while (it.hasNext()) {
             String name = it.next();
             String value = headers.get(name);
-            lines.line("{} : {}", name, value);
+            lines.line("%s : %s", name, value);
         }
 
         RequestBody reqBody = request.body();
@@ -65,11 +65,11 @@ public class HttpLoggerInterceptor implements Interceptor {
             names = headers.names();
             it = names.iterator();
             lines.empty().line("-- Response Header --");
-            lines.line("Status : {}", response.code());
+            lines.line("Status : %s", response.code());
             while (it.hasNext()) {
                 String name = it.next();
                 String value = headers.get(name);
-                lines.line("{} : {}", name, value);
+                lines.line("%s : %s", name, value);
             }
 
             ResponseBody resBody = response.body();
@@ -101,7 +101,7 @@ public class HttpLoggerInterceptor implements Interceptor {
 
         // 结束时间
         long end = SystemClock.now();
-        lines.empty().line("-- Http Pigeon Finished. Used {} millis. --", end - start);
+        lines.empty().line("-- Http Pigeon Finished. Used %s millis. --", end - start);
 
         // tag
         Invocation tag = request.tag(Invocation.class);
@@ -122,7 +122,7 @@ public class HttpLoggerInterceptor implements Interceptor {
         lines.lines().stream()
                 .filter(Objects::nonNull)
                 .peek(item -> item.msg = Optional.ofNullable(item.msg).orElse(""))
-                .forEach(item -> sb.append("│ ").append(item.msg.contains("{}") ? String.format(item.msg.replace("{}", "%s"), item.args) : item.msg).append(System.lineSeparator()));
+                .forEach(item -> sb.append("│ ").append(null != item.args && item.args.length > 0 ? String.format(item.msg, item.args) : item.msg).append(System.lineSeparator()));
         sb.append("└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────");
         LOGGER.info(sb.toString());
     }
@@ -141,7 +141,7 @@ public class HttpLoggerInterceptor implements Interceptor {
         return buffer.readUtf8();
     }
 
-    private String responseToString(String contentType, byte[] bytes) throws IOException {
+    private String responseToString(String contentType, byte[] bytes) {
         if (contentType.startsWith("application/octet-stream")) {
             return "(binary body is not supported)";
         }
