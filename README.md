@@ -1,3 +1,5 @@
+Moved to [flare](https://github.com/yhyzgn/flare)
+
 # pigeon
 
 ![jdk](https://img.shields.io/badge/jdk-21%2B-critical) ![spring-boot](https://img.shields.io/badge/spring--boot-3.4.0-yellowgreen) 
